@@ -1,0 +1,115 @@
+---
+description: 「終結フェーズの成果物（Lessons Learned、移管ドキュメント、完了報告書）を生成するテンプレートを提供」	
+globs: 
+alwaysApply: false
+---
+# =========================
+# 06_pmbok_closing.mdc
+# =========================
+
+# ----------------------------------------------------------
+# パス参照設定 - このファイルは pmbok_paths.mdc を参照します
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+
+# ---------- Lessons Learned ----------
+lessons_learned_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクトIDは？"
+        key: "project_id"
+        required: true
+      - question: "日付は？（yyyy-mm-dd）"
+        key: "record_date"
+        required: true
+  - category: "振り返り"
+    items:
+      - question: "成功要因は？（箇条書きで）"
+        key: "success_factors"
+        required: true
+      - question: "改善点は？（箇条書きで）"
+        key: "improvement_points"
+        required: true
+
+lessons_learned_template: |
+  # Lessons Learned: {{project_id}}
+  **日付**: {{record_date}}
+
+  ## 成功要因
+  {{success_factors}}
+
+  ## 改善点
+  {{improvement_points}}
+
+  ## 実施したアクション
+  *プロジェクト中に実施した改善アクション*
+
+  ## 次回への提言
+  *今後のプロジェクトへの提言*
+
+# ---------- Transition Document ----------
+transition_document_questions:
+  - category: "サービス情報"
+    items:
+      - question: "サービス名は？"
+        key: "service_name"
+        required: true
+      - question: "本番環境稼働日は？（yyyy-mm-dd）"
+        key: "go_live_date"
+        required: true
+      - question: "運用手順書はどこにありますか？"
+        key: "runbook"
+        required: true
+      - question: "連絡先リストは？（役割/名前/連絡先）"
+        key: "contacts"
+        required: true
+
+transition_document_template: |
+  # 移行文書: {{service_name}}
+
+  **本番環境稼働日**: {{go_live_date}}
+
+  ## 運用手順
+  {{runbook}}
+
+  ## 連絡先リスト
+  {{contacts}}
+
+  ## システム構成図
+  *システム構成図をここに*
+
+  ## 障害対応手順
+  *主要障害シナリオと対応手順*
+
+# ---------- Benefits Realization ----------
+benefits_realization_questions:
+  - category: "測定結果"
+    items:
+      - question: "レポート日付は？（yyyy-mm-dd）"
+        key: "report_date"
+        required: true
+      - question: "KPI達成状況は？（項目/目標値/達成値）"
+        key: "kpi_status"
+        required: true
+      - question: "ROI達成状況は？"
+        key: "roi"
+        required: false
+      - question: "次のステップは？"
+        key: "next_steps"
+        required: false
+
+benefits_realization_template: |
+  # 効果測定レポート
+  **日付**: {{report_date}}
+
+  ## KPI達成状況
+  {{kpi_status}}
+
+  ## ROI
+  {{roi}}
+
+  ## 次のステップ
+  {{next_steps}}
+
+  ## 添付資料
+  *関連する測定データや分析結果*

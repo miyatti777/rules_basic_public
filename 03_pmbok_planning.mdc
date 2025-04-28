@@ -1,0 +1,763 @@
+---
+description: 「計画フェーズ（WBS、リスク計画、バックログ初期化、ロードマップ等）の質問とテンプレートを定義」
+globs: 
+alwaysApply: false
+---
+# ===========================================================
+# 03_pmbok_planning.mdc - "PMBOK 計画フェーズ処理"
+# ===========================================================
+# タスク: WBS, リスク計画, その他計画フェーズドキュメントの
+# 生成のための質問とテンプレートを定義します。
+# 00_master_rules.mdc から呼ばれます。
+# ===========================================================
+
+# ----------------------------------------------------------
+# パス参照設定 - このファイルは pmbok_paths.mdc を参照します
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+
+# ----------------------------------------------------------
+# ◆ WBS 作成のための質問セット
+# ----------------------------------------------------------
+wbs_questions:
+  - question: "プロジェクト名は何ですか？"
+    key: project_name
+    required: true
+    description: "プロジェクトの正式名称を入力してください"
+    
+  - question: "プロジェクト開始日と終了予定日はいつですか？"
+    key: project_duration
+    required: true
+    description: "YYYY-MM-DD - YYYY-MM-DD の形式で入力してください"
+    
+  - question: "プロジェクトマネージャーは誰ですか？"
+    key: project_manager
+    required: true
+    description: "プロジェクトマネージャーの氏名を入力してください"
+    
+  - question: "主要なデリバラブル（成果物）は何ですか？"
+    key: major_deliverables
+    required: true
+    description: "主要な成果物を箇条書きで入力してください"
+    
+  - question: "WBSの主要カテゴリはどのように分類しますか？"
+    key: wbs_categories
+    required: true
+    description: "例: 計画, 開発, テスト, 展開, など"
+    
+  - question: "各カテゴリの主要タスクを挙げてください"
+    key: major_tasks
+    required: true
+    description: "カテゴリごとの主要タスクを箇条書きで"
+
+# ----------------------------------------------------------
+# ◆ WBS テンプレート
+# ----------------------------------------------------------
+wbs_template: |
+  # {{project_name}} - 作業分解構造図 (WBS)
+  
+  **プロジェクト期間:** {{project_duration}}  
+  **プロジェクトマネージャー:** {{project_manager}}  
+  **作成日:** {{today}}  
+  **最終更新日:** {{today}}  
+  
+  ## 1. プロジェクト概要
+  
+  {{project_description}}
+  
+  ## 2. 主要デリバラブル
+  
+  {{major_deliverables}}
+  
+  ## 3. WBS階層
+  
+  {{wbs_hierarchy}}
+  
+  ## 4. リソース計画
+  
+  {{resource_plan}}
+  
+  ## 5. スケジュールサマリー
+  
+  {{schedule_summary}}
+  
+  ## 6. 進捗状況
+  
+  {{progress_status}}
+  
+  ## 7. 注記
+  
+  {{notes}}
+  
+  ## 8. 更新履歴
+  
+  - {{today}}: 初版作成
+
+# ----------------------------------------------------------
+# ◆ リスク計画質問セット
+# ----------------------------------------------------------
+risk_questions:
+  - question: "プロジェクト名は何ですか？"
+    key: project_name
+    required: true
+    description: "プロジェクトの正式名称を入力してください"
+    
+  - question: "主要なリスクカテゴリは何ですか？"
+    key: risk_categories
+    required: true
+    description: "例: 技術的, スケジュール, 予算, リソース, など"
+    
+  - question: "各カテゴリで想定されるリスクを挙げてください"
+    key: identified_risks
+    required: true
+    description: "カテゴリごとの主なリスクを箇条書きで"
+    
+  - question: "リスク評価のための基準はどのように設定しますか？"
+    key: risk_criteria
+    required: true
+    description: "影響度と発生確率の評価基準を定義してください"
+
+# ----------------------------------------------------------
+# ◆ リスク計画テンプレート
+# ----------------------------------------------------------
+risk_plan_template: |
+  # {{project_name}} - リスク管理計画
+  
+  **作成日:** {{today}}  
+  **最終更新日:** {{today}}  
+  **担当者:** {{project_manager}}  
+  
+  ## 1. リスク管理アプローチ
+  
+  {{risk_approach}}
+  
+  ## 2. リスク評価基準
+  
+  {{risk_criteria}}
+  
+  ## 3. 特定されたリスク
+  
+  {{identified_risks}}
+  
+  ## 4. リスク対応戦略
+  
+  {{risk_responses}}
+  
+  ## 5. モニタリングおよび報告
+  
+  {{monitoring_reporting}}
+  
+  ## 6. 役割と責任
+  
+  {{roles_responsibilities}}
+  
+  ## 7. 更新履歴
+  
+  - {{today}}: 初版作成
+
+# ----------------------------------------------------------
+# ◆ バックログ初期化質問セット
+# ----------------------------------------------------------
+backlog_init_questions:
+  - question: "製品/プロジェクト名は何ですか？"
+    key: product_name
+    required: true
+    description: "バックログを作成する製品またはプロジェクトの名称"
+    
+  - question: "製品のビジョンは何ですか？"
+    key: product_vision
+    required: true
+    description: "この製品が達成しようとしている目標や解決する問題"
+    
+  - question: "主要なエピックまたは機能カテゴリは何ですか？"
+    key: main_epics
+    required: true
+    description: "製品の主要機能グループを箇条書きで（3-7個程度）"
+    
+  - question: "優先順位付けの基準は何ですか？"
+    key: priority_criteria
+    required: true
+    description: "アイテムの優先順位をどのように決定するか（例：ビジネス価値、技術的リスク、依存関係）"
+    
+  - question: "見積もり方法は何を使用しますか？"
+    key: estimation_method
+    required: true
+    description: "ストーリーポイント、理想日数、Tシャツサイズなど"
+    
+  - question: "WBSとの連携はどうしますか？"
+    key: wbs_relation
+    required: false
+    description: "WBSとバックログアイテムの紐付け方法（オプション）"
+
+# ----------------------------------------------------------
+# ◆ バックログ初期化テンプレート
+# ----------------------------------------------------------
+backlog_yaml_template: |
+  # プロダクトバックログ定義
+  project_id: "{{project_id}}"
+  name: "{{backlog_name}}"
+  description: |
+    {{backlog_description}}
+  
+  # バックログアイテム定義
+  items:
+    # エピック1
+    - id: "EPIC-001"
+      title: "{{epic1_title}}"
+      description: "{{epic1_description}}"
+      priority: "high"
+      type: "epic"
+      estimate: ~
+      acceptance_criteria: []
+      dependencies: []
+      assignee: ""
+      status: "new"
+      
+    # ユーザーストーリー（エピック1に紐づく）
+    - id: "US-001"
+      title: "{{us1_title}}"
+      description: "{{us1_description}}"
+      priority: "high"
+      type: "story"
+      estimate: 5
+      epic_id: "EPIC-001"
+      acceptance_criteria:
+        - "{{us1_ac1}}"
+        - "{{us1_ac2}}"
+      dependencies: []
+      assignee: ""
+      status: "new"
+    
+    # ユーザーストーリー2
+    - id: "US-002"
+      title: "{{us2_title}}"
+      description: "{{us2_description}}"
+      priority: "medium"
+      type: "story"
+      estimate: 3
+      epic_id: "EPIC-001"
+      acceptance_criteria:
+        - "{{us2_ac1}}"
+      dependencies: []
+      assignee: ""
+      status: "new"
+
+# エラー処理セクション
+backlog_validation_error_handling:
+  # バックログYAML検証エラー時の処理
+  on_yaml_validation_error:
+    - action: "notify"
+      message: |
+        ⚠️ バックログYAMLの検証でエラーが発見されました。以下の問題を修正してください：
+        
+        {{validation_errors}}
+        
+        問題を修正して再度「バックログ初期化して」と入力するか、
+        手動でYAMLファイルを編集してください。
+    - action: "ask"
+      question: "エラーを修正しますか？それとも手動で対応しますか？(自動修正/手動対応)"
+      store_as: "error_handling_choice"
+    - action: "branch"
+      condition: "{{error_handling_choice}} == '自動修正'"
+      if_true:
+        - action: "edit_file"
+          path: "{{patterns.backlog_yaml}}"
+          # 自動修正ロジック（シンプルなエラーのみ）
+      if_false:
+        - action: "notify"
+          message: "手動で修正する場合は、YAMLファイルを直接編集してください。修正後、再度検証します。"
+
+# エラー別の修正ガイダンス
+validation_error_guidance:
+  missing_required_field: |
+    必須フィールド「{{field_name}}」が欠けています。
+    以下のように追加してください：
+    ```yaml
+    {{field_name}}: "値を入力してください"
+    ```
+  
+  invalid_id_format: |
+    ID「{{id_value}}」の形式が不正です。
+    - EPICは「EPIC-数字3桁」（例：EPIC-001）
+    - ストーリーは「US-数字3桁」（例：US-001）
+    - タスクは「TASK-数字3桁」（例：TASK-001）
+    の形式で指定してください。
+  
+  invalid_status: |
+    ステータス「{{status_value}}」は無効です。
+    以下のいずれかを使用してください：
+    - new（新規）
+    - in_progress（進行中）
+    - blocked（ブロック中）
+    - done（完了）
+
+# ----------------------------------------------------------
+# ◆ ユーザーストーリー作成質問セット
+# ----------------------------------------------------------
+user_story_questions:
+  - question: "このストーリーのID/番号は何ですか？"
+    key: story_id
+    required: true
+    description: "US-#### の形式で一意のID"
+    
+  - question: "このストーリーが属するエピックのIDは何ですか？"
+    key: epic_id
+    required: true
+    description: "EP-## の形式でエピックID"
+    
+  - question: "ストーリーのタイトルは何ですか？"
+    key: story_title
+    required: true
+    description: "簡潔で明確なタイトル（50文字以内）"
+    
+  - question: "ユーザーストーリーの内容を「〜として、〜したい、なぜなら〜」の形式で記述してください"
+    key: user_story
+    required: true
+    description: "「〜ロールとして、〜機能が欲しい、なぜなら〜価値があるから」の形式"
+    
+  - question: "受け入れ基準は何ですか？"
+    key: acceptance_criteria
+    required: true
+    description: "このストーリーが完了したと見なすための基準を箇条書きで"
+    
+  - question: "ストーリーポイントまたは見積もりはいくつですか？"
+    key: story_points
+    required: true
+    description: "ストーリーの複雑さ/作業量の見積もり"
+    
+  - question: "優先度はどれくらいですか？"
+    key: priority
+    required: true
+    description: "High/Medium/Low または数値で"
+    
+  - question: "技術的な注記やメモはありますか？"
+    key: technical_notes
+    required: false
+    description: "実装に関する詳細や技術的な考慮事項（オプション）"
+
+# ----------------------------------------------------------
+# ◆ ユーザーストーリーテンプレート
+# ----------------------------------------------------------
+user_story_template: |
+  # {{story_title}}
+  
+  **ID:** {{story_id}}  
+  **エピック:** {{epic_id}}  
+  **優先度:** {{priority}}  
+  **ストーリーポイント:** {{story_points}}  
+  **ステータス:** Open  
+  **担当者:** {{assignee}}  
+  **作成日:** {{today}}  
+  **更新日:** {{today}}  
+  
+  ## 説明
+  
+  {{description}}
+  
+  ## ユーザーストーリー
+  
+  {{user_story}}
+  
+  ## 受け入れ基準
+  
+  {{acceptance_criteria}}
+  
+  ## 技術的詳細
+  
+  {{technical_notes}}
+  
+  ## 注記
+  
+  {{notes}}
+
+#----------------------------------------------------------
+# ◆ ロードマップ作成 質問セット
+#----------------------------------------------------------
+roadmap_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクト名は？"
+        key: project_name
+        required: true
+      - question: "作成日は？"
+        key: creation_date
+        required: true
+        description: "YYYY-MM-DD形式"
+      - question: "バージョン"
+        key: version
+        required: true
+        description: "例: 1.0, 1.1"
+      - question: "作成者"
+        key: author
+        required: true
+        description: "氏名（役職）"
+
+  - category: "プロジェクト概要"
+    items:
+      - question: "プロジェクト期間（全体）"
+        key: project_period
+        required: true
+        description: "YYYY年MM月DD日 〜 YYYY年MM月DD日"
+      - question: "MVPリリース期限"
+        key: mvp_deadline
+        required: true
+        description: "YYYY年MM月DD日"
+      - question: "主要目標（箇条書き）"
+        key: main_goals
+        required: true
+        description: "プロジェクトで達成したい主要な目標を箇条書きで"
+      - question: "主要成果物（箇条書き）"
+        key: main_deliverables
+        required: true
+        description: "開発する主要なモジュールやシステムを箇条書きで"
+  
+  - category: "開発フェーズとマイルストーン"
+    items:
+      - question: "フェーズ1の期間と概要"
+        key: phase1_overview
+        required: true
+        description: "期間と主な内容"
+      - question: "フェーズ1の主要マイルストーン"
+        key: phase1_milestones
+        required: true
+        description: "M1: 名称 (日付) の形式で箇条書き"
+      - question: "フェーズ2の期間と概要"
+        key: phase2_overview
+        required: true
+        description: "期間と主な内容"
+      - question: "フェーズ2の主要マイルストーン"
+        key: phase2_milestones
+        required: true
+        description: "M1: 名称 (日付) の形式で箇条書き"
+      - question: "フェーズ3の期間と概要（任意）"
+        key: phase3_overview
+        required: false
+        description: "期間と主な内容"
+      - question: "フェーズ3の主要マイルストーン（任意）"
+        key: phase3_milestones
+        required: false
+        description: "M1: 名称 (日付) の形式で箇条書き"
+
+  - category: "実装スプリント計画"
+    items:
+      - question: "スプリント1の期間、目標、バックログアイテム"
+        key: sprint1_details
+        required: true
+        description: "期間、目標、主要バックログアイテムID、完了の定義、成果物を含む"
+      - question: "スプリント2の期間、目標、バックログアイテム"
+        key: sprint2_details
+        required: true
+        description: "期間、目標、主要バックログアイテムID、完了の定義、成果物を含む"
+      - question: "スプリント3の期間、目標、バックログアイテム"
+        key: sprint3_details
+        required: true
+        description: "期間、目標、主要バックログアイテムID、完了の定義、成果物を含む"
+      - question: "スプリント4以降の詳細（任意）"
+        key: sprint4plus_details
+        required: false
+        description: "期間、目標、主要バックログアイテムID、完了の定義、成果物を含む"
+
+  - category: "機能リリース計画"
+    items:
+      - question: "MVP1リリース内容"
+        key: mvp1_features
+        required: false
+        description: "MVP1で提供する機能を各モジュールごとに箇条書き"
+      - question: "MVP2リリース内容"
+        key: mvp2_features
+        required: true
+        description: "MVP2で提供する機能を各モジュールごとに箇条書き"
+      - question: "MVP3リリース内容（任意）"
+        key: mvp3_features
+        required: false
+        description: "MVP3で提供する機能を各モジュールごとに箇条書き"
+
+  - category: "リソース計画"
+    items:
+      - question: "人的リソース"
+        key: human_resources
+        required: true
+        description: "役割、必要工数、主な作業期間を表形式で"
+      - question: "技術リソース"
+        key: technical_resources
+        required: true
+        description: "使用する技術スタックや環境を箇条書きで"
+      - question: "予算計画"
+        key: budget_plan
+        required: true
+        description: "開発予算、運用コスト、投資回収期間などを箇条書きで"
+
+  - category: "リスクと対策"
+    items:
+      - question: "主要リスクとその対策"
+        key: risks_and_mitigations
+        required: true
+        description: "リスクカテゴリ、主要リスク、対策を表形式で"
+
+  - category: "コミュニケーション計画"
+    items:
+      - question: "ステークホルダーコミュニケーション"
+        key: stakeholder_communication
+        required: true
+        description: "ステークホルダー、コミュニケーション方法、頻度、責任者を表形式で"
+      - question: "会議体制"
+        key: meeting_structure
+        required: true
+        description: "定例会議、スプリント関連会議などの頻度と目的を箇条書きで"
+
+#----------------------------------------------------------
+# ◆ ロードマップ テンプレート
+#----------------------------------------------------------
+roadmap_template: |
+  ---
+  doc_targets: ['roadmap']
+  importance: 5
+  project_name: '{{project_name}}'
+  project_id: '{{project_id}}'
+  start_date: '{{start_date}}'
+  end_date: '{{end_date}}'
+  phases: '{{phases}}'
+  ---
+
+  # リリースロードマップ – {{project_name}}
+
+  ## 基本情報
+
+  **プロジェクト名**: {{project_name}}  
+  **作成日**: {{creation_date}}  
+  **バージョン**: {{version}}  
+  **作成者**: {{author}}  
+  **最終更新日**: {{today}}  
+
+  ## 1. プロジェクト概要
+
+  {{project_description}}
+
+  **プロジェクト期間**: {{project_period}}（全体）  
+  **MVPリリース期限**: {{mvp_deadline}}  
+
+  ### 1.1 主要目標
+
+  {{main_goals}}
+
+  ### 1.2 成果物
+
+  {{main_deliverables}}
+
+  ## 2. 開発フェーズとマイルストーン
+
+  ### フェーズ1: {{phase1_title}}
+  **期間**: {{phase1_period}}
+
+  #### 主要マイルストーン：
+  {{phase1_milestones}}
+
+  #### 主要タスク：
+  {{phase1_tasks}}
+
+  ### フェーズ2: {{phase2_title}}
+  **期間**: {{phase2_period}}
+
+  #### 主要マイルストーン：
+  {{phase2_milestones}}
+
+  #### 詳細フェーズ計画：
+  {{phase2_detailed_plan}}
+
+  #### 実装スプリント計画：
+
+  ```yaml
+  sprints:
+    - number: 1
+      period: "{{sprint1_period}}"
+      goal: "{{sprint1_goal}}"
+      backlog_items:
+        - id: "{{sprint1_item1_id}}"
+          description: "{{sprint1_item1_desc}}"
+        - id: "{{sprint1_item2_id}}"
+          description: "{{sprint1_item2_desc}}"
+      definition_of_done:
+        - "{{sprint1_dod1}}"
+        - "{{sprint1_dod2}}"
+      deliverables:
+        - "{{sprint1_deliverable1}}"
+
+    - number: 2
+      period: "{{sprint2_period}}"
+      goal: "{{sprint2_goal}}"
+      backlog_items:
+        - id: "{{sprint2_item1_id}}"
+          description: "{{sprint2_item1_desc}}"
+        - id: "{{sprint2_item2_id}}"
+          description: "{{sprint2_item2_desc}}"
+      definition_of_done:
+        - "{{sprint2_dod1}}"
+        - "{{sprint2_dod2}}"
+      deliverables:
+        - "{{sprint2_deliverable1}}"
+        - "{{sprint2_deliverable2}}"
+        - "{{sprint2_deliverable3}}"
+        - "{{sprint2_deliverable4}}"
+
+    - number: 3
+      period: "{{sprint3_period}}"
+      goal: "{{sprint3_goal}}"
+      backlog_items:
+        - id: "{{sprint3_item1_id}}"
+          description: "{{sprint3_item1_desc}}"
+        - id: "{{sprint3_item2_id}}"
+          description: "{{sprint3_item2_desc}}"
+      definition_of_done:
+        - "{{sprint3_dod1}}"
+      deliverables:
+        - "{{sprint3_deliverable1}}"
+
+    - number: 4
+      period: "{{sprint4_period}}"
+      goal: "{{sprint4_goal}}"
+      backlog_items:
+        - id: "{{sprint4_item1_id}}"
+          description: "{{sprint4_item1_desc}}"
+        - id: "{{sprint4_item2_id}}"
+          description: "{{sprint4_item2_desc}}"
+        - id: "{{sprint4_item3_id}}"
+          description: "{{sprint4_item3_desc}}"
+      definition_of_done:
+        - "{{sprint4_dod1}}"
+        - "{{sprint4_dod2}}"
+        - "{{sprint4_dod3}}"
+      deliverables:
+        - "{{sprint4_deliverable1}}"
+        - "{{sprint4_deliverable2}}"
+        - "{{sprint4_deliverable3}}"
+
+    - number: 5
+      period: "{{sprint5_period}}"
+      goal: "{{sprint5_goal}}"
+      backlog_items:
+        - id: "{{sprint5_item1_id}}"
+          description: "{{sprint5_item1_desc}}"
+        - id: "{{sprint5_item2_id}}"
+          description: "{{sprint5_item2_desc}}"
+      definition_of_done:
+        - "{{sprint5_dod1}}"
+        - "{{sprint5_dod2}}"
+        - "{{sprint5_dod3}}"
+      deliverables:
+        - "{{sprint5_deliverable1}}"
+        - "{{sprint5_deliverable2}}"
+
+    - number: 6
+      period: "{{sprint6_period}}"
+      goal: "{{sprint6_goal}}"
+      backlog_items:
+        - id: "{{sprint6_item1_id}}"
+          description: "{{sprint6_item1_desc}}"
+        - id: "{{sprint6_item2_id}}"
+          description: "{{sprint6_item2_desc}}"
+      definition_of_done:
+        - "{{sprint6_dod1}}"
+        - "{{sprint6_dod2}}"
+        - "{{sprint6_dod3}}"
+      deliverables:
+        - "{{sprint6_deliverable1}}"
+        - "{{sprint6_deliverable2}}"
+        - "{{sprint6_deliverable3}}"
+        - "{{sprint6_deliverable4}}"
+
+    - number: 7
+      period: "{{sprint7_period}}"
+      goal: "{{sprint7_goal}}"
+      backlog_items:
+        - id: "{{sprint7_item1_id}}"
+          description: "{{sprint7_item1_desc}}"
+        - id: "{{sprint7_item2_id}}"
+          description: "{{sprint7_item2_desc}}"
+        - id: "{{sprint7_item3_id}}"
+          description: "{{sprint7_item3_desc}}"
+      definition_of_done:
+        - "{{sprint7_dod1}}"
+        - "{{sprint7_dod2}}"
+        - "{{sprint7_dod3}}"
+        - "{{sprint7_dod4}}"
+      deliverables:
+        - "{{sprint7_deliverable1}}"
+        - "{{sprint7_deliverable2}}"
+        - "{{sprint7_deliverable3}}"
+        - "{{sprint7_deliverable4}}"
+  ```
+
+  ### フェーズ3: {{phase3_title}}
+  **期間**: {{phase3_period}}
+
+  #### 主要マイルストーン：
+  {{phase3_milestones}}
+
+  #### 想定される拡張機能：
+  {{phase3_features}}
+
+  ## 3. 機能リリース計画
+
+  ### {{mvp1_title}}
+
+  {{mvp1_features}}
+
+  ### {{mvp2_title}}
+
+  {{mvp2_features}}
+
+  ### {{mvp3_title}}
+
+  {{mvp3_features}}
+
+  ## 4. リソース計画
+
+  ### 4.1 人的リソース
+
+  {{human_resources}}
+
+  ### 4.2 技術リソース
+
+  {{technical_resources}}
+
+  ### 4.3 予算計画
+
+  {{budget_plan}}
+
+  ## 5. リスクと対策
+
+  {{risks_and_mitigations}}
+
+  ## 6. コミュニケーション計画
+
+  ### 6.1 ステークホルダーコミュニケーション
+
+  {{stakeholder_communication}}
+
+  ### 6.2 会議体制
+
+  {{meeting_structure}}
+
+  ## 7. リリース準備とバリデーション
+
+  ### {{mvp_preparation_title}}
+  {{mvp_preparation_details}}
+
+  ### {{mvp_post_release_title}}
+  {{mvp_post_release_details}}
+
+  ## 8. 承認
+
+  | 役割 | 氏名 | 署名 | 日付 |
+  |------|------|------|------|
+  | プロジェクトマネージャー | {{project_manager}} |  |  |
+  | プロダクトオーナー | {{product_owner}} |  |  |
+  | スポンサー | {{sponsor}} |  |  |
+  | {{client_role}} | {{client_name}} |  |  |
+  | {{tech_role}} | {{tech_lead}} |  |  |
+
+  ## 9. 更新履歴
+  | 日付 | 更新者 | 変更内容 |
+  |------|-------|---------|
+  | {{creation_date}} | {{author}} | 初版作成 | 
+  | {{today}} | {{current_user}} | {{update_description}} |

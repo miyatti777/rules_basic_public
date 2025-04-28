@@ -1,0 +1,537 @@
+---
+description: "Discovery（発見）フェーズの質問リストとテンプレートを提供 仮説マップ、ペルソナ、課題定義、ジャーニー、仮設リスト"
+globs: 
+alwaysApply: false
+---
+# 新フェーズ「Discovery」- Lean UX アプローチ
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+# ----------------------------------------------------------
+
+# ----------------------------------------------------------
+# 1. Assumption Map - 前提条件の可視化
+# ----------------------------------------------------------
+assumption_questions:
+  - category: "仮説マップ（Assumption Map）基本情報"
+    items:
+      - question: "ターゲットユーザー (WHO) は？"
+        key: who
+        required: true
+      - question: "抱えている課題 (PROBLEM) は？"
+        key: problem
+        required: true
+      - question: "仮のソリューション / 機能案は？"
+        key: solution
+        required: true
+      - question: "期待するユーザー行動 (OUTCOME) は？"
+        key: outcome
+        required: true
+      - question: "測定指標 (METRIC) は？"
+        key: metric
+        required: true
+      
+  - category: "確実性とリスクの評価（Pip Decks方式）"
+    items:
+      - question: "この仮説が間違っていた場合のリスク（1-5、5が最高リスク）は？"
+        key: risk_level
+        required: true
+        description: "もしこの仮説が誤りだった場合、どれくらい悪影響がありますか？5=非常に大きな影響、1=影響は軽微"
+      - question: "この仮説に対する現在の確実性（1-5、1が最も不確か）は？"
+        key: certainty_level
+        required: true
+        description: "この仮説についてどれくらい確信がありますか？1=ほとんど確信がない（未知）、5=強い確信がある（既知）"
+
+assumption_template: |
+  ---
+  doc_type: assumption_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # Assumption Map – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 仮説マップ（Lean UX形式）
+
+  | ID | WHO | PROBLEM | SOLUTION/FEATURE | OUTCOME | METRIC | リスク | 確実性 |
+  |----|-----|---------|------------------|---------|--------|--------|--------|
+  | H1 | {{who}} | {{problem}} | {{solution}} | {{outcome}} | {{metric}} | {{risk_level}} | {{certainty_level}} |
+
+  ## 確実性×リスク マトリックス（Pip Decks方式）
+
+  ```
+  高リスク │    未知・高リスク    │    既知・高リスク
+         │  すぐに調査が必要   │   リスク対策計画を立てる
+         │                   │
+  ─────────┼───────────────────┼────────────────────
+         │                   │
+  低リスク │    未知・低リスク    │    既知・低リスク
+         │  知識を深める評価   │   後回しだが監視する
+         │                   │
+         └───────────────────┴────────────────────
+               未知             既知
+              確実性
+  ```
+
+  ### マトリックスの見方
+  - **高リスク・未知**：すぐに調査すべき最優先事項
+  - **高リスク・既知**：リスク対策計画を立てて対応
+  - **低リスク・未知**：知識を深めるための評価を行う
+  - **低リスク・既知**：後回しにするが状況変化を監視
+
+  ## 優先順位の決定方法
+  1. 各仮説を「リスク」と「確実性」のスコアに基づいてマトリックス上に配置
+  2. 「高リスク・未知」の象限にある仮説を最優先で検証
+  3. 「高リスク・既知」の象限にある仮説について対策を計画
+  4. 残りの象限の仮説はリソースに余裕がある場合に取り組む
+
+  ## 次のステップ
+  1. この仮説マップを元に検証計画を立てる
+  2. 「高リスク・未知」の象限から優先的に検証を行う
+  3. 「高リスク・既知」の象限には対策計画を立てる
+  4. 検証結果を元に仮説を修正・追加する
+
+# 複数仮説を格納するためのテンプレート
+assumption_map_multiple_template: |
+  ---
+  doc_type: assumption_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # Assumption Map – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 仮説マップ（Lean UX形式）
+
+  | ID | WHO | PROBLEM | SOLUTION/FEATURE | OUTCOME | METRIC | リスク | 確実性 |
+  |----|-----|---------|------------------|---------|--------|--------|--------|
+  {{#each assumptions}}
+  | H{{@index}} | {{this.who}} | {{this.problem}} | {{this.solution}} | {{this.outcome}} | {{this.metric}} | {{this.risk_level}} | {{this.certainty_level}} |
+  {{/each}}
+
+  ## 確実性×リスク マトリックス（Pip Decks方式）
+
+  ```
+  高リスク │    未知・高リスク    │    既知・高リスク
+         │  すぐに調査が必要   │   リスク対策計画を立てる
+         │                   │
+  ─────────┼───────────────────┼────────────────────
+         │                   │
+  低リスク │    未知・低リスク    │    既知・低リスク
+         │  知識を深める評価   │   後回しだが監視する
+         │                   │
+         └───────────────────┴────────────────────
+               未知             既知
+              確実性
+  ```
+
+  ### マトリックスの見方
+  - **高リスク・未知**（リスク:4-5, 確実性:1-2）：すぐに調査すべき最優先事項
+  - **高リスク・既知**（リスク:4-5, 確実性:4-5）：リスク対策計画を立てて対応
+  - **低リスク・未知**（リスク:1-2, 確実性:1-2）：知識を深めるための評価を行う
+  - **低リスク・既知**（リスク:1-2, 確実性:4-5）：後回しにするが状況変化を監視
+
+  ### 優先順位分類
+
+  #### 高リスク・未知（最優先）
+  {{#each assumptions}}
+  {{#if (and (gte this.risk_level 4) (lte this.certainty_level 2))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 高リスク・既知（対策計画）
+  {{#each assumptions}}
+  {{#if (and (gte this.risk_level 4) (gte this.certainty_level 4))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 低リスク・未知（知識を深める）
+  {{#each assumptions}}
+  {{#if (and (lte this.risk_level 2) (lte this.certainty_level 2))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 低リスク・既知（監視）
+  {{#each assumptions}}
+  {{#if (and (lte this.risk_level 2) (gte this.certainty_level 4))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  ## 次のステップ
+  1. この仮説マップを元に検証計画を立てる
+  2. 「高リスク・未知」の象限から優先的に検証を行う
+  3. 「高リスク・既知」の象限には対策計画を立てる
+  4. 検証結果を元に仮説を修正・追加する
+  5. assumption_map.md をStock/projects/{{project_id}}/documents/2_discovery/ に確定保存
+  6. 優先度の高い仮説からhypothesis_backlog.yamlに登録
+
+# ----------------------------------------------------------
+# 2. Persona - ユーザー像
+# ----------------------------------------------------------
+persona_questions:
+  - category: "ペルソナ情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "ペルソナ名"
+        key: persona_name
+        required: true
+      - question: "年齢・性別"
+        key: demographics
+        required: true
+      - question: "職業・役割"
+        key: occupation
+        required: true
+      - question: "ゴール（目標）"
+        key: goals
+        required: true
+      - question: "フラストレーション（悩み）"
+        key: pain_points
+        required: true
+      - question: "行動パターン"
+        key: behaviors
+        required: true
+
+persona_template: |
+  ---
+  doc_type: persona
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # ペルソナ定義
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}
+
+  ## {{persona_name}}
+
+  **基本情報**: {{demographics}}  
+  **職業/役割**: {{occupation}}
+
+  ### ゴール
+  {{goals}}
+
+  ### 課題・悩み
+  {{pain_points}}
+
+  ### 行動パターン
+  {{behaviors}}
+
+# ----------------------------------------------------------
+# 3. Problem Statement - 課題定義
+# ----------------------------------------------------------
+problem_questions:
+  - category: "課題定義の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "背景（現状の課題の概要）"
+        key: background
+        required: true
+      - question: "主要な問題点（箇条書きで3つ程度）"
+        key: main_problems
+        required: true
+      - question: "なぜ今解決すべきか（緊急性・重要性）"
+        key: urgency
+        required: true
+      - question: "短期的な期待効果"
+        key: short_term_effects
+        required: true
+      - question: "長期的な期待効果"
+        key: long_term_effects
+        required: true
+      - question: "解決の方向性（候補となるソリューション）"
+        key: solution_directions
+        required: true
+      - question: "次のステップ（アクションプラン）"
+        key: next_steps
+        required: true
+      - question: "成功指標（定量的な指標）"
+        key: success_metrics
+        required: true
+
+problem_template: |
+  ---
+  doc_type: problem_statement
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # プロブレムステートメント：{{project_id}}
+
+  ## 1. 背景
+
+  {{background}}
+
+  ## 2. 主要な問題点
+
+  {{main_problems}}
+
+  ## 3. 解決の必要性と期待効果
+
+  ### なぜ今解決すべきか
+
+  {{urgency}}
+
+  ### 期待される効果
+
+  1. **短期的効果**：
+     {{short_term_effects}}
+
+  2. **中長期的効果**：
+     {{long_term_effects}}
+
+  ## 4. ソリューションの方向性
+
+  {{solution_directions}}
+
+  ## 5. 次のステップ
+
+  {{next_steps}}
+
+  ## 6. 成功指標
+
+  {{success_metrics}}
+
+# ----------------------------------------------------------
+# 4. Hypothesis Backlog - 仮説リスト
+# ----------------------------------------------------------
+hypothesis_questions:
+  - category: "仮説バックログ"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "仮説のタイトル"
+        key: hypothesis_title
+        required: true
+      - question: "もし〜ならば〜（具体的な仮説）"
+        key: if_then_statement
+        required: true
+      - question: "検証方法"
+        key: validation_method
+        required: true
+      - question: "成功指標"
+        key: success_metric
+        required: true
+      - question: "リスクレベル（1-5、5が最高リスク）"
+        key: risk_level
+        required: true
+      - question: "確実性レベル（1-5、1が最も不確か）"
+        key: certainty_level
+        required: true
+
+hypothesis_template: |
+  ---
+  doc_type: hypothesis_backlog
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 仮説バックログ
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}
+
+  ## 仮説リスト
+
+  epics:
+    - epic_id: HX-01
+      title: {{hypothesis_title}}
+      statement: {{if_then_statement}}
+      validation: {{validation_method}}
+      success_criteria: {{success_metric}}
+      risk_level: {{risk_level}}
+      certainty_level: {{certainty_level}}
+      status: "未検証"
+      priority_quadrant: "{{#if (and (gte risk_level 4) (lte certainty_level 2))}}高リスク・未知（最優先）{{else}}{{#if (and (gte risk_level 4) (gte certainty_level 4))}}高リスク・既知（対策計画）{{else}}{{#if (and (lte risk_level 2) (lte certainty_level 2))}}低リスク・未知（知識を深める）{{else}}{{#if (and (lte risk_level 2) (gte certainty_level 4))}}低リスク・既知（監視）{{else}}中程度（個別判断）{{/if}}{{/if}}{{/if}}{{/if}}"
+
+# ----------------------------------------------------------
+# 5. User Journey Map - ユーザージャーニーマップ
+# ----------------------------------------------------------
+journey_map_questions:
+  - category: "ジャーニーマップ基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "対象ペルソナ（複数可、カンマ区切り）"
+        key: target_personas
+        required: true
+      - question: "ジャーニーの主要フェーズ（複数可、カンマ区切り）"
+        key: journey_phases
+        required: true
+      - question: "現状の課題・痛点（各フェーズごとの主な問題）"
+        key: current_pain_points
+        required: true
+      - question: "理想のジャーニー（各フェーズでの改善後の姿）"
+        key: ideal_journey
+        required: true
+      - question: "改善ポイント（具体的な改善策）"
+        key: improvement_points
+        required: true
+
+journey_map_template: |
+  ---
+  doc_type: user_journey_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # ユーザージャーニーマップ – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **更新日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## はじめに
+
+  このドキュメントは、{{project_id}}における主要ペルソナの現状の業務フローと、プロジェクト実施後の理想的な業務フロー（ジャーニー）を記述しています。各ペルソナの目標、行動、感情、課題、および改善機会を可視化することで、具体的な解決策の方向性を示します。
+
+  ## ペルソナと現状のジャーニー
+
+  {{#each target_personas}}
+  ### {{this}}の現状のジャーニー
+
+  | フェーズ | 行動 | 感情 | 課題/痛点 |
+  |---------|------|------|----------|
+  {{/each}}
+
+  ## 理想のジャーニー（提案後）
+
+  {{#each target_personas}}
+  ### {{this}}の理想のジャーニー
+
+  | フェーズ | 行動 | 感情 | 改善ポイント |
+  |---------|------|------|------------|
+  {{/each}}
+
+  ## 主要な発見と改善機会
+
+  ### 共通する主要な痛点
+
+  {{current_pain_points}}
+
+  ### 提案ソリューションによる改善ポイント
+
+  {{improvement_points}}
+
+  ## 次のステップ
+
+  1. ユーザージャーニーマップを基に、各ペルソナの主要なペインポイントに対応するソリューションの詳細設計を行う
+  2. 優先度の高い解決策から順に実装計画を策定
+  3. ソリューション導入後の効果測定指標と方法を具体化する
+
+# ----------------------------------------------------------
+# 6. Validation Plan - 検証計画
+# ----------------------------------------------------------
+validation_plan_questions:
+  - category: "検証計画基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "検証の目的（箇条書きで2-4項目）"
+        key: validation_purpose
+        required: true
+      - question: "検証対象の主要仮説（3つ程度）"
+        key: main_hypotheses
+        required: true
+      - question: "検証方法の概要（各仮説ごとの実施期間・対象者・手順）"
+        key: validation_methods
+        required: true
+      - question: "検証の指標（定量/定性指標と成功基準）"
+        key: metrics
+        required: true
+      - question: "検証体制（役割と責任）"
+        key: validation_team
+        required: true
+      - question: "リスクと対策"
+        key: risks_countermeasures
+        required: true
+      - question: "検証スケジュール"
+        key: validation_timeline
+        required: true
+      - question: "次のステップ"
+        key: next_steps
+        required: true
+
+validation_plan_template: |
+  ---
+  doc_type: validation_plan
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # 検証計画（バリデーションプラン）– {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **更新日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 1. 概要
+
+  本検証計画は、{{project_id}}における仮説マップで設定した優先度の高い仮説を検証するための具体的な方法とスケジュールを定義します。特に「高リスク・未知」の象限に分類された仮説を優先的に検証します。
+
+  ## 2. 検証目的
+
+  {{validation_purpose}}
+
+  ## 3. 優先仮説の検証計画
+
+  {{main_hypotheses}}
+
+  ## 4. 検証方法
+
+  {{validation_methods}}
+
+  ## 5. 計測指標と成功基準
+
+  {{metrics}}
+
+  ## 6. 検証体制
+
+  {{validation_team}}
+
+  ## 7. リスクと対策
+
+  {{risks_countermeasures}}
+
+  ## 8. タイムライン
+
+  {{validation_timeline}}
+
+  ## 9. 次のステップ
+
+  {{next_steps}}
+
+  ---
+
+  **作成者**: [担当者名]  
+  **承認者**: [承認者名] 
