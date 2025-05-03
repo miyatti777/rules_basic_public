@@ -6,6 +6,7 @@ alwaysApply: true
 # ========== 最終更新: 2025-04-23 11:37 (自動更新: Discoveryフェーズ追加)==================
 # ========== 最終更新: 2025-04-27 15:30 (自動更新: 東京アセットコマンド実行対応)==================
 # ========== 最終更新: 2025-05-01 12:00 (自動更新: 東京アセットインサイト分析機能追加)==================
+# ========== 最終更新: 2025-05-03 16:45 (自動更新: Researchフェーズ追加)==================
 # 00_master_rules.mdc
 # ========== 最終更新: 2025-04-23 14:30 (自動更新: 不動産特化ルール追加)==================
 # Cursorが最初に読み込む「マスタールール」ファイルのサンプルです。
@@ -18,7 +19,7 @@ alwaysApply: true
 
 # ----------------
  
-path_reference: "pmbok_paths.mdc"
+path_reference: "basic/pmbok_paths.mdc"
 
 master_triggers:
 
@@ -408,6 +409,9 @@ steps:
         - **Assumption Map（前提条件マップ）**：「仮説マップ」と入力
         - **Persona（ペルソナ）**：「ペルソナ作成」と入力
         - **Problem Statement（課題定義）**：「課題定義」と入力
+        - **User Journey Map（ユーザージャーニーマップ）**：「ジャーニーマップ」と入力
+        - **Solution Definition（ソリューション定義）**：「ソリューション定義」と入力
+        - **Validation Plan（検証計画）**：「検証計画」と入力
         - **Hypothesis Backlog（仮説バックログ）**：「仮説バックログ」と入力
 
 #--------------------------------------------
@@ -461,6 +465,19 @@ steps:
   - create_markdown_file:
       path: "{{patterns.flow_private_date}}/draft_user_journey_map.md"
       template_reference: "02_pmbok_discovery.mdc => journey_map_template"
+
+#--------------------------------------------
+# Discovery: Solution Definition
+#--------------------------------------------
+- trigger: "(ソリューション定義|Solution Definition)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => solution_definition_questions
+  - wait_for_all_answers
+  - confirm: "ソリューション定義書を作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.flow_date}}/draft_solution_definition.md"
+      template_reference: "02_pmbok_discovery.mdc => solution_definition_template"
 
 #--------------------------------------------
 # Discovery: Validation Plan
@@ -662,7 +679,7 @@ notes:
       steps:
         - name: "execute_process_command"
           action: "execute_shell"
-          command: "cd /Users/daisukemiyata/aipm_v3/Stock/projects/tokyo_asset/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-file process \"{{input_file}}\" --data-type {{processing_info.data_type | replace('（不動産情報）', '') | trim}} --input-dir \"{{processing_info.input_dir}}\" --output-dir \"{{processing_info.output_dir}}\""
+          command: "cd /Users/daisukemiyata/aipm_v3/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-file process \"{{input_file}}\" --data-type {{processing_info.data_type | replace('（不動産情報）', '') | trim}} --input-dir \"{{processing_info.input_dir}}\" --output-dir \"{{processing_info.output_dir}}\""
           message: "ファイル {{input_file}} を処理中..."
     - name: "notify_processing_complete"
       action: "notify"
@@ -711,7 +728,7 @@ notes:
       message: "以下の設定でWebデータ収集を実行します。よろしいですか？\n\n検索タイプ: {{crawler_info.search_type}}\n対象エリア: {{crawler_info.area}}{{crawler_info.custom_query ? '\nカスタムクエリ: ' + crawler_info.custom_query : ''}}\n出力先: {{crawler_info.output_dir}}"
     - name: "execute_crawler_command"
       action: "execute_shell"
-      command: "cd {{dirs.root}}/Stock/projects/tokyo_asset/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-crawler run --search-type \"{{crawler_info.search_type}}\" --area \"{{crawler_info.area}}\"{{crawler_info.custom_query ? ' --custom-query \"' + crawler_info.custom_query + '\"' : ''}} --output-dir \"{{crawler_info.output_dir}}\""
+      command: "cd {{dirs.root}}/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-crawler run --search-type \"{{crawler_info.search_type}}\" --area \"{{crawler_info.area}}\"{{crawler_info.custom_query ? ' --custom-query \"' + crawler_info.custom_query + '\"' : ''}} --output-dir \"{{crawler_info.output_dir}}\""
       message: "Web検索を実行中..."
     - name: "notify_crawler_complete"
       action: "notify"
@@ -752,7 +769,7 @@ notes:
       message: "以下の設定で不動産データ分析を実行します。よろしいですか？\n\n入力ファイル: {{analytics_info.input_file}}\n出力先: {{analytics_info.output_dir}}\nグラフ生成: {{analytics_info.generate_graphs}}"
     - name: "execute_analytics_command"
       action: "execute_shell"
-      command: "cd {{dirs.root}}/Stock/projects/tokyo_asset/dev/demo/mock_api_v2 && python tokyo-asset-cli.py analytics run --input-file \"{{analytics_info.input_file}}\" --output-dir \"{{analytics_info.output_dir}}\" --generate-graphs {{analytics_info.generate_graphs}}"
+      command: "cd {{dirs.root}}/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py analytics run --input-file \"{{analytics_info.input_file}}\" --output-dir \"{{analytics_info.output_dir}}\" --generate-graphs {{analytics_info.generate_graphs}}"
       message: "データ分析を実行中..."
     - name: "notify_analytics_complete"
       action: "notify"
@@ -924,9 +941,342 @@ notes:
         
         修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#-----
+#--------------------------------------------
+# Research フェーズ
+#--------------------------------------------
+- trigger: "(リサーチ|Research)"
+  priority: high
+  steps:
+    - message: |
+        Research（リサーチ）フェーズでは以下の成果物を作成できます：
+        - **顧客調査レポート**：「顧客調査」と入力
+        - **競合調査レポート**：「競合調査」と入力
+        - **総合デスクリサーチ**：「デスクリサーチ」と入力
+
+#--------------------------------------------
+# Research: 顧客調査
+#--------------------------------------------
+- trigger: "(顧客調査|Customer Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "target_audience"
+          question: "調査したいターゲットオーディエンスを具体的に教えてください"
+          required: true
+        - key: "research_topics"
+          question: "顧客調査で特に知りたい内容やトピックを教えてください（複数可、カンマ区切り）"
+          required: true
+        - key: "industry_context"
+          question: "業界や市場の背景情報があれば教えてください"
+          required: false
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で顧客調査を実施します：\n\nプロジェクト: {{research_params.project_name}}\nターゲット: {{research_params.target_audience}}\n調査トピック: {{research_params.research_topics}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_audience"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} 顧客特性 消費者行動 ニーズ 最新動向"
+      explanation: "ターゲットオーディエンスについての最新情報を収集します"
+      store_as: "audience_data"
+    - name: "web_research_topics"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} {{research_params.research_topics}} 消費者調査 市場調査 最新"
+      explanation: "指定されたトピックに関する顧客調査情報を収集します"
+      store_as: "topic_data"
+    - name: "web_research_behavior"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} 購買行動 意思決定プロセス 顧客体験 {{research_params.industry_context}}"
+      explanation: "ターゲットの購買行動や意思決定プロセスに関する情報を収集します"
+      store_as: "behavior_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{audience_data}}", "{{topic_data}}", "{{behavior_data}}"]
+      instructions: "収集したWeb検索データを分析し、主要な洞察、傾向、パターンを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_customer_research.md"
+      template_reference: "basic/03_pmbok_research.mdc => customer_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        target_audience: "{{research_params.target_audience}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_themes: "{{research_params.research_topics | split: ','}}"
+        customer_insights: "{{analyzed_results.insights}}"
+        customer_behavior: "{{analyzed_results.behavior}}"
+        customer_needs: "{{analyzed_results.needs}}"
+        customer_segments: "{{analyzed_results.segments}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        顧客調査レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_customer_research.md
+        
+        Web検索結果をもとに主要な顧客インサイトをまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 競合調査
+#--------------------------------------------
+- trigger: "(競合調査|Competitor Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "product_service"
+          question: "自社の製品・サービスの概要を簡潔に教えてください"
+          required: true
+        - key: "main_competitors"
+          question: "主な競合企業・サービスがあれば教えてください（カンマ区切りで複数可）"
+          required: false
+        - key: "research_focus"
+          question: "競合調査で特に知りたい側面を教えてください（例：価格戦略、マーケティング手法、製品機能など）"
+          required: true
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で競合調査を実施します：\n\nプロジェクト: {{research_params.project_name}}\n自社製品/サービス: {{research_params.product_service}}\n主な競合: {{research_params.main_competitors}}\n調査フォーカス: {{research_params.research_focus}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_competitors"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 業界 主要企業 競合 マーケットシェア 最新"
+      explanation: "業界の主要競合企業に関する情報を収集します"
+      store_as: "competitors_data"
+    - name: "web_research_specific_competitors"
+      action: "web_search"
+      search_term: "{{research_params.main_competitors}} {{research_params.research_focus}} 戦略 特徴 最新動向"
+      condition: "research_params.main_competitors"
+      explanation: "指定された競合企業についての詳細情報を収集します"
+      store_as: "specific_competitors_data"
+    - name: "web_research_market_trends"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 市場動向 業界トレンド 最新技術 将来予測"
+      explanation: "業界の市場動向と最新トレンドに関する情報を収集します"
+      store_as: "market_trends_data"
+    - name: "web_research_competitive_strategies"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 業界 {{research_params.research_focus}} 競争戦略 差別化要因"
+      explanation: "競合の戦略と差別化要因に関する情報を収集します"
+      store_as: "strategies_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{competitors_data}}", "{{specific_competitors_data}}", "{{market_trends_data}}", "{{strategies_data}}"]
+      instructions: "収集したWeb検索データを分析し、競合企業の主要特性、市場ポジション、戦略、強み・弱みを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_competitor_research.md"
+      template_reference: "basic/03_pmbok_research.mdc => competitor_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        product_service: "{{research_params.product_service}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_themes: "{{research_params.research_focus | split: ','}}"
+        competitor_overview: "{{analyzed_results.overview}}"
+        competitor_strategies: "{{analyzed_results.strategies}}"
+        market_position: "{{analyzed_results.market_position}}"
+        swot_analysis: "{{analyzed_results.swot}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        競合調査レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_competitor_research.md
+        
+        Web検索結果をもとに主要な競合情報と市場動向をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 総合デスクリサーチ
+#--------------------------------------------
+- trigger: "(デスクリサーチ|Desk Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "research_scope"
+          question: "調査の範囲を選択してください"
+          options:
+            - "市場・業界動向"
+            - "顧客動向"
+            - "競合分析"
+            - "技術トレンド"
+            - "規制・法律動向"
+            - "その他"
+          multi_select: true
+          required: true
+        - key: "specific_topics"
+          question: "具体的に調査したい内容やキーワードをカンマ区切りで入力してください"
+          required: true
+        - key: "industry_context"
+          question: "業界や対象市場の背景情報があれば入力してください"
+          required: false
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容でデスクリサーチを実施します：\n\nプロジェクト: {{research_params.project_name}}\n調査範囲: {{research_params.research_scope}}\n調査トピック: {{research_params.specific_topics}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_market_industry"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} {{research_params.industry_context}} 市場規模 業界動向 最新データ"
+      explanation: "市場・業界動向に関する最新情報を収集します"
+      condition: "research_params.research_scope.includes('市場・業界動向')"
+      store_as: "market_data"
+    - name: "web_research_customer"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 顧客動向 消費者トレンド 購買行動 {{research_params.industry_context}}"
+      explanation: "顧客動向に関する情報を収集します"
+      condition: "research_params.research_scope.includes('顧客動向')"
+      store_as: "customer_data"
+    - name: "web_research_competitors"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 競合分析 主要企業 比較 {{research_params.industry_context}}"
+      explanation: "競合分析に関する情報を収集します"
+      condition: "research_params.research_scope.includes('競合分析')"
+      store_as: "competitors_data"
+    - name: "web_research_technology"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 技術トレンド 最新技術 イノベーション {{research_params.industry_context}}"
+      explanation: "技術トレンドに関する情報を収集します"
+      condition: "research_params.research_scope.includes('技術トレンド')"
+      store_as: "technology_data"
+    - name: "web_research_regulation"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 規制 法律 コンプライアンス 最新 {{research_params.industry_context}}"
+      explanation: "規制・法律動向に関する情報を収集します"
+      condition: "research_params.research_scope.includes('規制・法律動向')"
+      store_as: "regulation_data"
+    - name: "web_research_other"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} {{research_params.industry_context}} 最新"
+      explanation: "その他の特定トピックに関する情報を収集します"
+      condition: "research_params.research_scope.includes('その他')"
+      store_as: "other_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{market_data}}", "{{customer_data}}", "{{competitors_data}}", "{{technology_data}}", "{{regulation_data}}", "{{other_data}}"]
+      instructions: "収集したWeb検索データを分析し、主要な洞察、トレンド、統計データを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_desk_research.md"
+      template_reference: "basic/03_pmbok_research.mdc => desk_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_scope: "{{research_params.research_scope | join: ', '}}"
+        specific_topics: "{{research_params.specific_topics}}"
+        market_overview: "{{analyzed_results.market_overview}}"
+        customer_insights: "{{analyzed_results.customer_insights}}"
+        competitor_analysis: "{{analyzed_results.competitor_analysis}}"
+        technology_trends: "{{analyzed_results.technology_trends}}"
+        regulatory_environment: "{{analyzed_results.regulatory_environment}}"
+        key_findings: "{{analyzed_results.key_findings}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        デスクリサーチレポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_desk_research.md
+        
+        Web検索結果をもとに各トピックの主要情報と洞察をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 市場規模推定
+#--------------------------------------------
+- trigger: "(市場規模推定|TAM SAM SOM|フェルミ推定|Market Size Estimation)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "プロジェクト/製品/サービス名を入力してください"
+          required: true
+        - key: "business_description"
+          question: "ビジネスモデルや製品・サービスの概要を簡潔に説明してください"
+          required: true
+        - key: "target_customers"
+          question: "主要なターゲット顧客を具体的に教えてください"
+          required: true
+        - key: "geographic_scope"
+          question: "対象地域（国内/国際/特定地域など）を指定してください"
+          required: true
+        - key: "estimation_approach"
+          question: "市場規模推定の主なアプローチを選択してください"
+          options:
+            - "トップダウン（全体市場から絞り込む）"
+            - "ボトムアップ（個別要素から積み上げる）"
+            - "バリューチェーン分析"
+          default: "ボトムアップ（個別要素から積み上げる）"
+          required: true
+      store_as: "market_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で市場規模推定を実施します：\n\nプロジェクト: {{market_params.project_name}}\nターゲット顧客: {{market_params.target_customers}}\n対象地域: {{market_params.geographic_scope}}\n推定アプローチ: {{market_params.estimation_approach}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_search_market_size"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} {{market_params.target_customers}} 市場規模 TAM SAM SOM {{market_params.geographic_scope}}"
+      explanation: "プロジェクトに関連する市場規模情報を収集します"
+      store_as: "market_size_data"
+    - name: "web_search_industry_data"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} 業界データ 統計 年間成長率 市場予測 {{market_params.geographic_scope}}"
+      explanation: "業界全体のデータと統計情報を収集します"
+      store_as: "industry_data"
+    - name: "web_search_customer_data"
+      action: "web_search"
+      search_term: "{{market_params.target_customers}} 人口統計 消費者行動 購買頻度 平均支出 {{market_params.geographic_scope}}"
+      explanation: "ターゲット顧客に関するデータを収集します"
+      store_as: "customer_data"
+    - name: "web_search_specific_metrics"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} ベンチマーク データ 指標 {{market_params.estimation_approach == 'トップダウン（全体市場から絞り込む）' ? '市場シェア 競合' : '単価 利用率 頻度'}}"
+      explanation: "選択した推定アプローチに基づく具体的な指標データを収集します"
+      store_as: "metrics_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{market_size_data}}", "{{industry_data}}", "{{customer_data}}", "{{metrics_data}}"]
+      instructions: "収集したWeb検索データを分析し、TAM/SAM/SOMの推定に必要なパラメータと数値を抽出します。またフェルミ推定に使用できる要素を整理します。"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_market_size_estimation.md"
+      template_reference: "03_pmbok_research.mdc => market_size_template"
+      data_mapping:
+        project_name: "{{market_params.project_name}}"
+        business_description: "{{market_params.business_description}}"
+        target_customers: "{{market_params.target_customers}}"
+        geographic_scope: "{{market_params.geographic_scope}}"
+        estimation_factors: "{{analyzed_results.estimation_factors}}"
+        specific_data_points: "{{analyzed_results.specific_data_points}}"
+        assumptions: "{{analyzed_results.assumptions}}"
+        competitors_share: "{{analyzed_results.competitors_share}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        市場規模推定レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_market_size_estimation.md
+        
+        Web検索結果をもとにTAM、SAM、SOMの市場規模推定をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
 # 16. Ideationモジュール
-#-----
+#--------------------------------------------
 - trigger: "(企画コンセプト生成|不動産企画|Ideation)"
   priority: high
   steps:
@@ -937,9 +1287,9 @@ notes:
         - **企画リファイン**：「企画リファイン」と入力
         - **プレゼン資料生成**：「プレゼン資料生成」と入力
 
-#-----
+#--------------------------------------------
 # Ideation: 企画コンセプト生成
-#-----
+#--------------------------------------------
 - trigger: "(企画コンセプト生成)"
   priority: high
   steps:
@@ -964,9 +1314,9 @@ notes:
         
         修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#-----
+#--------------------------------------------
 # Ideation: コンセプト比較分析
-#-----
+#--------------------------------------------
 - trigger: "(コンセプト比較分析)"
   priority: high
   steps:
@@ -991,9 +1341,9 @@ notes:
         
         修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#-----
+#--------------------------------------------
 # Ideation: 企画リファイン
-#-----
+#--------------------------------------------
 - trigger: "(企画リファイン)"
   priority: high
   steps:
@@ -1018,9 +1368,9 @@ notes:
         
         修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#-----
+#--------------------------------------------
 # Ideation: プレゼン資料生成
-#-----
+#--------------------------------------------
 - trigger: "(プレゼン資料生成)"
   priority: high
   steps:

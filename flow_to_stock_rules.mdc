@@ -7,6 +7,7 @@ alwaysApply: false
 # flow_to_stock_rules.mdc
 #  Flow（WIP）→ Stock（正式）→ Archived（履歴）
 # ==========================================
+# 最終更新: 2025-05-03 - Researchフェーズ対応
 
 # ----------------------------------------------------------
 # パス参照設定 - このファイルは pmbok_paths.mdc を参照します
@@ -256,6 +257,46 @@ flows:
     source_pattern: "{{patterns.draft_sprint_review}}"
     trigger_event: "確定反映"
     target_path_template: "{{patterns.review_md}}"
+    steps:
+      - "{{ execute_flow_to_stock_script }}"  # スクリプト呼び出し
+
+# ----------------------------------------------------
+# 20. Research: 顧客調査レポートの確定
+# ----------------------------------------------------
+  - name: "customer_research_finalization"
+    source_pattern: "{{patterns.draft_customer_research}}"
+    trigger_event: "確定反映"
+    target_path_template: "{{patterns.stock_customer_research}}"
+    steps:
+      - "{{ execute_flow_to_stock_script }}"  # スクリプト呼び出し
+
+# ----------------------------------------------------
+# 21. Research: 競合調査レポートの確定
+# ----------------------------------------------------
+  - name: "competitor_research_finalization"
+    source_pattern: "{{patterns.draft_competitor_research}}"
+    trigger_event: "確定反映"
+    target_path_template: "{{patterns.stock_competitor_research}}"
+    steps:
+      - "{{ execute_flow_to_stock_script }}"  # スクリプト呼び出し
+
+# ----------------------------------------------------
+# 22. Research: デスクリサーチレポートの確定
+# ----------------------------------------------------
+  - name: "desk_research_finalization"
+    source_pattern: "{{patterns.draft_desk_research}}"
+    trigger_event: "確定反映"
+    target_path_template: "{{patterns.stock_desk_research}}"
+    steps:
+      - "{{ execute_flow_to_stock_script }}"  # スクリプト呼び出し
+
+# ----------------------------------------------------
+# 23. Research: 市場規模推定レポートの確定
+# ----------------------------------------------------
+  - name: "market_size_estimation_finalization"
+    source_pattern: "{{patterns.flow_date}}/draft_market_size_estimation.md"
+    trigger_event: "確定反映"
+    target_path_template: "{{patterns.doc_research}}/market_size_estimation.md"
     steps:
       - "{{ execute_flow_to_stock_script }}"  # スクリプト呼び出し
 

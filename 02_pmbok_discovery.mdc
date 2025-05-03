@@ -535,3 +535,81 @@ validation_plan_template: |
 
   **作成者**: [担当者名]  
   **承認者**: [承認者名] 
+
+# ----------------------------------------------------------
+# 7. Solution Definition - ソリューション定義
+# ----------------------------------------------------------
+solution_definition_questions:
+  - category: "ソリューション定義の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "背景（ユーザーが直面している状況）"
+        key: background
+        required: true
+      - question: "課題/ニーズ（お客様が抱える問題）"
+        key: problem
+        required: true
+      - question: "提案するソリューション"
+        key: solution
+        required: true
+      - question: "期待する行動変化"
+        key: behavior_change
+        required: true
+      - question: "ソリューションの主要機能（箇条書きで3-5項目）"
+        key: main_features
+        required: true
+      - question: "ソリューションの仕様詳細"
+        key: specifications
+        required: true
+      - question: "関連する既存リソース（既存ペルソナやジャーニーマップなど）"
+        key: related_resources
+        required: false
+
+solution_definition_template: |
+  ---
+  doc_type: solution_definition
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # ソリューション定義：{{project_id}}
+
+  ## 1. 課題仮説
+
+  ### 背景
+  {{background}}
+
+  ### 課題/ニーズ
+  上記の状況があるので、お客様は**{{problem}}**があります。
+
+  ## 2. ソリューション仮説
+
+  **{{solution}}**することで、より多くのお客様が**{{behavior_change}}**できるようになると信じています。
+
+  ## 3. ソリューションの主要機能
+
+  {{main_features}}
+
+  ## 4. 仕様詳細
+
+  {{specifications}}
+
+  ## 5. 関連リソース
+
+  {{#if related_resources}}
+  {{related_resources}}
+  {{else}}
+  - ペルソナ：[リンク]
+  - ユーザージャーニーマップ：[リンク]
+  - 課題定義書：[リンク]
+  {{/if}}
+
+  ## 6. 次のステップ
+
+  1. 本ソリューション定義をもとに検証計画を策定する
+  2. 優先度の高い機能から検証を実施する
+  3. ユーザーフィードバックをもとにソリューション定義を改善する 

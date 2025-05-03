@@ -8,7 +8,7 @@ alwaysApply: true
 # ==========================================================
 # ・{{ }} 内は Cursor が動的に置換するプレースホルダ変数
 # ・必要に応じて root を環境パスに書き換えてください
-# ・最終更新: 2025-04-28 - プログラム階層化対応
+# ・最終更新: 2025-05-03 - Researchフェーズ対応
 
 # ----
 # 0. ルートディレクトリ
@@ -89,6 +89,11 @@ patterns:
   draft_problem:      "{{patterns.flow_date}}/draft_problem_statement.md"
   draft_hypothesis:   "{{patterns.flow_date}}/draft_hypothesis_backlog.md"
   draft_journey_map:  "{{patterns.flow_date}}/draft_user_journey_map.md"
+  draft_solution:     "{{patterns.flow_date}}/draft_solution_definition.md"
+  
+  # ---- Planning関連 ---
+  draft_project_scope: "{{patterns.flow_date}}/draft_project_scope_statement.md"
+  draft_prd:          "{{patterns.flow_date}}/draft_product_requirements.md"
   
   # ---- タスク管理テンプレート ---
   daily_tasks_template: "{{dirs.flow_templates}}/daily_tasks_template.md"
@@ -102,6 +107,7 @@ patterns:
   # プロセス別フォルダ
   doc_initiating:     "{{patterns.docs_root}}/1_initiating"
   doc_discovery:      "{{patterns.docs_root}}/2_discovery"
+  doc_research:       "{{patterns.docs_root}}/2_research"  # Researchフェーズフォルダ
   doc_planning:       "{{patterns.docs_root}}/3_planning"
   doc_executing:      "{{patterns.docs_root}}/4_executing"
   doc_monitoring:     "{{patterns.docs_root}}/5_monitoring"
@@ -120,12 +126,15 @@ patterns:
   stock_problem:          "{{patterns.doc_discovery}}/problem_statement.md"
   stock_hypothesis:       "{{patterns.doc_discovery}}/hypothesis_backlog.md"
   stock_journey_map:      "{{patterns.doc_discovery}}/user_journey_map.md"
+  stock_solution:         "{{patterns.doc_discovery}}/solution_definition.md"
   stock_validation_plan:  "{{patterns.doc_discovery}}/validation_plan.md"
   stock_ideation_dir:     "{{patterns.doc_discovery}}/ideation"
 
   # ---- Stock: Planning ---
   stock_wbs:              "{{patterns.doc_planning}}/wbs.md"
   risk_plan:              "{{patterns.doc_planning}}/risk_plan.md"
+  project_scope:          "{{patterns.doc_planning}}/project_scope_statement.md"
+  product_requirements:   "{{patterns.doc_planning}}/product_requirements.md"
   comm_plan:              "{{patterns.doc_planning}}/communication_plan.md"
   roadmap:                "{{patterns.doc_planning}}/product_roadmap.md"
   
@@ -153,6 +162,19 @@ patterns:
   lessons_learned_dir:    "{{patterns.doc_closing}}/lessons_learned"
   transition_doc:         "{{patterns.doc_closing}}/transition_document.md"
   benefits_report:        "{{patterns.doc_closing}}/benefits_report.md"
+
+  # ---- Research関連 ---
+  draft_customer_research: "{{patterns.flow_date}}/draft_customer_research.md"
+  draft_competitor_research: "{{patterns.flow_date}}/draft_competitor_research.md"
+  draft_desk_research: "{{patterns.flow_date}}/draft_desk_research.md"
+  draft_market_size: "{{patterns.flow_date}}/draft_market_size_estimation.md"
+  research_dir: "{{patterns.flow_date}}/research"
+  
+  # ---- Stock: Research -----
+  stock_customer_research: "{{patterns.doc_research}}/customer_research.md"
+  stock_competitor_research: "{{patterns.doc_research}}/competitor_research.md"
+  stock_desk_research: "{{patterns.doc_research}}/desk_research.md"
+  stock_market_size: "{{patterns.doc_research}}/market_size_estimation.md"
 
 # ----
 # 3. 便利変数（任意拡張）
