@@ -761,3 +761,455 @@ roadmap_template: |
   |------|-------|---------|
   | {{creation_date}} | {{author}} | 初版作成 | 
   | {{today}} | {{current_user}} | {{update_description}} |
+
+# ----------------------------------------------------------
+# ◆ プロジェクトスコープ記述書の質問セット
+# ----------------------------------------------------------
+project_scope_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクト名"
+        key: project_name
+        required: true
+      - question: "プロジェクトマネージャー"
+        key: project_manager
+        required: true
+      - question: "作成日"
+        key: creation_date
+        required: true
+        description: "YYYY-MM-DD形式"
+        default: "{{today}}"
+      - question: "バージョン"
+        key: version
+        required: true
+        description: "例: 1.0"
+        default: "1.0"
+
+  - category: "プロジェクト目的・背景"
+    items:
+      - question: "プロジェクト目的"
+        key: project_purpose
+        required: true
+        description: "このプロジェクトが何を達成しようとしているのか"
+      - question: "ビジネス背景"
+        key: business_background
+        required: true
+        description: "ビジネス上の背景、現状の課題など"
+      - question: "期待される利益・効果"
+        key: expected_benefits
+        required: true
+        description: "このプロジェクトで得られる利益や効果"
+
+  - category: "プロジェクト成果物"
+    items:
+      - question: "主要成果物リスト"
+        key: deliverables
+        required: true
+        description: "プロジェクトが提供する主な成果物（製品、サービス、文書など）を箇条書きで"
+      - question: "成果物の受け入れ基準"
+        key: acceptance_criteria
+        required: true
+        description: "成果物が完了したと見なす基準"
+
+  - category: "プロジェクト範囲"
+    items:
+      - question: "含まれる範囲"
+        key: in_scope
+        required: true
+        description: "このプロジェクトに含まれる範囲を箇条書きで"
+      - question: "除外される範囲"
+        key: out_of_scope
+        required: true
+        description: "このプロジェクトに含まれない範囲を箇条書きで"
+      - question: "主な制約条件"
+        key: constraints
+        required: true
+        description: "時間、予算、リソース、品質などの制約"
+      - question: "主な前提条件"
+        key: assumptions
+        required: true
+        description: "プロジェクト遂行上の前提条件"
+
+  - category: "要件概要"
+    items:
+      - question: "主要要件"
+        key: key_requirements
+        required: true
+        description: "プロジェクトの主な要件を箇条書きで"
+      - question: "優先順位付け基準"
+        key: prioritization_criteria
+        required: true
+        description: "要件の優先順位をどのように決定するか"
+
+  - category: "関連情報"
+    items:
+      - question: "主要ステークホルダー"
+        key: key_stakeholders
+        required: true
+        description: "主要なステークホルダーとその役割"
+      - question: "参照すべき文書"
+        key: reference_documents
+        required: false
+        description: "参照すべきプロジェクト憲章、要件文書、ディスカバリー成果物など"
+
+# ----------------------------------------------------------
+# ◆ プロジェクトスコープ記述書テンプレート
+# ----------------------------------------------------------
+project_scope_template: |
+  # {{project_name}} - プロジェクトスコープ記述書
+  
+  **バージョン:** {{version}}  
+  **作成日:** {{creation_date}}  
+  **作成者:** {{project_manager}}  
+  **最終更新日:** {{creation_date}}  
+  
+  ## 1. プロジェクト概要
+  
+  ### 1.1 プロジェクト目的
+  
+  {{project_purpose}}
+  
+  ### 1.2 ビジネス背景
+  
+  {{business_background}}
+  
+  ### 1.3 期待される利益・効果
+  
+  {{expected_benefits}}
+  
+  ## 2. プロジェクト成果物
+  
+  ### 2.1 主要成果物
+  
+  {{deliverables}}
+  
+  ### 2.2 成果物の受け入れ基準
+  
+  {{acceptance_criteria}}
+  
+  ## 3. プロジェクト範囲
+  
+  ### 3.1 含まれる範囲（In Scope）
+  
+  {{in_scope}}
+  
+  ### 3.2 除外される範囲（Out of Scope）
+  
+  {{out_of_scope}}
+  
+  ### 3.3 制約条件
+  
+  {{constraints}}
+  
+  ### 3.4 前提条件
+  
+  {{assumptions}}
+  
+  ## 4. 要件概要
+  
+  ### 4.1 主要要件
+  
+  {{key_requirements}}
+  
+  ### 4.2 優先順位付け基準
+  
+  {{prioritization_criteria}}
+  
+  ## 5. 関連情報
+  
+  ### 5.1 主要ステークホルダー
+  
+  {{key_stakeholders}}
+  
+  ### 5.2 参照文書
+  
+  {{reference_documents}}
+  
+  ## 6. 承認
+  
+  | 役割 | 氏名 | 署名 | 日付 |
+  |------|------|------|------|
+  | プロジェクトスポンサー | | | |
+  | プロジェクトマネージャー | {{project_manager}} | | {{creation_date}} |
+  | 主要ステークホルダー | | | |
+  
+  ## 7. 変更履歴
+  
+  | バージョン | 日付 | 変更者 | 変更内容 |
+  |-----------|------|-------|---------|
+  | {{version}} | {{creation_date}} | {{project_manager}} | 初版作成 |
+
+# ----------------------------------------------------------
+# ◆ プロダクト要求仕様書（PRD）の質問セット
+# ----------------------------------------------------------
+prd_questions:
+  - category: "基本情報"
+    items:
+      - question: "製品名"
+        key: product_name
+        required: true
+      - question: "バージョン"
+        key: version
+        required: true
+        description: "例: 1.0"
+        default: "1.0"
+      - question: "作成者"
+        key: author
+        required: true
+      - question: "作成日"
+        key: creation_date
+        required: true
+        description: "YYYY-MM-DD形式"
+        default: "{{today}}"
+
+  - category: "製品概要"
+    items:
+      - question: "製品ビジョン"
+        key: product_vision
+        required: true
+        description: "この製品が解決する問題と将来の方向性"
+      - question: "製品の目的"
+        key: product_purpose
+        required: true
+        description: "この製品が達成しようとしていること"
+      - question: "主要ユーザー"
+        key: target_users
+        required: true
+        description: "この製品の主なユーザーは誰か"
+      - question: "主な課題・ニーズ"
+        key: user_needs
+        required: true
+        description: "（背景） という状況があるので、お客様は （課題/ニーズ） があります。"
+
+  - category: "ソリューション定義"
+    items:
+      - question: "提案するソリューション"
+        key: proposed_solution
+        required: true
+        description: "どのようなソリューションを提供するか"
+      - question: "期待する行動変化"
+        key: expected_behavior_change
+        required: true
+        description: "(ソリューション) することで、より多くのお客様が (行動変化) できるようになると信じています"
+      - question: "競合差別化ポイント"
+        key: competitive_advantage
+        required: false
+        description: "競合製品と比較した差別化ポイント"
+
+  - category: "機能要件"
+    items:
+      - question: "コア機能"
+        key: core_features
+        required: true
+        description: "製品の中心的な機能を箇条書きで"
+      - question: "ユーザーストーリー"
+        key: user_stories
+        required: true
+        description: "主要なユーザーストーリーを箇条書きで（〜として、〜したい、なぜなら〜の形式）"
+      - question: "機能の優先順位"
+        key: feature_priorities
+        required: true
+        description: "機能の優先順位（Must Have, Should Have, Could Have, Won't Haveなど）"
+
+  - category: "非機能要件"
+    items:
+      - question: "パフォーマンス要件"
+        key: performance_requirements
+        required: true
+        description: "応答時間、スループット、同時ユーザー数など"
+      - question: "セキュリティ要件"
+        key: security_requirements
+        required: true
+        description: "認証、データ保護、プライバシー対策など"
+      - question: "スケーラビリティ"
+        key: scalability
+        required: false
+        description: "ユーザー数や取引量の増加への対応方法"
+      - question: "互換性・統合性"
+        key: compatibility
+        required: false
+        description: "他システムやプラットフォームとの互換性要件"
+      - question: "ユーザビリティ要件"
+        key: usability_requirements
+        required: false
+        description: "使いやすさ、アクセシビリティ、学習容易性など"
+
+  - category: "技術仕様"
+    items:
+      - question: "技術スタック"
+        key: technology_stack
+        required: false
+        description: "使用する主要な技術、言語、フレームワークなど"
+      - question: "アーキテクチャ概要"
+        key: architecture_overview
+        required: false
+        description: "システムの基本的なアーキテクチャ方針"
+      - question: "データ要件"
+        key: data_requirements
+        required: false
+        description: "データモデル、ストレージ、バックアップ要件など"
+
+  - category: "リリース計画"
+    items:
+      - question: "MVPの定義"
+        key: mvp_definition
+        required: true
+        description: "最小限実現すべき機能セット"
+      - question: "リリースロードマップ"
+        key: release_roadmap
+        required: false
+        description: "主要なリリースマイルストーンとタイミング"
+      - question: "フィードバックプラン"
+        key: feedback_plan
+        required: false
+        description: "ユーザーからのフィードバック収集方法"
+
+  - category: "その他"
+    items:
+      - question: "制約条件"
+        key: constraints
+        required: true
+        description: "時間、予算、技術などの制約"
+      - question: "前提条件"
+        key: assumptions
+        required: true
+        description: "製品開発上の前提条件"
+      - question: "リスクと軽減策"
+        key: risks_and_mitigations
+        required: false
+        description: "主要リスクとその対策"
+
+# ----------------------------------------------------------
+# ◆ プロダクト要求仕様書（PRD）テンプレート
+# ----------------------------------------------------------
+prd_template: |
+  # {{product_name}} - プロダクト要求仕様書 (PRD)
+  
+  **バージョン:** {{version}}  
+  **作成日:** {{creation_date}}  
+  **作成者:** {{author}}  
+  **最終更新日:** {{creation_date}}  
+  
+  ## 1. 製品概要
+  
+  ### 1.1 製品ビジョン
+  
+  {{product_vision}}
+  
+  ### 1.2 製品の目的
+  
+  {{product_purpose}}
+  
+  ### 1.3 対象ユーザー
+  
+  {{target_users}}
+  
+  ### 1.4 課題・ニーズ定義
+  
+  {{user_needs}}
+  
+  ## 2. ソリューション
+  
+  ### 2.1 提案するソリューション
+  
+  {{proposed_solution}}
+  
+  ### 2.2 期待する行動変化
+  
+  {{expected_behavior_change}}
+  
+  ### 2.3 競合差別化ポイント
+  
+  {{competitive_advantage}}
+  
+  ## 3. 機能要件
+  
+  ### 3.1 コア機能
+  
+  {{core_features}}
+  
+  ### 3.2 ユーザーストーリー
+  
+  {{user_stories}}
+  
+  ### 3.3 機能の優先順位
+  
+  {{feature_priorities}}
+  
+  ## 4. 非機能要件
+  
+  ### 4.1 パフォーマンス要件
+  
+  {{performance_requirements}}
+  
+  ### 4.2 セキュリティ要件
+  
+  {{security_requirements}}
+  
+  ### 4.3 スケーラビリティ
+  
+  {{scalability}}
+  
+  ### 4.4 互換性・統合性
+  
+  {{compatibility}}
+  
+  ### 4.5 ユーザビリティ要件
+  
+  {{usability_requirements}}
+  
+  ## 5. 技術仕様
+  
+  ### 5.1 技術スタック
+  
+  {{technology_stack}}
+  
+  ### 5.2 アーキテクチャ概要
+  
+  {{architecture_overview}}
+  
+  ### 5.3 データ要件
+  
+  {{data_requirements}}
+  
+  ## 6. リリース計画
+  
+  ### 6.1 MVPの定義
+  
+  {{mvp_definition}}
+  
+  ### 6.2 リリースロードマップ
+  
+  {{release_roadmap}}
+  
+  ### 6.3 フィードバックプラン
+  
+  {{feedback_plan}}
+  
+  ## 7. 制約・前提条件
+  
+  ### 7.1 制約条件
+  
+  {{constraints}}
+  
+  ### 7.2 前提条件
+  
+  {{assumptions}}
+  
+  ### 7.3 リスクと軽減策
+  
+  {{risks_and_mitigations}}
+  
+  ## 8. 承認
+  
+  | 役割 | 氏名 | 署名 | 日付 |
+  |------|------|------|------|
+  | プロダクトオーナー | | | |
+  | プロジェクトマネージャー | | | |
+  | 開発リード | | | |
+  
+  ## 9. 変更履歴
+  
+  | バージョン | 日付 | 変更者 | 変更内容 |
+  |-----------|------|-------|---------|
+  | {{version}} | {{creation_date}} | {{author}} | 初版作成 |

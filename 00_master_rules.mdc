@@ -138,6 +138,44 @@ master_triggers:
         message: "{{patterns.draft_wbs}} を出力しました。詳細を追記したらStockへ確定してください。"
 
   #--------------------------------------------
+  # 4-1. プロジェクトスコープ記述書
+  #--------------------------------------------
+  - trigger: "(プロジェクトスコープ記述書|Project Scope Statement)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => project_scope_questions"
+        message: "プロジェクトスコープ記述書を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "プロジェクトスコープ記述書のドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_project_scope}}"
+        template_reference: "basic/03_pmbok_planning.mdc => project_scope_template"
+        message: "{{patterns.draft_project_scope}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
+  # 4-2. プロダクト要求仕様書（PRD）
+  #--------------------------------------------
+  - trigger: "(プロダクト要求仕様書|PRD|Product Requirements Document)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => prd_questions"
+        message: "プロダクト要求仕様書（PRD）を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "プロダクト要求仕様書のドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_prd}}"
+        template_reference: "basic/03_pmbok_planning.mdc => prd_template"
+        message: "{{patterns.draft_prd}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
   # 5. スプリントゴール作成
   #--------------------------------------------
   - trigger: "スプリントゴール|Sprint Goal"
