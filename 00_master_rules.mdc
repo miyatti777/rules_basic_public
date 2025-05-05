@@ -176,6 +176,25 @@ master_triggers:
         message: "{{patterns.draft_prd}} を出力しました。詳細を追記したらStockへ確定してください。"
 
   #--------------------------------------------
+  # 4-3. Design Doc（設計文書）
+  #--------------------------------------------
+  - trigger: "(Design Doc|デザインドック|設計文書)(作成|)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => design_doc_questions"
+        message: "Design Doc（設計文書）を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "Design Docのドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_design_doc}}"
+        template_reference: "basic/03_pmbok_planning.mdc => design_doc_template"
+        message: "{{patterns.draft_design_doc}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
   # 5. スプリントゴール作成
   #--------------------------------------------
   - trigger: "スプリントゴール|Sprint Goal"
@@ -450,6 +469,11 @@ steps:
         - **User Journey Map（ユーザージャーニーマップ）**：「ジャーニーマップ」と入力
         - **Solution Definition（ソリューション定義）**：「ソリューション定義」と入力
         - **Validation Plan（検証計画）**：「検証計画」と入力
+        - **UX Research Overview（UXリサーチ調査概要）**：「UXリサーチ」と入力
+        - **Interview Guide（インタビュー設計）**：「インタビュー設計」と入力
+        - **Recruiting Plan（リクルーティング計画）**：「リクルーティング」と入力
+        - **Interview Analysis（インタビュー分析）**：「インタビュー分析」と入力
+        - **Research Summary（リサーチサマリー）**：「リサーチサマリー」と入力
         - **Hypothesis Backlog（仮説バックログ）**：「仮説バックログ」と入力
 
 #--------------------------------------------
@@ -520,15 +544,90 @@ steps:
 #--------------------------------------------
 # Discovery: Validation Plan
 #--------------------------------------------
-- trigger: "(検証計画|バリデーションプラン|Validation Plan)"
-priority: high
-steps:
-  - call basic/02_pmbok_discovery.mdc => validation_plan_questions
-  - wait_for_all_answers
-  - confirm: "検証計画（バリデーションプラン）を作成します。よろしいですか？"
-  - create_markdown_file:
-      path: "{{patterns.flow_private_date}}/draft_validation_plan.md"
-      template_reference: "02_pmbok_discovery.mdc => validation_plan_template"
+- trigger: "(検証計画|Validation Plan)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => validation_plan_questions
+    - wait_for_all_answers
+    - confirm: "検証計画を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_validation_plan.md"
+        template_reference: "02_pmbok_discovery.mdc => validation_plan_template"
+
+#--------------------------------------------
+# Discovery: UXリサーチ調査概要
+#--------------------------------------------
+- trigger: "(UXリサーチ|ユーザー調査|UX調査|ユーザーリサーチ)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => ux_research_overview_questions
+    - wait_for_all_answers
+    - confirm: "UXリサーチ調査概要を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_ux_research_overview.md"
+        template_reference: "02_pmbok_discovery.mdc => ux_research_overview_template"
+        
+#--------------------------------------------
+# Discovery: インタビュー設計
+#--------------------------------------------
+- trigger: "(インタビュー設計|インタビュー質問|質問表作成|インタビューガイド)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => interview_design_questions
+    - wait_for_all_answers
+    - confirm: "インタビューガイドを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_interview_guide.md"
+        template_reference: "02_pmbok_discovery.mdc => interview_guide_template"
+
+#--------------------------------------------
+# Discovery: リクルーティング計画
+#--------------------------------------------
+- trigger: "(リクルーティング|ユーザー募集|被験者募集|参加者募集)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => recruiting_plan_questions
+    - wait_for_all_answers
+    - confirm: "リクルーティング計画を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_recruiting_plan.md"
+        template_reference: "02_pmbok_discovery.mdc => recruiting_plan_template"
+
+#--------------------------------------------
+# Discovery: インタビュー分析（個別）
+#--------------------------------------------
+- trigger: "(インタビュー分析|インタビュー結果|インタビュー記録|個別分析)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => interview_analysis_questions
+    - wait_for_all_answers
+    - confirm: "インタビュー分析（個別）レポートを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_interview_analysis_{{participant_id}}.md"
+        template_reference: "02_pmbok_discovery.mdc => interview_analysis_template"
+    - notify: |
+        インタビュー分析レポートのドラフトを作成しました：
+        {{patterns.flow_private_date}}/draft_interview_analysis_{{participant_id}}.md
+        
+        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Discovery: リサーチサマリー（全体分析）
+#--------------------------------------------
+- trigger: "(リサーチサマリー|調査サマリー|全体分析|インタビューまとめ)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => research_summary_questions
+    - wait_for_all_answers
+    - confirm: "リサーチサマリー（全体分析）レポートを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_research_summary.md"
+        template_reference: "02_pmbok_discovery.mdc => research_summary_template"
+    - notify: |
+        リサーチサマリーレポートのドラフトを作成しました：
+        {{patterns.flow_private_date}}/draft_research_summary.md
+        
+        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
 #--------------------------------------------
 # Discovery: Hypothesis Backlog
@@ -579,405 +678,7 @@ notes:
   - "project_id や today などの変数は呼び出し時にセットされ、Cursor が自動的に解決します"
   - "使用例：プロジェクトID は AIPM-PMBOK のようにご指定ください"
 
-#--------------------------------------------
-# 15. 不動産特化ルール
-#--------------------------------------------
-- trigger: "(不動産|Real Estate)"
-  priority: high
-  steps:
-    - message: |
-        不動産業界向けDiscoveryフェーズでは以下の専用テンプレートを作成できます：
-        - **不動産市場調査**：「不動産市場調査」と入力
-        - **不動産ターゲットペルソナ**：「不動産ペルソナ」と入力
-        - **不動産プロジェクト課題定義**：「不動産課題定義」と入力
-        - **不動産仮説検証計画**：「不動産検証計画」と入力
-        - **不動産ロケーション分析**：「不動産ロケーション分析」と入力
-        
-        東京アセットAIシステムを使った分析も可能です：
-        - **東京アセット不動産データ収集**：「東京アセット収集」と入力
-        - **東京アセット不動産分析**：「東京アセット分析」と入力
-        - **東京アセット洞察生成**：「東京アセット洞察」と入力
 
-#--------------------------------------------
-# 不動産: 市場調査
-#--------------------------------------------
-- trigger: "(不動産市場調査|Real Estate Market)"
-  priority: high
-  steps:
-    - call basic/pmbok_discovery_real_estate.mdc => real_estate_market_questions
-    - wait_for_all_answers
-    - confirm: "不動産市場調査レポートを作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_private_date}}/draft_real_estate_market.md"
-        template_reference: "basic/pmbok_discovery_real_estate.mdc => real_estate_market_template"
-    - notify: |
-        不動産市場調査レポートのドラフトを作成しました。
-        {{patterns.flow_private_date}}/draft_real_estate_market.md を確認し、
-        必要に応じて修正後、「確定反映して」と入力してください。
-
-#--------------------------------------------
-# 不動産: ターゲットペルソナ
-#--------------------------------------------
-- trigger: "(不動産ペルソナ|Real Estate Persona)"
-  priority: high
-  steps:
-    - call basic/pmbok_discovery_real_estate.mdc => real_estate_persona_questions
-    - wait_for_all_answers
-    - confirm: "不動産ターゲットペルソナを作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_private_date}}/draft_real_estate_persona.md"
-        template_reference: "basic/pmbok_discovery_real_estate.mdc => real_estate_persona_template"
-    - notify: |
-        不動産ターゲットペルソナのドラフトを作成しました。
-        {{patterns.flow_private_date}}/draft_real_estate_persona.md を確認し、
-        必要に応じて修正後、「確定反映して」と入力してください。
-
-#--------------------------------------------
-# 不動産: 課題定義
-#--------------------------------------------
-- trigger: "(不動産課題定義|Real Estate Problem)"
-  priority: high
-  steps:
-    - call basic/pmbok_discovery_real_estate.mdc => real_estate_problem_questions
-    - wait_for_all_answers
-    - confirm: "不動産プロジェクト課題定義書を作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_private_date}}/draft_real_estate_problem.md"
-        template_reference: "basic/pmbok_discovery_real_estate.mdc => real_estate_problem_template"
-    - notify: |
-        不動産プロジェクト課題定義書のドラフトを作成しました。
-        {{patterns.flow_private_date}}/draft_real_estate_problem.md を確認し、
-        必要に応じて修正後、「確定反映して」と入力してください。
-
-#--------------------------------------------
-# 不動産: 仮説検証計画
-#--------------------------------------------
-- trigger: "(不動産検証計画|Real Estate Validation)"
-  priority: high
-  steps:
-    - call basic/pmbok_discovery_real_estate.mdc => real_estate_validation_questions
-    - wait_for_all_answers
-    - confirm: "不動産プロジェクト仮説検証計画を作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_private_date}}/draft_real_estate_validation.md"
-        template_reference: "basic/pmbok_discovery_real_estate.mdc => real_estate_validation_template"
-    - notify: |
-        不動産プロジェクト仮説検証計画のドラフトを作成しました。
-        {{patterns.flow_private_date}}/draft_real_estate_validation.md を確認し、
-        必要に応じて修正後、「確定反映して」と入力してください。
-
-#--------------------------------------------
-# 不動産: ロケーション分析
-#--------------------------------------------
-- trigger: "(不動産ロケーション分析|Real Estate Location)"
-  priority: high
-  steps:
-    - call basic/pmbok_discovery_real_estate.mdc => real_estate_location_questions
-    - wait_for_all_answers
-    - confirm: "不動産ロケーション分析レポートを作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_private_date}}/draft_real_estate_location.md"
-        template_reference: "basic/pmbok_discovery_real_estate.mdc => real_estate_location_template"
-    - notify: |
-        不動産ロケーション分析レポートのドラフトを作成しました。
-        {{patterns.flow_private_date}}/draft_real_estate_location.md を確認し、
-        必要に応じて修正後、「確定反映して」と入力してください。
-
-#--------------------------------------------
-# 東京アセット: データ処理
-#--------------------------------------------
-- trigger: "(不動産データ処理|real estate data processing)"
-  priority: high
-  steps:
-    - name: "ask_data_processing_info"
-      action: "ask_questions"
-      questions:
-        - key: "input_dir"
-          question: "処理する入力データのディレクトリパスを入力してください（デフォルト: Flow/{{today}}/{{PJ}}/inputs）"
-          default: "Flow/{{today}}/{{PJ}}/inputs"
-          required: false
-        - key: "output_dir"
-          question: "処理結果の出力先ディレクトリを入力してください（デフォルト: Flow/{{today}}/{{PJ}}/outputs）"
-          default: "Flow/{{today}}/{{PJ}}/outputs"
-          required: false
-        - key: "data_type"
-          question: "処理するデータタイプを選択してください"
-          options:
-            - "property（不動産情報）"
-          default: "property"
-          required: true
-      store_as: "processing_info"
-    - name: "confirm_data_processing"
-      action: "confirm"
-      message: "以下の設定でデータを処理します。よろしいですか？\n\n入力ディレクトリ: {{processing_info.input_dir}}\n出力ディレクトリ: {{processing_info.output_dir}}\nデータタイプ: {{processing_info.data_type}}"
-    - name: "process_each_file"
-      action: "for_each"
-      items: "{{input_files.stdout_lines}}"
-      variable: "input_file"
-      steps:
-        - name: "execute_process_command"
-          action: "execute_shell"
-          command: "cd /Users/daisukemiyata/aipm_v3/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-file process \"{{input_file}}\" --data-type {{processing_info.data_type | replace('（不動産情報）', '') | trim}} --input-dir \"{{processing_info.input_dir}}\" --output-dir \"{{processing_info.output_dir}}\""
-          message: "ファイル {{input_file}} を処理中..."
-    - name: "notify_processing_complete"
-      action: "notify"
-      message: |
-        データ処理が完了しました。
-        
-        次のステップは以下のとおりです：
-        1. 「東京アセット分析」と入力すると処理したデータの分析を実行できます
-        2. 「東京アセット洞察」と入力すると分析結果から洞察を生成できます
-        3. 「不動産市場調査」「不動産ロケーション分析」などで詳細レポートを作成できます
-
-#--------------------------------------------
-# 東京アセット: データ収集
-#--------------------------------------------
-- trigger: "(不動産データ収集|tokyo asset crawler)"
-  priority: high
-  steps:
-    - name: "ask_crawler_info"
-      action: "ask_questions"
-      questions:
-        - key: "search_type"
-          question: "検索タイプを選択してください"
-          options:
-            - "エリア情報検索"
-            - "市場情報検索"
-            - "不足情報検索"
-            - "将来予測検索"
-            - "類似検索"
-            - "カスタム検索"
-          default: "エリア情報検索"
-          required: true
-        - key: "area"
-          question: "対象エリア名を入力してください（例: 本郷三丁目、渋谷区）"
-          required: true
-        - key: "custom_query"
-          question: "カスタム検索の場合、任意クエリを入力してください"
-          required: false
-          condition: "search_type == 'カスタム検索'"
-        - key: "output_dir"
-          question: "出力先ディレクトリを入力してください（デフォルト: crawler/results）"
-          default: "{{patterns.flow_private_date}}/crawler"
-          required: false
-      store_as: "crawler_info"
-    - name: "confirm_crawler_execution"
-      action: "confirm"
-      message: "以下の設定でWebデータ収集を実行します。よろしいですか？\n\n検索タイプ: {{crawler_info.search_type}}\n対象エリア: {{crawler_info.area}}{{crawler_info.custom_query ? '\nカスタムクエリ: ' + crawler_info.custom_query : ''}}\n出力先: {{crawler_info.output_dir}}"
-    - name: "execute_crawler_command"
-      action: "execute_shell"
-      command: "cd {{dirs.root}}/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py collect-crawler run --search-type \"{{crawler_info.search_type}}\" --area \"{{crawler_info.area}}\"{{crawler_info.custom_query ? ' --custom-query \"' + crawler_info.custom_query + '\"' : ''}} --output-dir \"{{crawler_info.output_dir}}\""
-      message: "Web検索を実行中..."
-    - name: "notify_crawler_complete"
-      action: "notify"
-      message: |
-        データ収集が完了しました。
-        
-        次のステップは以下のとおりです：
-        1. 「東京アセット分析」と入力すると収集したデータの分析を実行できます
-        2. 「東京アセット洞察」と入力すると収集したデータから洞察を生成できます
-        3. {{crawler_info.output_dir}} に保存されたJSONファイルを確認できます
-
-#--------------------------------------------
-# 東京アセット: データ分析
-#--------------------------------------------
-- trigger: "(不動産データ分析|real estate analytics)"
-  priority: high
-  steps:
-    - name: "ask_analytics_info"
-      action: "ask_questions"
-      questions:
-        - key: "input_file"
-          question: "分析する入力ファイルのパスを入力してください"
-          required: true
-        - key: "output_dir"
-          question: "結果の出力先ディレクトリを入力してください（デフォルト: Flow/{{today}}）"
-          default: "{{patterns.flow_private_date}}/analytics"
-          required: false
-        - key: "generate_graphs"
-          question: "グラフを生成しますか？"
-          options:
-            - "true"
-            - "false"
-          default: "true"
-          required: false
-      store_as: "analytics_info"
-    - name: "confirm_analytics_execution"
-      action: "confirm"
-      message: "以下の設定で不動産データ分析を実行します。よろしいですか？\n\n入力ファイル: {{analytics_info.input_file}}\n出力先: {{analytics_info.output_dir}}\nグラフ生成: {{analytics_info.generate_graphs}}"
-    - name: "execute_analytics_command"
-      action: "execute_shell"
-      command: "cd {{dirs.root}}/Stock/programs/tokyo_asset/projects/tas_ai_system/dev/demo/mock_api_v2 && python tokyo-asset-cli.py analytics run --input-file \"{{analytics_info.input_file}}\" --output-dir \"{{analytics_info.output_dir}}\" --generate-graphs {{analytics_info.generate_graphs}}"
-      message: "データ分析を実行中..."
-    - name: "notify_analytics_complete"
-      action: "notify"
-      message: |
-        データ分析が完了しました。
-        
-        次のステップは以下のとおりです：
-        1. {{analytics_info.output_dir}} に生成された分析グラフと結果を確認できます
-        2. 「確定反映して」と入力すると分析結果をStockディレクトリに移動できます
-        3. 「東京アセット洞察」と入力すると分析結果から洞察を生成できます
-
-#--------------------------------------------
-# 東京アセット: インサイト分析
-#--------------------------------------------
-- trigger: "(不動産インサイト分析|tokyo asset insight)"
-  priority: high
-  steps:
-    - message: |
-        東京アセットAIシステムでは以下のインサイト分析が可能です：
-        
-        - **エリア分析**：「エリア分析」と入力
-        - **エリア予測分析**：「エリア予測分析」と入力
-        - **類似エリア分析**：「類似エリア分析」と入力
-        - **カスタム分析**：「カスタム分析」と入力
-        
-        既存のデータを活用する場合は、質問に答える際に「既存データ使用」を選択してパスを指定してください。
-
-#--------------------------------------------
-# 東京アセット: エリア分析
-#--------------------------------------------
-- trigger: "(エリア分析|area analysis)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/insight_analysis.mdc => area_analysis_questions"
-      message: "【エリア分析】に必要な情報を収集します。以下の質問に回答してください。既存データを活用する場合は「既存データ使用」を選択してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でエリア分析レポートを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_area_analysis_{{area_name}}.md"
-      template_reference: "real_estate/insight_analysis.mdc => area_analysis_template"
-      message: "エリア分析レポートのドラフトを作成しました。"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        エリア分析レポートのドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_area_analysis_{{area_name}}.md
-        
-        {{#use_existing_data}}
-        既存データ「{{existing_data_path}}」を使用してレポートを作成しました。
-        {{/use_existing_data}}
-        {{^use_existing_data}}
-        レポート内の実行コマンドを使用して東京アセットAIシステムでデータ収集と分析を行い、
-        レポートを充実させることができます。
-        {{/use_existing_data}}
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
-
-#--------------------------------------------
-# 東京アセット: エリア予測分析
-#--------------------------------------------
-- trigger: "(エリア予測分析|area forecast)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/insight_analysis.mdc => area_forecast_questions"
-      message: "【エリア予測分析】に必要な情報を収集します。以下の質問に回答してください。既存データを活用する場合は「既存データ使用」を選択してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でエリア予測分析レポートを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_area_forecast_{{area_name}}.md"
-      template_reference: "real_estate/insight_analysis.mdc => area_forecast_template"
-      message: "エリア予測分析レポートのドラフトを作成しました。"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        エリア予測分析レポートのドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_area_forecast_{{area_name}}.md
-        
-        {{#use_existing_data}}
-        既存データ「{{existing_data_path}}」を使用してレポートを作成しました。
-        {{/use_existing_data}}
-        {{^use_existing_data}}
-        レポート内の実行コマンドを使用して東京アセットAIシステムでデータ収集と分析を行い、
-        将来予測データを充実させることができます。
-        {{/use_existing_data}}
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
-
-#--------------------------------------------
-# 東京アセット: 類似エリア分析
-#--------------------------------------------
-- trigger: "(類似エリア分析|similar area analysis)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/insight_analysis.mdc => similar_area_questions"
-      message: "【類似エリア分析】に必要な情報を収集します。以下の質問に回答してください。既存データを活用する場合は「既存データ使用」を選択してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報で類似エリア分析レポートを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_similar_area_{{area_name}}.md"
-      template_reference: "real_estate/insight_analysis.mdc => similar_area_template"
-      message: "類似エリア分析レポートのドラフトを作成しました。"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        類似エリア分析レポートのドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_similar_area_{{area_name}}.md
-        
-        {{#use_existing_data}}
-        既存データ「{{existing_data_path}}」を使用してレポートを作成しました。
-        {{/use_existing_data}}
-        {{^use_existing_data}}
-        レポート内の実行コマンドを使用して東京アセットAIシステムでデータ収集と分析を行い、
-        類似エリアの比較データを充実させることができます。
-        {{/use_existing_data}}
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
-
-#--------------------------------------------
-# 東京アセット: カスタム分析
-#--------------------------------------------
-- trigger: "(カスタム分析|custom analysis)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/insight_analysis.mdc => custom_analysis_questions"
-      message: "【カスタム分析】に必要な情報を収集します。以下の質問に回答してください。既存データを活用する場合は「既存データ使用」を選択してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でカスタム分析レポートを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_custom_analysis_{{analysis_title | slugify}}.md"
-      template_reference: "real_estate/insight_analysis.mdc => custom_analysis_template"
-      message: "カスタム分析レポートのドラフトを作成しました。"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        カスタム分析レポート「{{analysis_title}}」のドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_custom_analysis_{{analysis_title | slugify}}.md
-        
-        {{#use_existing_data}}
-        既存データ「{{existing_data_path}}」を使用してレポートを作成しました。
-        {{/use_existing_data}}
-        {{^use_existing_data}}
-        レポート内の実行コマンドを使用して東京アセットAIシステムでデータ収集と分析を行い、
-        カスタム分析を充実させることができます。
-        {{/use_existing_data}}
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
 #--------------------------------------------
 # Research フェーズ
@@ -1039,7 +740,7 @@ notes:
     - name: "create_draft"
       action: "create_markdown_file"
       path: "{{patterns.flow_date}}/draft_customer_research.md"
-      template_reference: "basic/03_pmbok_research.mdc => customer_research_template"
+      template_reference: "basic/02_pmbok_research.mdc => customer_research_template"
       data_mapping:
         project_name: "{{research_params.project_name}}"
         target_audience: "{{research_params.target_audience}}"
@@ -1113,7 +814,7 @@ notes:
     - name: "create_draft"
       action: "create_markdown_file"
       path: "{{patterns.flow_date}}/draft_competitor_research.md"
-      template_reference: "basic/03_pmbok_research.mdc => competitor_research_template"
+      template_reference: "basic/02_pmbok_research.mdc => competitor_research_template"
       data_mapping:
         project_name: "{{research_params.project_name}}"
         product_service: "{{research_params.product_service}}"
@@ -1210,7 +911,7 @@ notes:
     - name: "create_draft"
       action: "create_markdown_file"
       path: "{{patterns.flow_date}}/draft_desk_research.md"
-      template_reference: "basic/03_pmbok_research.mdc => desk_research_template"
+      template_reference: "basic/02_pmbok_research.mdc => desk_research_template"
       data_mapping:
         project_name: "{{research_params.project_name}}"
         research_period: "{{today}}"
@@ -1293,7 +994,7 @@ notes:
     - name: "create_draft"
       action: "create_markdown_file"
       path: "{{patterns.flow_date}}/draft_market_size_estimation.md"
-      template_reference: "03_pmbok_research.mdc => market_size_template"
+      template_reference: "02_pmbok_research.mdc => market_size_template"
       data_mapping:
         project_name: "{{market_params.project_name}}"
         business_description: "{{market_params.business_description}}"
@@ -1312,125 +1013,202 @@ notes:
         Web検索結果をもとにTAM、SAM、SOMの市場規模推定をまとめました。
         内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#--------------------------------------------
-# 16. Ideationモジュール
-#--------------------------------------------
-- trigger: "(企画コンセプト生成|不動産企画|Ideation)"
-  priority: high
-  steps:
-    - message: |
-        Ideationモジュールでは以下の成果物を作成できます：
-        - **企画コンセプト生成**：「企画コンセプト生成」と入力
-        - **コンセプト比較分析**：「コンセプト比較分析」と入力
-        - **企画リファイン**：「企画リファイン」と入力
-        - **プレゼン資料生成**：「プレゼン資料生成」と入力
 
-#--------------------------------------------
-# Ideation: 企画コンセプト生成
-#--------------------------------------------
-- trigger: "(企画コンセプト生成)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/ideation_module.mdc => concept_questions"
-      message: "【企画コンセプト生成】に必要な情報を収集します。以下の質問に回答してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報で企画コンセプトを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_concept_{{property_type}}_{{area_name}}.md"
-      template_reference: "real_estate/ideation_module.mdc => concept_template"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        企画コンセプト「{{area_name}} {{property_type}}」のドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_concept_{{property_type}}_{{area_name}}.md
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
-#--------------------------------------------
-# Ideation: コンセプト比較分析
-#--------------------------------------------
-- trigger: "(コンセプト比較分析)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/ideation_module.mdc => comparison_questions"
-      message: "【コンセプト比較分析】に必要な情報を収集します。以下の質問に回答してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でコンセプト比較分析を作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_concept_comparison_{{area_name}}.md"
-      template_reference: "real_estate/ideation_module.mdc => comparison_template"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        コンセプト比較分析のドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_concept_comparison_{{area_name}}.md
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+#-----
+# 16. Developmentフェーズ - 実装フェーズ
+#-----
+  - trigger: "(開発フェーズ|Development|実装フェーズ)"
+    priority: high
+    steps:
+      - message: |
+          Development（開発実装）フェーズでは以下の成果物を作成できます：
+          - **開発環境セットアップ**：「開発環境初期化」と入力
+          - **開発計画**：「開発計画作成」と入力
+          - **実装順序計画**：「実装順序計画」と入力
+          - **ストーリー実装**：「ストーリー実装」と入力
+          - **記事執筆**：「記事執筆」と入力
+          - **成果物確認**：「成果物確認」と入力
 
-#--------------------------------------------
-# Ideation: 企画リファイン
-#--------------------------------------------
-- trigger: "(企画リファイン)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/ideation_module.mdc => refine_questions"
-      message: "【企画リファイン】に必要な情報を収集します。以下の質問に回答してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でリファイン版コンセプトを作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_concept_refined_{{concept_id}}.md"
-      template_reference: "real_estate/ideation_module.mdc => refine_template"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        リファイン版コンセプトのドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_concept_refined_{{concept_id}}.md
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+#-----
+# Development: 開発環境初期化
+#-----
+  - trigger: "(開発環境初期化|Development初期化|実装環境セットアップ)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_init_questions"
+        message: "【開発環境セットアップ】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で開発環境セットアップドキュメントを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_setup}}"
+        template_reference: "basic/09_pmbok_development.mdc => development_init_template"
+        message: "開発環境セットアップのドラフトを作成しました。"
+      - name: "setup_dev_folders"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.dev_root}}/{code,articles,assets}"
+        message: "開発用フォルダを作成しています..."
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          開発環境セットアップが完了しました。
+          
+          セットアップドキュメント: {{patterns.draft_dev_setup}}
+          開発フォルダ: {{patterns.dev_root}}
+          
+          次のステップ:
+          1. 「開発計画作成」と入力して開発計画を作成
+          2. 「実装順序計画」と入力して実装順序を決定
+          3. 「ストーリー実装」と入力して個別ストーリーの実装を開始
 
-#--------------------------------------------
-# Ideation: プレゼン資料生成
-#--------------------------------------------
-- trigger: "(プレゼン資料生成)"
-  priority: high
-  steps:
-    - name: "start_info_collection"
-      action: "call real_estate/ideation_module.mdc => presentation_questions"
-      message: "【プレゼン資料生成】に必要な情報を収集します。以下の質問に回答してください。"
-    - name: "wait_user_responses"
-      action: "wait_for_all_answers"
-      message: "必要な回答が揃うまで先に進みません。"
-    - name: "confirm_document_creation"
-      action: "confirm"
-      message: "収集した情報でプレゼン資料を作成します。よろしいですか？"
-    - name: "create_draft"
-      action: "create_markdown_file"
-      path: "{{patterns.flow_private_date}}/draft_presentation_{{concept_id}}.md"
-      template_reference: "real_estate/ideation_module.mdc => presentation_template"
-    - name: "notify_completion"
-      action: "notify"
-      message: |
-        プレゼン資料のドラフトを作成しました：
-        {{patterns.flow_private_date}}/draft_presentation_{{concept_id}}.md
-        
-        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+#-----
+# Development: 開発計画作成
+#-----
+  - trigger: "(開発計画作成|Development計画|実装計画)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_planning_questions"
+        message: "【開発計画】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で開発計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_plan}}"
+        template_reference: "basic/09_pmbok_development.mdc => development_planning_template"
+        message: "開発計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          開発計画のドラフトを作成しました：
+          {{patterns.draft_dev_plan}}
+          
+          次のステップ:
+          1. 「実装順序計画」と入力して詳細な実装順序を決定
+          2. 「ストーリー実装」と入力して個別ストーリーの実装を開始
+
+#-----
+# Development: 実装順序計画
+#-----
+  - trigger: "(実装順序計画|開発順序|ストーリー依存関係|実装順序決定)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => implementation_order_questions"
+        message: "【実装順序計画】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で実装順序計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_dev_dir}}/draft_implementation_order.md"
+        template_reference: "basic/09_pmbok_development.mdc => implementation_order_template"
+        message: "実装順序計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          実装順序計画のドラフトを作成しました：
+          {{patterns.flow_dev_dir}}/draft_implementation_order.md
+          
+          ストーリーの依存関係を分析し、最適な実装順序を決定しました。
+          次は「ストーリー実装」と入力して、個別ストーリーの実装を開始してください。
+
+#-----
+# Development: ストーリー実装
+#-----
+  - trigger: "(ストーリー実装|実装開始|ユーザーストーリー実装)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => story_implementation_questions"
+        message: "【ストーリー実装】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でストーリー実装計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_story}}"
+        template_reference: "basic/09_pmbok_development.mdc => story_implementation_template"
+        message: "ストーリー実装計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ストーリー実装計画のドラフトを作成しました：
+          {{patterns.draft_dev_story}}
+          
+          実装完了後は「成果物確認」と入力して、成果物のレビューと確定を行ってください。
+
+#-----
+# Development: 記事執筆
+#-----
+  - trigger: "(記事執筆|ドキュメント作成|記事作成)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => article_writing_questions"
+        message: "【記事執筆】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で記事ドラフトを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_article}}"
+        template_reference: "basic/09_pmbok_development.mdc => article_writing_template"
+        message: "記事ドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          記事ドラフトを作成しました：
+          {{patterns.draft_dev_article}}
+          
+          記事の執筆を進め、完了後は「成果物確認」と入力して確定手続きを行ってください。
+
+#-----
+# Development: 成果物確認
+#-----
+  - trigger: "(成果物確認|実装確認|確定レビュー)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_review_questions"
+        message: "【成果物確認】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でレビューレポートを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_dev_dir}}/draft_development_review.md"
+        template_reference: "basic/09_pmbok_development.mdc => development_review_template"
+        message: "レビューレポートを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          成果物レビューレポートを作成しました：
+          {{patterns.flow_dev_dir}}/draft_development_review.md
+          
+          成果物の確認が完了したら「確定反映して」と入力して、
+          Flow → Stock への移動を行ってください。
 
 

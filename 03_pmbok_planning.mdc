@@ -1213,3 +1213,239 @@ prd_template: |
   | バージョン | 日付 | 変更者 | 変更内容 |
   |-----------|------|-------|---------|
   | {{version}} | {{creation_date}} | {{author}} | 初版作成 |
+
+# ----------------------------------------------------------
+# ◆ Design Doc（設計文書）の質問セット
+# ----------------------------------------------------------
+design_doc_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクト名"
+        key: project_name
+        required: true
+      - question: "作成者"
+        key: author
+        required: true
+      - question: "作成日"
+        key: creation_date
+        required: true
+        default: "{{today}}"
+      - question: "ステータス"
+        key: status
+        description: "ドキュメントの状態（ドラフト、レビュー中、最終版、実装済み、廃止）"
+        default: "ドラフト"
+        required: true
+      - question: "文書バージョン"
+        key: version
+        default: "0.1"
+        required: true
+
+  - category: "コンテキストとスコープ"
+    items:
+      - question: "このシステム/機能が解決する問題は何ですか？"
+        key: problem_statement
+        required: true
+        description: "簡潔に問題を説明してください。なぜこのシステムを構築するのか、実際に何が構築されようとしているのかを説明してください。"
+      - question: "この設計の背景情報"
+        key: background
+        required: true
+        description: "関連する既存システムや前提となる知識、技術的背景などを説明してください。"
+
+  - category: "目標と非目標"
+    items:
+      - question: "この設計の目標（箇条書きで）"
+        key: goals
+        required: true
+        description: "このシステムが達成すべき目標をリストアップしてください。"
+      - question: "この設計の非目標（箇条書きで）"
+        key: non_goals
+        required: false
+        description: "目標ではないが明示的に除外する内容をリストアップしてください。「システムがクラッシュしない」のような否定的な目標ではなく、「オフライン動作のサポート」のような選択しなかった潜在的な目標を書いてください。"
+
+  - category: "設計概要"
+    items:
+      - question: "ハイレベルな設計概要"
+        key: overview
+        required: true
+        description: "システム全体の概要を3〜4段落で説明してください。図やダイアグラムを含めても構いません。"
+      - question: "システムコンテキスト図"
+        key: system_context
+        required: false
+        description: "システムと他のコンポーネントとの関係を示す図。あれば貼り付けてください。"
+
+  - category: "詳細設計"
+    items:
+      - question: "技術的アプローチ"
+        key: technical_approach
+        required: true
+        description: "採用する技術、アーキテクチャ、主要コンポーネントとその役割を説明してください。"
+      - question: "データモデル/ストレージ"
+        key: data_model
+        required: false
+        description: "データをどのように保存するか、主要なデータ構造や関係性を説明してください。"
+      - question: "APIまたはインターフェース"
+        key: api_interface
+        required: false
+        description: "システムが提供するAPIやインターフェースがあれば、その概要を説明してください。詳細な定義ではなく、設計上重要な点に焦点を当ててください。"
+      - question: "スケーラビリティとパフォーマンス"
+        key: scalability
+        required: false
+        description: "システムがどのようにスケールするか、パフォーマンス要件をどう満たすかを説明してください。"
+
+  - category: "トレードオフと代替案"
+    items:
+      - question: "検討した代替案"
+        key: alternatives
+        required: true
+        description: "検討したが選択しなかった代替設計とその理由を説明してください。各案のトレードオフを含めてください。"
+      - question: "現在の設計を選んだ主な理由"
+        key: decision_rationale
+        required: true
+        description: "現在の設計を選んだ理由と、それがプロジェクトの目標達成にどう役立つかを説明してください。"
+
+  - category: "懸念事項と考慮点"
+    items:
+      - question: "セキュリティの考慮点"
+        key: security_considerations
+        required: false
+        description: "セキュリティに関する懸念と対策について説明してください。"
+      - question: "プライバシーの考慮点"
+        key: privacy_considerations
+        required: false
+        description: "プライバシーに関する懸念と対策について説明してください。"
+      - question: "その他の懸念事項"
+        key: other_concerns
+        required: false
+        description: "その他の懸念事項（テクニカルデット、リスク、制約など）を説明してください。"
+
+  - category: "実装とテスト計画"
+    items:
+      - question: "実装計画"
+        key: implementation_plan
+        required: false
+        description: "主要なマイルストーンや実装順序があれば説明してください。"
+      - question: "テスト方針"
+        key: testing_approach
+        required: false
+        description: "システムをどのようにテストするか、主要なテストケースや検証方法について説明してください。"
+      - question: "モニタリングとメトリクス"
+        key: monitoring
+        required: false
+        description: "システムの健全性や成功を測定するためのメトリクスや監視方法があれば説明してください。"
+
+# ----------------------------------------------------------
+# ◆ Design Doc（設計文書）のテンプレート
+# ----------------------------------------------------------
+design_doc_template: |
+  # {{project_name}} - Design Doc（設計文書）
+
+  **作成者:** {{author}}  
+  **作成日:** {{creation_date}}  
+  **ステータス:** {{status}}  
+  **バージョン:** {{version}}
+
+  ## 目次
+
+  - [1. コンテキストとスコープ](#1-コンテキストとスコープ)
+  - [2. 目標と非目標](#2-目標と非目標)
+  - [3. 設計概要](#3-設計概要)
+  - [4. 詳細設計](#4-詳細設計)
+  - [5. 代替案と検討したトレードオフ](#5-代替案と検討したトレードオフ)
+  - [6. 懸念事項と考慮点](#6-懸念事項と考慮点)
+  - [7. 実装とテスト計画](#7-実装とテスト計画)
+
+  ## 1. コンテキストとスコープ
+
+  ### 問題の説明
+  {{problem_statement}}
+
+  ### 背景
+  {{background}}
+
+  ## 2. 目標と非目標
+
+  ### 目標
+  {{goals}}
+
+  ### 非目標
+  {{non_goals}}
+
+  ## 3. 設計概要
+  {{overview}}
+
+  {% if system_context %}
+  ### システムコンテキスト図
+  {{system_context}}
+  {% endif %}
+
+  ## 4. 詳細設計
+
+  ### 技術的アプローチ
+  {{technical_approach}}
+
+  {% if data_model %}
+  ### データモデル/ストレージ
+  {{data_model}}
+  {% endif %}
+
+  {% if api_interface %}
+  ### APIとインターフェース
+  {{api_interface}}
+  {% endif %}
+
+  {% if scalability %}
+  ### スケーラビリティとパフォーマンス
+  {{scalability}}
+  {% endif %}
+
+  ## 5. 代替案と検討したトレードオフ
+
+  ### 検討した代替案
+  {{alternatives}}
+
+  ### 選定の理由
+  {{decision_rationale}}
+
+  ## 6. 懸念事項と考慮点
+
+  {% if security_considerations %}
+  ### セキュリティの考慮点
+  {{security_considerations}}
+  {% endif %}
+
+  {% if privacy_considerations %}
+  ### プライバシーの考慮点
+  {{privacy_considerations}}
+  {% endif %}
+
+  {% if other_concerns %}
+  ### その他の懸念事項
+  {{other_concerns}}
+  {% endif %}
+
+  ## 7. 実装とテスト計画
+
+  {% if implementation_plan %}
+  ### 実装計画
+  {{implementation_plan}}
+  {% endif %}
+
+  {% if testing_approach %}
+  ### テスト方針
+  {{testing_approach}}
+  {% endif %}
+
+  {% if monitoring %}
+  ### モニタリングとメトリクス
+  {{monitoring}}
+  {% endif %}
+
+  ## 付録
+
+  **関連文書:**
+  - プロジェクト憲章
+  - プロジェクトスコープ記述書
+  - プロダクト要求仕様書（PRD）
+
+  **変更履歴:**
+  - {{creation_date}}: 初版作成（{{author}}）
