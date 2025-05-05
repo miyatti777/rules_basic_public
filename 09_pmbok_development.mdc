@@ -1,0 +1,659 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# ==========================================================
+# pmbok_development.mdc  ―  "開発実装フェーズ"
+# ==========================================================
+# Developmentフェーズは、Planningフェーズで定義された要件を実際に実装するフェーズです。
+# このフェーズでは以下のようなタスクを行います：
+# - 開発環境のセットアップ
+# - ユーザーストーリーの実装
+# - 記事や成果物の作成
+# - コードの品質管理
+# ==========================================================
+
+# ----
+path_reference: "pmbok_paths.mdc"
+# ----
+
+# ------
+# 1. Development初期化 - 開発環境セットアップ
+# ------
+development_init_questions:
+  - category: "開発環境セットアップの基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "開発種別"
+        key: dev_type
+        options:
+          - "ソフトウェア開発"
+          - "記事/ドキュメント作成"
+          - "複合タイプ"
+        required: true
+      - question: "開発言語・フレームワーク"
+        key: technologies
+        required: false
+        condition: "dev_type == 'ソフトウェア開発' || dev_type == '複合タイプ'"
+      - question: "記事カテゴリ・テーマ"
+        key: article_themes
+        required: false
+        condition: "dev_type == '記事/ドキュメント作成' || dev_type == '複合タイプ'"
+      - question: "ソース管理方法"
+        key: source_control
+        options:
+          - "Git"
+          - "ローカルのみ"
+          - "その他"
+        default: "Git"
+        required: true
+      - question: "参照するドキュメント（複数選択可）"
+        key: reference_docs
+        options:
+          - "プロジェクト憲章"
+          - "PRD"
+          - "Design Doc"
+          - "ユーザーストーリー"
+          - "その他"
+        multi_select: true
+        required: true
+      - question: "初期セットアップに必要な追加情報"
+        key: setup_info
+        required: false
+
+development_init_template: |
+  ---
+  doc_type: development_setup
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 開発環境セットアップ：{{project_id}}
+
+  ## 1. 概要
+
+  このドキュメントは、{{project_id}}の開発環境セットアップ手順を定義します。
+
+  - **開発種別**: {{dev_type}}
+  - **参照ドキュメント**: {{#each reference_docs}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+
+  ## 2. 環境構成
+
+  {{#if technologies}}
+  ### 技術スタック
+  - 言語/フレームワーク: {{technologies}}
+  {{/if}}
+
+  {{#if article_themes}}
+  ### 記事/ドキュメントテーマ
+  - {{article_themes}}
+  {{/if}}
+
+  ### ソース管理
+  - {{source_control}}
+  
+  ## 3. ディレクトリ構成
+
+  ```
+  {{project_id}}/
+  ├── development/           # 開発成果物のルートディレクトリ
+  │   ├── code/              # コードベース（ソフトウェア開発の場合）
+  │   ├── articles/          # 記事/ドキュメント（コンテンツ作成の場合）
+  │   └── assets/            # 共有リソース（画像、データなど）
+  └── documents/             # プロジェクトドキュメント（既存）
+  ```
+
+  ## 4. セットアップ手順
+
+  1. 開発環境の初期化
+     ```bash
+     mkdir -p {{patterns.dev_root}}/{code,articles,assets}
+     ```
+
+  2. 参照ドキュメントの確認
+     {{#each reference_docs}}
+     - {{this}}の主要要件を確認
+     {{/each}}
+
+  3. 初期コード/テンプレートファイルの作成
+     {{#if (eq dev_type "ソフトウェア開発")}}
+     ```bash
+     # 基本ファイル構造の作成
+     touch {{patterns.dev_code}}/README.md
+     mkdir -p {{patterns.dev_code}}/src
+     ```
+     {{/if}}
+     
+     {{#if (eq dev_type "記事/ドキュメント作成")}}
+     ```bash
+     # 記事テンプレートの作成
+     touch {{patterns.dev_articles}}/README.md
+     ```
+     {{/if}}
+
+  {{#if setup_info}}
+  ## 5. 追加設定情報
+
+  {{setup_info}}
+  {{/if}}
+
+  ## 次のステップ
+
+  1. 開発計画の作成（「開発計画作成」で実行）
+  2. ユーザーストーリーの順序付け（「実装順序計画」で実行）
+  3. 個別ストーリーの実装（「ストーリー実装」で実行）
+
+# ------
+# 2. Development計画 - 開発計画作成
+# ------
+development_planning_questions:
+  - category: "開発計画の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "開発開始日"
+        key: start_date
+        default: "{{today}}"
+        required: true
+      - question: "対象ストーリーIDs（「US-1,US-2」のようにカンマ区切り）"
+        key: story_ids
+        required: true
+        description: "空白の場合はバックログから自動取得します"
+      - question: "技術的な注意点・制約事項"
+        key: technical_constraints
+        required: false
+      - question: "開発者の役割分担（該当する場合）"
+        key: roles
+        required: false
+      - question: "実装順序の基本方針"
+        key: implementation_approach
+        options:
+          - "機能横断的（一つの機能を完成させてから次へ）"
+          - "レイヤー横断的（基盤から順に構築）"
+          - "ユーザーインターフェース優先"
+          - "バックエンド優先"
+          - "その他"
+        required: true
+
+development_planning_template: |
+  ---
+  doc_type: development_plan
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 開発計画：{{project_id}}
+
+  ## 1. 概要
+
+  このドキュメントは、{{project_id}}の開発・実装計画を定義します。
+
+  - **開発開始日**: {{start_date}}
+  - **実装アプローチ**: {{implementation_approach}}
+
+  ## 2. 対象ストーリー
+
+  {{#if story_ids}}
+  以下のユーザーストーリーを実装します：
+  {{#each story_ids}}
+  - {{this}}
+  {{/each}}
+  {{else}}
+  バックログから自動取得したストーリーを実装します。
+  {{/if}}
+
+  ## 3. 技術スタック構成
+
+  ### 主要技術要素
+  - 要検討
+
+  {{#if technical_constraints}}
+  ### 技術的制約事項
+  {{technical_constraints}}
+  {{/if}}
+
+  ## 4. 実装順序
+
+  {{implementation_approach}}アプローチに基づき、以下の順序で実装を進めます：
+
+  1. 基盤コンポーネント
+     - 環境設定
+     - 共通ライブラリ/ユーティリティ
+
+  2. 主要機能
+     - 最小実装（MVP）の核となる機能
+     - ユーザーにとって価値の高いストーリー
+
+  3. 拡張機能
+     - オプショナル機能
+     - UX改善
+
+  {{#if roles}}
+  ## 5. 役割分担
+
+  {{roles}}
+  {{/if}}
+
+  ## 6. 次のステップ
+
+  1. 「実装順序計画」コマンドで詳細な実装順序を決定
+  2. 各ストーリーの依存関係を分析
+  3. 「ストーリー実装」で個別ストーリーの実装を開始
+
+# ------
+# 3. 実装順序計画 - 依存関係の分析と最適な実装順序の決定
+# ------
+implementation_order_questions:
+  - category: "実装順序計画の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "対象ストーリーIDs（「US-1,US-2」のようにカンマ区切り）"
+        key: story_ids
+        required: true
+      - question: "各ストーリーの依存関係（「US-1:US-2,US-3」のように依存先をカンマ区切りで指定）"
+        key: dependencies
+        required: false
+        description: "形式：ストーリーID:依存先ID1,依存先ID2（複数の依存関係はセミコロンで区切る）"
+      - question: "各ストーリーの難易度（「US-1:高,US-2:中」のように指定）"
+        key: complexity
+        required: false
+        description: "形式：ストーリーID:難易度（低/中/高）"
+      - question: "各ストーリーのビジネス価値（「US-1:高,US-2:中」のように指定）"
+        key: business_value
+        required: false
+        description: "形式：ストーリーID:価値（低/中/高）"
+      - question: "優先度付けの方針"
+        key: prioritization_approach
+        options:
+          - "ビジネス価値優先"
+          - "技術的依存関係優先"
+          - "リスク低減優先"
+          - "最小実装(MVP)優先"
+          - "バランス型"
+        default: "バランス型"
+        required: true
+
+implementation_order_template: |
+  ---
+  doc_type: implementation_order
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 実装順序計画：{{project_id}}
+
+  ## 1. 概要
+
+  このドキュメントは、{{project_id}}のユーザーストーリー実装順序を定義します。
+  優先度付け方針: **{{prioritization_approach}}**
+
+  ## 2. ストーリー分析
+
+  | ストーリーID | 依存関係 | 難易度 | ビジネス価値 |
+  |------------|---------|-------|------------|
+  {{#each story_ids}}
+  | {{this}} | {{lookup ../dependencies this}} | {{lookup ../complexity this}} | {{lookup ../business_value this}} |
+  {{/each}}
+
+  ## 3. 依存関係グラフ
+
+  ```
+  [依存関係図をここに表示 - 実際の実装時には可視化]
+  ```
+
+  ## 4. 推奨実装順序
+
+  以下の順序で実装を進めることを推奨します：
+
+  1. 基盤ストーリー（他に依存されているもの）
+     - [ストーリーリスト]
+
+  2. 高価値/低複雑性ストーリー
+     - [ストーリーリスト]
+
+  3. 中価値ストーリー
+     - [ストーリーリスト]
+
+  4. その他のストーリー
+     - [ストーリーリスト]
+
+  ## 5. 実装スケジュール案
+
+  | フェーズ | ストーリー | 予定期間 |
+  |--------|----------|---------|
+  | フェーズ1 | [ストーリーリスト] | 〜[日付] |
+  | フェーズ2 | [ストーリーリスト] | 〜[日付] |
+  | フェーズ3 | [ストーリーリスト] | 〜[日付] |
+
+  ## 6. 次のステップ
+
+  1. 「ストーリー実装」コマンドで各ストーリーの実装を開始
+  2. 実装中に発見された新たな依存関係を記録
+  3. 必要に応じて実装順序を調整
+
+# ------
+# 4. ストーリー実装 - 個別ストーリーの実装
+# ------
+story_implementation_questions:
+  - category: "ストーリー実装の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "実装するストーリーID"
+        key: story_id
+        required: true
+      - question: "ストーリータイトル"
+        key: story_title
+        required: true
+      - question: "ストーリー内容"
+        key: story_description
+        required: true
+      - question: "受入条件"
+        key: acceptance_criteria
+        required: true
+      - question: "実装言語/フレームワーク"
+        key: technologies
+        required: true
+      - question: "関連するドキュメント/コード"
+        key: related_docs
+        required: false
+      - question: "注意点/制約"
+        key: constraints
+        required: false
+
+story_implementation_template: |
+  ---
+  doc_type: story_implementation
+  project_id: {{project_id}}
+  story_id: {{story_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # {{story_id}}: {{story_title}} 実装計画
+
+  ## 1. ストーリー概要
+
+  {{story_description}}
+
+  ## 2. 受入条件
+
+  {{acceptance_criteria}}
+
+  ## 3. 技術要素
+
+  - **実装言語/フレームワーク**: {{technologies}}
+  {{#if related_docs}}
+  - **関連ドキュメント/コード**: {{related_docs}}
+  {{/if}}
+  {{#if constraints}}
+  - **制約事項**: {{constraints}}
+  {{/if}}
+
+  ## 4. 実装計画
+
+  ### 実装ステップ
+
+  1. 環境準備
+     - [必要な設定・準備]
+
+  2. テスト計画
+     - [テスト方針・内容]
+
+  3. コア機能実装
+     - [主要機能の実装手順]
+
+  4. UI/UX実装 (該当する場合)
+     - [UI/UX関連の実装手順]
+
+  5. 統合・テスト
+     - [結合・システムテスト項目]
+
+  ### 実装コード
+
+  ```[主要な言語]
+  // 主要なコード構造やアルゴリズム案をここに記述
+  ```
+
+  ## 5. 実装結果
+
+  *実装完了後に記入*
+
+  ### 成果物の場所
+  - コード: {{patterns.dev_code}}/[パス]
+  - 関連資料: {{patterns.dev_assets}}/[パス]
+
+  ### 動作確認結果
+  - [テスト結果]
+
+  ## 6. 次のステップ
+
+  1. コードレビュー依頼
+  2. 必要に応じてリファクタリング
+  3. 次のストーリーへ進む
+
+# ------
+# 5. 記事執筆 - 記事/ドキュメント作成
+# ------
+article_writing_questions:
+  - category: "記事執筆の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "記事タイトル"
+        key: article_title
+        required: true
+      - question: "記事の目的/対象読者"
+        key: article_purpose
+        required: true
+      - question: "記事の種類"
+        key: article_type
+        options:
+          - "技術解説"
+          - "チュートリアル"
+          - "ケーススタディ"
+          - "比較分析"
+          - "トレンド解説"
+          - "その他"
+        required: true
+      - question: "主要なキーワード/トピック"
+        key: keywords
+        required: true
+      - question: "参考資料/ソース"
+        key: references
+        required: false
+      - question: "記事の構成案（目次レベル）"
+        key: outline
+        required: false
+      - question: "添付資料（図表など）"
+        key: attachments
+        required: false
+
+article_writing_template: |
+  ---
+  doc_type: article
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # {{article_title}}
+
+  ## 記事計画
+
+  - **種類**: {{article_type}}
+  - **目的/対象読者**: {{article_purpose}}
+  - **キーワード**: {{keywords}}
+
+  {{#if references}}
+  ## 参考資料
+
+  {{references}}
+  {{/if}}
+
+  {{#if outline}}
+  ## 構成案
+
+  {{outline}}
+  {{else}}
+  ## 構成案
+
+  1. はじめに
+     - 背景
+     - 本記事の目的
+
+  2. 主要セクション1
+     - サブセクション1.1
+     - サブセクション1.2
+
+  3. 主要セクション2
+     - サブセクション2.1
+     - サブセクション2.2
+
+  4. 主要セクション3
+     - サブセクション3.1
+     - サブセクション3.2
+
+  5. まとめ
+     - 重要なポイント
+     - 次のステップ
+  {{/if}}
+
+  {{#if attachments}}
+  ## 添付資料
+
+  {{attachments}}
+  {{/if}}
+
+  ## 執筆プラン
+
+  1. 調査フェーズ
+     - 主要情報の収集
+     - キーポイントの整理
+
+  2. ドラフト作成
+     - 構成に沿った執筆
+     - 図表の作成
+
+  3. レビュー・編集
+     - 内容の正確性確認
+     - 読みやすさの改善
+
+  4. 最終化
+     - 校正
+     - 体裁の調整
+
+  ## 記事本文
+
+  *ここに記事本文を執筆します*
+
+  ## 公開先
+
+  - {{patterns.dev_articles}}/[ファイル名]
+  - [その他の公開先]
+
+# ------
+# 6. 成果物確認 - 開発結果の確認と確定
+# ------
+development_review_questions:
+  - category: "開発成果物確認の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "確認対象（ファイルパスまたはストーリーID）"
+        key: review_target
+        required: true
+      - question: "開発成果物の種類"
+        key: output_type
+        options:
+          - "ソースコード"
+          - "記事/ドキュメント"
+          - "設計資料"
+          - "テスト結果"
+          - "その他"
+        required: true
+      - question: "主要な変更点/機能"
+        key: key_changes
+        required: true
+      - question: "動作確認結果"
+        key: verification_results
+        required: false
+        condition: "output_type == 'ソースコード'"
+      - question: "品質チェック内容"
+        key: quality_checks
+        required: true
+      - question: "未解決の問題/TODO項目"
+        key: pending_items
+        required: false
+      - question: "確定先のパス（Stock内）"
+        key: final_path
+        required: true
+
+development_review_template: |
+  ---
+  doc_type: development_review
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 開発成果物レビュー：{{project_id}}
+
+  ## 1. レビュー概要
+
+  - **対象**: {{review_target}}
+  - **種類**: {{output_type}}
+  - **レビュー日**: {{today}}
+
+  ## 2. 主要な変更点/機能
+
+  {{key_changes}}
+
+  {{#if (eq output_type "ソースコード")}}
+  ## 3. 動作確認結果
+
+  {{#if verification_results}}
+  {{verification_results}}
+  {{else}}
+  - 未実施
+  {{/if}}
+  {{/if}}
+
+  ## 4. 品質チェック
+
+  {{quality_checks}}
+
+  {{#if pending_items}}
+  ## 5. 未解決の問題/TODO
+
+  {{pending_items}}
+  {{/if}}
+
+  ## 6. 確定情報
+
+  - **確定先パス**: {{final_path}}
+  - **確定方法**: `Flow → Stock` への移動
+
+  ## 7. 確定手順
+
+  1. コードレビュー完了の確認
+  2. テストの実行・確認
+  3. 「確定反映して」コマンドの実行
+  4. {{final_path}} への反映確認
+
+  ## 8. 次のステップ
+
+  1. 残存する問題の対応計画
+  2. 次の開発項目への移行

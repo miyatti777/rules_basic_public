@@ -1,0 +1,1321 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+path_reference: "basic/pmbok_paths.mdc"
+
+master_triggers:
+
+
+  #-----
+  # プロジェクト初期化フェーズ
+  #-----
+  - trigger: "(プロジェクト初期化|プロジェクト開始|プロジェクト立ち上げ)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/01_pmbok_initiating.mdc => project_init_questions"
+        message: "プロジェクト初期化に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_project_creation"
+        action: "confirm"
+        message: "以下の内容でプロジェクトを初期化します：\n\nプログラム: {{program_id}}\nプロジェクト: {{project_id}}\n\nよろしいですか？"
+      - name: "create_program_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}"
+        message: "プログラムディレクトリを作成します..."
+      - name: "create_project_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.project_dir}}"
+        message: "プロジェクトディレクトリを作成します..."
+      - name: "create_document_dirs"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.doc_initiating}} {{patterns.doc_discovery}} {{patterns.doc_research}} {{patterns.doc_planning}} {{patterns.doc_executing}} {{patterns.doc_monitoring}} {{patterns.doc_closing}}"
+        message: "プロジェクト文書ディレクトリを作成します..."
+      - name: "create_readme"
+        action: "create_markdown_file"
+        path: "{{patterns.project_dir}}/README.md"
+        content: |
+          # {{project_id}}
+
+          ## 概要
+          {{project_purpose}}
+
+          ## 開始日
+          {{start_date}}
+
+          ## 終了予定日
+          {{end_date}}
+
+          ## 主要ステークホルダー
+          {{#stakeholders}}
+          - {{.}}
+          {{/stakeholders}}
+          {{^stakeholders}}
+          - TBD
+          {{/stakeholders}}
+        message: "プロジェクトREADMEを作成します..."
+      - name: "check_structure"
+        action: "execute_shell"
+        command: "find {{patterns.project_dir}} -type d | sort"
+        message: "プロジェクト構造を確認します..."
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ✅ プロジェクト「{{project_id}}」の初期化が完了しました。
+          
+          次のステップとして以下をお勧めします：
+          
+          1. 「プロジェクト憲章」と入力して、プロジェクト憲章を作成する
+          2. 「ステークホルダー分析」と入力して、ステークホルダーを特定する
+          3. 「WBS作成」と入力して、作業分解構造を作成する
+          
+          作業を開始するには「作業開始」と入力すると、今日の日付のフォルダと日次タスクファイルが作成されます。
+
+  #-----
+  # プロジェクト名から初期化（プログラム名質問）
+  #-----
+  - trigger: "([^プログラム初期化|^プロジェクト初期化][^\\s]+)(始めたい|はじめたい|開始したい|作りたい)"
+    priority: high
+    steps:
+      - name: "extract_project_name"
+        action: "extract"
+        pattern: "([^プログラム初期化|^プロジェクト初期化][^\\s]+)(始めたい|はじめたい|開始したい|作りたい)"
+        group: 1
+        store_as: "extracted_project"
+      - name: "ask_program_name"
+        action: "call basic/01_pmbok_initiating.mdc => project_program_questions"
+        message: "「{{extracted_project}}」のプログラム名（カテゴリ）を教えてください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_project_creation"
+        action: "confirm"
+        message: "以下の内容でプロジェクトを初期化します：\n\nプログラム: {{program_id}}\nプロジェクト: {{extracted_project}}\n\nよろしいですか？"
+      - name: "create_program_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}"
+        message: "プログラムディレクトリを作成します..."
+      - name: "create_project_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}/projects/{{extracted_project}}"
+        message: "プロジェクトディレクトリを作成します..."
+      - name: "create_document_dirs"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}/projects/{{extracted_project}}/documents/{1_initiating,2_discovery,2_research,3_planning,4_executing,5_monitoring,6_closing}"
+        message: "プロジェクト文書ディレクトリを作成します..."
+      - name: "create_flow_folder"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.flow_date}}/{{program_id}}_{{extracted_project}}"
+        message: "Flowフォルダを作成しています..."
+      - name: "create_daily_tasks_file"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_date}}/{{program_id}}_{{extracted_project}}/daily_tasks.md"
+        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
+        message: "日次タスクファイルを作成します。"
+      - name: "notify_next_steps"
+        action: "notify"
+        message: |
+          ✅ プロジェクト初期化が完了しました！
+          
+          プログラム: {{program_id}}
+          プロジェクト: {{extracted_project}}
+          
+          次のステップをおすすめします：
+          1.「プロジェクト憲章」と入力してプロジェクト憲章を作成する
+          2.「ステークホルダー分析」と入力して関係者を整理する
+          3.「WBS作成」と入力して作業分解構造を作成する
+          
+          また、「日次タスク作成」と入力すると今日のタスクリストが作成されます。
+
+  #-----
+  # 作業開始フェーズ（Flow日付フォルダ作成）
+  #-----
+  - trigger: "(作業開始|work start|今日の作業開始)"
+    priority: high
+    steps:
+      - name: "create_todays_flow_folder"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.flow_date}}"
+        message: "今日の日付でFlowフォルダを作成します。"
+      - name: "create_daily_tasks_file"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_date}}/daily_tasks.md"
+        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
+        message: "今日の日次タスクファイルを作成します。"
+      - name: "check_folder_structure"
+        action: "execute_shell"
+        command: "ls -la {{patterns.flow_date}}"
+        message: "作成したフォルダの構造を確認します。"
+      - name: "notify_creation"
+        action: "notify"
+        message: |
+          ✅ 作業開始の準備が完了しました。
+          今日の作業フォルダが作成されました：{{patterns.flow_date}}
+          日次タスクファイルも用意しました：{{patterns.flow_date}}/daily_tasks.md
+          
+          次のステップとして以下のコマンドが利用可能です：
+          -「議事録」：会議議事録のテンプレート作成
+          -「プロジェクト憲章」「ステークホルダー分析」：文書作成
+          -「WBS作成」：作業分解構造の作成
+
+
+
+  #--------------------------------------------
+  # 1. プロジェクト憲章作成
+  #--------------------------------------------
+  - trigger: "プロジェクト憲章|プロジェクトチャーター"
+    priority: high
+    mode: "exclusive"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/01_pmbok_initiating.mdc => charter_questions"
+        message: "【プロジェクト憲章】の作成に必要な情報を収集します。以下の質問に回答してください。すべて回答が終わるまでファイルは作成しません。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"  # 全質問が回答される or TBD指定で完了
+        message: "必要な回答が揃うまで他のファイル作成を行いません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で「プロジェクト憲章」のドラフトを作成してよろしいですか？（はい/いいえ）"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_charter}}"
+        template_reference: "basic/01_pmbok_initiating.mdc => charter_template"
+        message: "ドラフトを作成しました: {{patterns.draft_charter}}\n必要に応じて修正・追記した後、Stockディレクトリへ確定反映できます。"
+
+  #--------------------------------------------
+  # 2. ステークホルダー分析
+  #--------------------------------------------
+  - trigger: "ステークホルダー分析|ステークホルダーマップ"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_initiating.mdc => stakeholder_questions"
+        message: "【ステークホルダー分析】に必要な情報を収集します。以下の質問に回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "回答が完了したらドキュメント化を確認します。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で「ステークホルダー分析資料」をドラフト作成してよいですか？（はい/いいえ）"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_stakeholder}}"
+        template_reference: "basic/pmbok_initiating.mdc => stakeholder_template"
+        message: "draft_stakeholder_analysis.md を作成しました。{{patterns.flow_date}} フォルダ内にあります。"
+
+  #--------------------------------------------
+  # 3. リスク分析 / リスク計画
+  #--------------------------------------------
+  - trigger: "リスク分析|リスク計画"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_planning.mdc => risk_questions"
+        message: "【リスク分析】のための初期情報を収集します。回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "リスク計画をドラフト化してよろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_risk_plan}}"
+        template_reference: "basic/pmbok_planning.mdc => risk_plan_template"
+        message: "{{patterns.draft_risk_plan}} を作成しました。ご確認ください。"
+
+  #--------------------------------------------
+  # 4. WBS作成
+  #--------------------------------------------
+  - trigger: "WBS作成|作業分解構造"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_planning.mdc => wbs_questions"
+        message: "WBSを作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "WBSドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_wbs}}"
+        template_reference: "basic/pmbok_planning.mdc => wbs_template"
+        message: "{{patterns.draft_wbs}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
+  # 4-1. プロジェクトスコープ記述書
+  #--------------------------------------------
+  - trigger: "(プロジェクトスコープ記述書|Project Scope Statement)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => project_scope_questions"
+        message: "プロジェクトスコープ記述書を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "プロジェクトスコープ記述書のドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_project_scope}}"
+        template_reference: "basic/03_pmbok_planning.mdc => project_scope_template"
+        message: "{{patterns.draft_project_scope}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
+  # 4-2. プロダクト要求仕様書（PRD）
+  #--------------------------------------------
+  - trigger: "(プロダクト要求仕様書|PRD|Product Requirements Document)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => prd_questions"
+        message: "プロダクト要求仕様書（PRD）を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "プロダクト要求仕様書のドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_prd}}"
+        template_reference: "basic/03_pmbok_planning.mdc => prd_template"
+        message: "{{patterns.draft_prd}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
+  # 4-3. Design Doc（設計文書）
+  #--------------------------------------------
+  - trigger: "(Design Doc|デザインドック|設計文書)(作成|)"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/03_pmbok_planning.mdc => design_doc_questions"
+        message: "Design Doc（設計文書）を作成します。必要事項をヒアリングしますので、回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "Design Docのドラフトを作成してよろしいでしょうか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_design_doc}}"
+        template_reference: "basic/03_pmbok_planning.mdc => design_doc_template"
+        message: "{{patterns.draft_design_doc}} を出力しました。詳細を追記したらStockへ確定してください。"
+
+  #--------------------------------------------
+  # 5. スプリントゴール作成
+  #--------------------------------------------
+  - trigger: "スプリントゴール|Sprint Goal"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_executing.mdc => sprint_goal_questions"
+        message: "【スプリントゴール】作成に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation" 
+        action: "confirm"
+        message: "入力内容でスプリントゴールを作成してよろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_private_date}}/draft_sprint_goal_{{sprint_number}}.md"
+        template_reference: "basic/pmbok_executing.mdc => sprint_goal_template"
+        message: "スプリントゴールのドラフトを作成しました。内容を確認し、必要に応じて修正してください。"
+      - name: notify
+        action: notify
+        message: |
+          スプリントゴールのドラフトを Flow に生成しました。修正後、
+          「確定反映して」と入力すると Stock/projects/{{project_id}}/documents/4_executing/sprint_goals/ に保存されます。
+
+  #--------------------------------------------
+  # 6. 会議議事録
+  #--------------------------------------------
+  - trigger: "議事録|ミーティングノート"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_executing.mdc => meeting_minutes_questions"
+        message: "会議議事録を作成します。会議の基本情報を入力してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "議事録のドラフトを作成してよいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_minutes}}"
+        template_reference: "basic/pmbok_executing.mdc => meeting_minutes_template"
+        message: "{{patterns.draft_minutes}} が生成されました。"
+
+  #--------------------------------------------
+  # 7. 変更要求
+  #--------------------------------------------
+  - trigger: "変更要求|チェンジリクエスト"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_monitoring.mdc => change_request_questions"
+        message: "変更要求を作成します。必要情報を入力してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "変更要求書のドラフトを作成してもよろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "Flow/Private/{{today}}/draft_change_request.md"
+        template_reference: "basic/pmbok_monitoring.mdc => change_request_template"
+        message: "draft_change_request.md を作成しました。レビュー後に承認フローを進めてください。"
+
+  #--------------------------------------------
+  # 8. 教訓記録 (Lessons Learned)
+  #--------------------------------------------
+  - trigger: "教訓記録|レッスンラーニド|レッスンずらーんど"
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_closing.mdc => lessons_learned_questions"
+        message: "教訓記録（Lessons Learned）を作成します。いくつか質問を行いますので、回答お願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "教訓記録ドラフトを作成してよろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "Flow/Private/{{today}}/draft_lessons_learned.md"
+        template_reference: "basic/pmbok_closing.mdc => lessons_learned_template"
+        message: "draft_lessons_learned.md を作成しました。プロジェクト完了後の振り返りにお使いください。"
+
+#--------------------------------------------
+# 9. プロダクトバックログ初期化
+#--------------------------------------------
+
+    ```yaml
+    trigger: 
+    pattern: "(プロダクトバックログ初期化|backlog初期化|バックログ初期化)(して|お願い)"
+    priority: 100
+    ```
+
+    ```yaml
+    action:
+    type: function
+    function: backlog_initialization
+    params:
+        template_path: "{{patterns.backlog_init_template}}"
+        wbs_path: "{{patterns.wbs_path}}"
+    ```
+
+    ```javascript
+    function backlog_initialization(params) {
+    console.log("バックログ初期化プロセスを開始します");
+    
+    // Planning フェーズのルールを呼び出す
+    return {
+        type: "call_rule",
+        rule: "03_pmbok_planning.mdc",
+        function: "backlog_init",
+        params: {
+        template_path: params.template_path,
+        wbs_path: params.wbs_path
+        }
+    };
+    }
+    ```
+
+  - trigger: "(プロダクトバックログ初期化|backlog初期化|バックログ初期化)(して|お願い)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/pmbok_planning.mdc => backlog_questions"
+        message: "プロダクトバックログを初期化します。必要情報を収集しますので回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な情報をすべて収集するまでお待ちください。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でバックログYAMLファイルを作成します。よろしいですか？"
+      - name: "create_backlog_yaml"
+        action: "create_file"
+        path: "{{patterns.backlog_yaml}}"
+        template_reference: "basic/pmbok_planning.mdc => backlog_yaml_template"
+        message: "backlog.yamlを作成しました。"
+      - name: "create_epics_yaml" 
+        action: "create_file"
+        path: "{{patterns.epics_yaml}}"
+        template_reference: "basic/pmbok_planning.mdc => epics_yaml_template"
+        message: "epics.yamlを作成しました。"
+      - name: "validate_backlog_yaml"
+        action: "execute_shell"
+        command: "python {{patterns.backlog_validate_script}} {{patterns.backlog_yaml}}"
+        message: "バックログYAMLの検証を行います。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          バックログの初期化が完了しました。backlog.yamlとepics.yamlが作成されました。
+          これを基に「ユーザーストーリー生成して」と入力するとストーリーファイルを生成できます。
+          内容を確認、修正した後「確定反映して」と入力するとStockへ反映されます。
+
+#--------------------------------------------
+# 10. ユーザーストーリー生成
+#--------------------------------------------
+  - trigger: "(ユーザーストーリー生成|ストーリー生成|story生成)(して|お願い)"
+    priority: high
+    steps:
+      - name: "run_yaml_to_stories_script"
+        action: "execute_shell"
+        command: "python /Users/daisukemiyata/{{root}}/scripts/yaml_to_stories.py {{patterns.backlog_yaml}} {{patterns.stories_dir}}"
+        message: "backlog.yamlからユーザーストーリーファイルを生成します。"
+      - name: "notify_generation_complete"
+        action: "notify"
+        message: |
+          ユーザーストーリーファイルの生成が完了しました。
+          {{patterns.stories_dir}}に生成されたストーリーを確認してください。
+          修正後「確定反映して」で Stock/backlog/stories へ移動できます。
+
+
+
+#--------------------------------------------
+# 11. プロダクトロードマップ作成  ★NEW
+#--------------------------------------------
+  - trigger: "(ロードマップ作成|プロダクトロードマップ|リリース計画)"
+    priority: high
+    steps:
+      # ① 既存資料から自動下書き
+      - collect_flow_materials:
+          query:
+            doc_targets: "ロードマップ|roadmap"
+            lookback_days: 30
+          store_as: roadmap_pool
+      - prefill_question_answers:
+          target_questions: "pmbok_planning.mdc => roadmap_questions"
+          source: "{{roadmap_pool}}"
+      # ② 不足質問
+      - ask_unfilled_questions:
+          message: "ロードマップに必要な追加情報を入力してください。"
+      # ③ 確認
+      - confirm: "入力内容で ロードマップ ドラフトを Flow に生成します。よろしいですか？"
+      # ④ ドラフト生成
+      - create_markdown_file:
+          path: "{{patterns.draft_roadmap}}"
+          template_reference: "basic/pmbok_planning.mdc => roadmap_template"
+      - notify: |
+          {{patterns.draft_roadmap}} を作成しました。必要に応じ修正後「確定反映して」で Stock に移動します。
+
+#--------------------------------------------
+# 12. Sprint Review 自動生成 (毎週金曜 17:00 or 手動)
+#--------------------------------------------
+  - trigger: "(スプリントレビュー作成|Sprint Review)"
+    priority: high
+    steps:
+      # A) Flow 内の日次タスクを自動集約
+      - collect_flow_materials:
+          query:
+            glob: "{{patterns.daily_tasks_glob}}"
+            lookback_days: 14
+          store_as: daily_pool
+
+      # B) 完了ストーリー／インペディメント抽出
+      - transform:
+          source: "{{daily_pool}}"
+          script: |
+            # 入力: list[str] (= 日次タスク md)
+            import re, yaml, textwrap, json, itertools, pathlib
+            done = set(); imped = []
+            for path,txt in source:
+                for line in txt.splitlines():
+                    m = re.match(r"- \[x\] (US-[0-9]+)", line, re.I)
+                    if m: done.add(m.group(1))
+                    if "⚠" in line or "impediment" in line.lower():
+                        imped.append(line.lstrip("- "))
+
+            print(json.dumps({
+              "demo_items": "\n".join(f"- {d}" for d in sorted(done)),
+              "impediments": "\n".join(f"- {i}" for i in imped)
+            }))
+          store_as: auto_data
+
+      # C) 質問プリフィル
+      - prefill_question_answers:
+          target_questions: "pmbok_executing.mdc => sprint_review_questions"
+          source: "{{auto_data}}"
+
+      # D) 不足質問ヒアリング
+      - ask_unfilled_questions:
+          message: "Sprint Review に不足している情報を入力してください。"
+
+      # E) 確認してドラフト生成
+      - confirm: "入力＋自動集約で Sprint Review を Flow に作成します。よろしいですか？"
+      - create_markdown_file:
+          path: "{{patterns.draft_review}}"
+          template_reference: "basic/pmbok_executing.mdc => sprint_review_template"
+      - notify: |
+          {{patterns.draft_review}} を生成しました。
+          修正後「確定反映して」で Stock/sprints/{{sprint_id}} へ移動します。
+
+#--------------------------------------------
+# 13. タスク管理
+#--------------------------------------------
+  - trigger: "(今日のタスク|日次タスク作成|Daily tasks)"
+    call_rule: "07_task_management.mdc => daily_tasks"
+  - trigger: "(週次レビュー|Weekly review)"
+    call_rule: "07_task_management.mdc => weekly_review"
+  - trigger: "(Sync|WBSと同期|リスクログと同期)"
+    call_rule: "07_task_management.mdc => sync_with_artifacts"
+
+
+
+#--------------------------------------------
+# 14. Discovery フェーズ
+#--------------------------------------------
+- trigger: "(ディスカバリー|Discovery)"
+priority: high
+steps:
+    - message: |
+        Discovery（発見）フェーズでは以下の成果物を作成できます：
+        - **Assumption Map（前提条件マップ）**：「仮説マップ」と入力
+        - **Persona（ペルソナ）**：「ペルソナ作成」と入力
+        - **Problem Statement（課題定義）**：「課題定義」と入力
+        - **User Journey Map（ユーザージャーニーマップ）**：「ジャーニーマップ」と入力
+        - **Solution Definition（ソリューション定義）**：「ソリューション定義」と入力
+        - **Validation Plan（検証計画）**：「検証計画」と入力
+        - **UX Research Overview（UXリサーチ調査概要）**：「UXリサーチ」と入力
+        - **Interview Guide（インタビュー設計）**：「インタビュー設計」と入力
+        - **Recruiting Plan（リクルーティング計画）**：「リクルーティング」と入力
+        - **Interview Analysis（インタビュー分析）**：「インタビュー分析」と入力
+        - **Research Summary（リサーチサマリー）**：「リサーチサマリー」と入力
+        - **Hypothesis Backlog（仮説バックログ）**：「仮説バックログ」と入力
+
+#--------------------------------------------
+# Discovery: Assumption Map
+#--------------------------------------------
+- trigger: "(仮説マップ|Assumption Map)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => assumption_questions
+  - wait_for_all_answers
+  - confirm: "Assumption Map（前提条件マップ）を作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.draft_assumption}}"
+      template_reference: "02_pmbok_discovery.mdc => assumption_template"
+
+#--------------------------------------------
+# Discovery: Persona
+#--------------------------------------------
+- trigger: "(ペルソナ作成|Persona)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => persona_questions
+  - wait_for_all_answers
+  - confirm: "ペルソナを作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.draft_persona}}"
+      template_reference: "02_pmbok_discovery.mdc => persona_template"
+
+#--------------------------------------------
+# Discovery: Problem Statement
+#--------------------------------------------
+- trigger: "(課題定義|Problem Statement)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => problem_questions
+  - wait_for_all_answers
+  - confirm: "課題定義書を作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.draft_problem}}"
+      template_reference: "02_pmbok_discovery.mdc => problem_template"
+
+#--------------------------------------------
+# Discovery: User Journey Map
+#--------------------------------------------
+- trigger: "(ユーザージャーニーマップ|User Journey Map|ジャーニーマップ)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => journey_map_questions
+  - wait_for_all_answers
+  - confirm: "ユーザージャーニーマップを作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.flow_private_date}}/draft_user_journey_map.md"
+      template_reference: "02_pmbok_discovery.mdc => journey_map_template"
+
+#--------------------------------------------
+# Discovery: Solution Definition
+#--------------------------------------------
+- trigger: "(ソリューション定義|Solution Definition)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => solution_definition_questions
+  - wait_for_all_answers
+  - confirm: "ソリューション定義書を作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.flow_date}}/draft_solution_definition.md"
+      template_reference: "02_pmbok_discovery.mdc => solution_definition_template"
+
+#--------------------------------------------
+# Discovery: Validation Plan
+#--------------------------------------------
+- trigger: "(検証計画|Validation Plan)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => validation_plan_questions
+    - wait_for_all_answers
+    - confirm: "検証計画を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_validation_plan.md"
+        template_reference: "02_pmbok_discovery.mdc => validation_plan_template"
+
+#--------------------------------------------
+# Discovery: UXリサーチ調査概要
+#--------------------------------------------
+- trigger: "(UXリサーチ|ユーザー調査|UX調査|ユーザーリサーチ)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => ux_research_overview_questions
+    - wait_for_all_answers
+    - confirm: "UXリサーチ調査概要を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_ux_research_overview.md"
+        template_reference: "02_pmbok_discovery.mdc => ux_research_overview_template"
+        
+#--------------------------------------------
+# Discovery: インタビュー設計
+#--------------------------------------------
+- trigger: "(インタビュー設計|インタビュー質問|質問表作成|インタビューガイド)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => interview_design_questions
+    - wait_for_all_answers
+    - confirm: "インタビューガイドを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_interview_guide.md"
+        template_reference: "02_pmbok_discovery.mdc => interview_guide_template"
+
+#--------------------------------------------
+# Discovery: リクルーティング計画
+#--------------------------------------------
+- trigger: "(リクルーティング|ユーザー募集|被験者募集|参加者募集)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => recruiting_plan_questions
+    - wait_for_all_answers
+    - confirm: "リクルーティング計画を作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_recruiting_plan.md"
+        template_reference: "02_pmbok_discovery.mdc => recruiting_plan_template"
+
+#--------------------------------------------
+# Discovery: インタビュー分析（個別）
+#--------------------------------------------
+- trigger: "(インタビュー分析|インタビュー結果|インタビュー記録|個別分析)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => interview_analysis_questions
+    - wait_for_all_answers
+    - confirm: "インタビュー分析（個別）レポートを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_interview_analysis_{{participant_id}}.md"
+        template_reference: "02_pmbok_discovery.mdc => interview_analysis_template"
+    - notify: |
+        インタビュー分析レポートのドラフトを作成しました：
+        {{patterns.flow_private_date}}/draft_interview_analysis_{{participant_id}}.md
+        
+        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Discovery: リサーチサマリー（全体分析）
+#--------------------------------------------
+- trigger: "(リサーチサマリー|調査サマリー|全体分析|インタビューまとめ)"
+  priority: high
+  steps:
+    - call basic/02_pmbok_discovery.mdc => research_summary_questions
+    - wait_for_all_answers
+    - confirm: "リサーチサマリー（全体分析）レポートを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_private_date}}/draft_research_summary.md"
+        template_reference: "02_pmbok_discovery.mdc => research_summary_template"
+    - notify: |
+        リサーチサマリーレポートのドラフトを作成しました：
+        {{patterns.flow_private_date}}/draft_research_summary.md
+        
+        修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Discovery: Hypothesis Backlog
+#--------------------------------------------
+- trigger: "(仮説バックログ|Hypothesis)"
+priority: high
+steps:
+  - call basic/02_pmbok_discovery.mdc => hypothesis_questions
+  - wait_for_all_answers
+  - confirm: "仮説バックログを作成します。よろしいですか？"
+  - create_markdown_file:
+      path: "{{patterns.draft_hypothesis}}"
+      template_reference: "02_pmbok_discovery.mdc => hypothesis_template"
+
+#--------------------------------------------
+# Flow Assist フェーズ
+#--------------------------------------------
+- trigger: "(アイディア発散)"
+  priority: high
+  steps:
+    - call basic/03_pmbok_flow_assist.mdc => flow_assist_questions
+    - wait_for_all_answers
+    - confirm: "Flow Assist ドラフトを作成します。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_date}}/draft_flow_assist.md"
+        template_reference: "03_pmbok_flow_assist.mdc => flow_assist_template"
+
+#--------------------------------------------
+# 補足: 全体設定や共通メタ情報など
+#--------------------------------------------
+settings:
+  # ルール全体に適用する共通設定例
+  # 例: (あくまで参考、実際のCursor環境に合わせて書き替えてください)
+  date_format: "YYYY-MM-DD"
+  language: "ja"
+  default_actions:
+    - "information_collection"
+    - "confirm_creation"
+    - "create_file_in_flow"
+  error_handling:
+    unrecognized_trigger: "すみません、そのキーワードに対応するルールが見つかりませんでした。"
+    partial_answer: "一部回答が不足しています。TBDでよければ埋めますが、どうしますか？"
+
+notes:
+  - "このマスタールールで使われる pmbok_initiating.mdc, pmbok_planning.mdc 等に各フェーズの質問リスト・テンプレを記載"
+  - "flow_to_stock_rules.mdc 等でドラフト→確定反映の手順を定義する"
+  - "ユーザーが途中でキャンセル/保留した場合の処理をどうするか、必要なら 'cancel' アクションを追加する"
+  - "project_id や today などの変数は呼び出し時にセットされ、Cursor が自動的に解決します"
+  - "使用例：プロジェクトID は AIPM-PMBOK のようにご指定ください"
+
+
+
+#--------------------------------------------
+# Research フェーズ
+#--------------------------------------------
+- trigger: "(リサーチ|Research)"
+  priority: high
+  steps:
+    - message: |
+        Research（リサーチ）フェーズでは以下の成果物を作成できます：
+        - **顧客調査レポート**：「顧客調査」と入力
+        - **競合調査レポート**：「競合調査」と入力
+        - **総合デスクリサーチ**：「デスクリサーチ」と入力
+
+#--------------------------------------------
+# Research: 顧客調査
+#--------------------------------------------
+- trigger: "(顧客調査|Customer Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "target_audience"
+          question: "調査したいターゲットオーディエンスを具体的に教えてください"
+          required: true
+        - key: "research_topics"
+          question: "顧客調査で特に知りたい内容やトピックを教えてください（複数可、カンマ区切り）"
+          required: true
+        - key: "industry_context"
+          question: "業界や市場の背景情報があれば教えてください"
+          required: false
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で顧客調査を実施します：\n\nプロジェクト: {{research_params.project_name}}\nターゲット: {{research_params.target_audience}}\n調査トピック: {{research_params.research_topics}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_audience"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} 顧客特性 消費者行動 ニーズ 最新動向"
+      explanation: "ターゲットオーディエンスについての最新情報を収集します"
+      store_as: "audience_data"
+    - name: "web_research_topics"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} {{research_params.research_topics}} 消費者調査 市場調査 最新"
+      explanation: "指定されたトピックに関する顧客調査情報を収集します"
+      store_as: "topic_data"
+    - name: "web_research_behavior"
+      action: "web_search"
+      search_term: "{{research_params.target_audience}} 購買行動 意思決定プロセス 顧客体験 {{research_params.industry_context}}"
+      explanation: "ターゲットの購買行動や意思決定プロセスに関する情報を収集します"
+      store_as: "behavior_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{audience_data}}", "{{topic_data}}", "{{behavior_data}}"]
+      instructions: "収集したWeb検索データを分析し、主要な洞察、傾向、パターンを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_customer_research.md"
+      template_reference: "basic/02_pmbok_research.mdc => customer_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        target_audience: "{{research_params.target_audience}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_themes: "{{research_params.research_topics | split: ','}}"
+        customer_insights: "{{analyzed_results.insights}}"
+        customer_behavior: "{{analyzed_results.behavior}}"
+        customer_needs: "{{analyzed_results.needs}}"
+        customer_segments: "{{analyzed_results.segments}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        顧客調査レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_customer_research.md
+        
+        Web検索結果をもとに主要な顧客インサイトをまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 競合調査
+#--------------------------------------------
+- trigger: "(競合調査|Competitor Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "product_service"
+          question: "自社の製品・サービスの概要を簡潔に教えてください"
+          required: true
+        - key: "main_competitors"
+          question: "主な競合企業・サービスがあれば教えてください（カンマ区切りで複数可）"
+          required: false
+        - key: "research_focus"
+          question: "競合調査で特に知りたい側面を教えてください（例：価格戦略、マーケティング手法、製品機能など）"
+          required: true
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で競合調査を実施します：\n\nプロジェクト: {{research_params.project_name}}\n自社製品/サービス: {{research_params.product_service}}\n主な競合: {{research_params.main_competitors}}\n調査フォーカス: {{research_params.research_focus}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_competitors"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 業界 主要企業 競合 マーケットシェア 最新"
+      explanation: "業界の主要競合企業に関する情報を収集します"
+      store_as: "competitors_data"
+    - name: "web_research_specific_competitors"
+      action: "web_search"
+      search_term: "{{research_params.main_competitors}} {{research_params.research_focus}} 戦略 特徴 最新動向"
+      condition: "research_params.main_competitors"
+      explanation: "指定された競合企業についての詳細情報を収集します"
+      store_as: "specific_competitors_data"
+    - name: "web_research_market_trends"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 市場動向 業界トレンド 最新技術 将来予測"
+      explanation: "業界の市場動向と最新トレンドに関する情報を収集します"
+      store_as: "market_trends_data"
+    - name: "web_research_competitive_strategies"
+      action: "web_search"
+      search_term: "{{research_params.product_service}} 業界 {{research_params.research_focus}} 競争戦略 差別化要因"
+      explanation: "競合の戦略と差別化要因に関する情報を収集します"
+      store_as: "strategies_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{competitors_data}}", "{{specific_competitors_data}}", "{{market_trends_data}}", "{{strategies_data}}"]
+      instructions: "収集したWeb検索データを分析し、競合企業の主要特性、市場ポジション、戦略、強み・弱みを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_competitor_research.md"
+      template_reference: "basic/02_pmbok_research.mdc => competitor_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        product_service: "{{research_params.product_service}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_themes: "{{research_params.research_focus | split: ','}}"
+        competitor_overview: "{{analyzed_results.overview}}"
+        competitor_strategies: "{{analyzed_results.strategies}}"
+        market_position: "{{analyzed_results.market_position}}"
+        swot_analysis: "{{analyzed_results.swot}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        競合調査レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_competitor_research.md
+        
+        Web検索結果をもとに主要な競合情報と市場動向をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 総合デスクリサーチ
+#--------------------------------------------
+- trigger: "(デスクリサーチ|Desk Research)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "調査対象のプロジェクト名を入力してください"
+          required: true
+        - key: "research_scope"
+          question: "調査の範囲を選択してください"
+          options:
+            - "市場・業界動向"
+            - "顧客動向"
+            - "競合分析"
+            - "技術トレンド"
+            - "規制・法律動向"
+            - "その他"
+          multi_select: true
+          required: true
+        - key: "specific_topics"
+          question: "具体的に調査したい内容やキーワードをカンマ区切りで入力してください"
+          required: true
+        - key: "industry_context"
+          question: "業界や対象市場の背景情報があれば入力してください"
+          required: false
+      store_as: "research_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容でデスクリサーチを実施します：\n\nプロジェクト: {{research_params.project_name}}\n調査範囲: {{research_params.research_scope}}\n調査トピック: {{research_params.specific_topics}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_research_market_industry"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} {{research_params.industry_context}} 市場規模 業界動向 最新データ"
+      explanation: "市場・業界動向に関する最新情報を収集します"
+      condition: "research_params.research_scope.includes('市場・業界動向')"
+      store_as: "market_data"
+    - name: "web_research_customer"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 顧客動向 消費者トレンド 購買行動 {{research_params.industry_context}}"
+      explanation: "顧客動向に関する情報を収集します"
+      condition: "research_params.research_scope.includes('顧客動向')"
+      store_as: "customer_data"
+    - name: "web_research_competitors"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 競合分析 主要企業 比較 {{research_params.industry_context}}"
+      explanation: "競合分析に関する情報を収集します"
+      condition: "research_params.research_scope.includes('競合分析')"
+      store_as: "competitors_data"
+    - name: "web_research_technology"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 技術トレンド 最新技術 イノベーション {{research_params.industry_context}}"
+      explanation: "技術トレンドに関する情報を収集します"
+      condition: "research_params.research_scope.includes('技術トレンド')"
+      store_as: "technology_data"
+    - name: "web_research_regulation"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} 規制 法律 コンプライアンス 最新 {{research_params.industry_context}}"
+      explanation: "規制・法律動向に関する情報を収集します"
+      condition: "research_params.research_scope.includes('規制・法律動向')"
+      store_as: "regulation_data"
+    - name: "web_research_other"
+      action: "web_search"
+      search_term: "{{research_params.specific_topics}} {{research_params.industry_context}} 最新"
+      explanation: "その他の特定トピックに関する情報を収集します"
+      condition: "research_params.research_scope.includes('その他')"
+      store_as: "other_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{market_data}}", "{{customer_data}}", "{{competitors_data}}", "{{technology_data}}", "{{regulation_data}}", "{{other_data}}"]
+      instructions: "収集したWeb検索データを分析し、主要な洞察、トレンド、統計データを抽出します"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_desk_research.md"
+      template_reference: "basic/02_pmbok_research.mdc => desk_research_template"
+      data_mapping:
+        project_name: "{{research_params.project_name}}"
+        research_period: "{{today}}"
+        research_method: "Web検索による二次調査"
+        research_scope: "{{research_params.research_scope | join: ', '}}"
+        specific_topics: "{{research_params.specific_topics}}"
+        market_overview: "{{analyzed_results.market_overview}}"
+        customer_insights: "{{analyzed_results.customer_insights}}"
+        competitor_analysis: "{{analyzed_results.competitor_analysis}}"
+        technology_trends: "{{analyzed_results.technology_trends}}"
+        regulatory_environment: "{{analyzed_results.regulatory_environment}}"
+        key_findings: "{{analyzed_results.key_findings}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        デスクリサーチレポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_desk_research.md
+        
+        Web検索結果をもとに各トピックの主要情報と洞察をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+#--------------------------------------------
+# Research: 市場規模推定
+#--------------------------------------------
+- trigger: "(市場規模推定|TAM SAM SOM|フェルミ推定|Market Size Estimation)"
+  priority: high
+  steps:
+    - name: "collect_research_requirements"
+      action: "ask_questions"
+      questions:
+        - key: "project_name"
+          question: "プロジェクト/製品/サービス名を入力してください"
+          required: true
+        - key: "business_description"
+          question: "ビジネスモデルや製品・サービスの概要を簡潔に説明してください"
+          required: true
+        - key: "target_customers"
+          question: "主要なターゲット顧客を具体的に教えてください"
+          required: true
+        - key: "geographic_scope"
+          question: "対象地域（国内/国際/特定地域など）を指定してください"
+          required: true
+        - key: "estimation_approach"
+          question: "市場規模推定の主なアプローチを選択してください"
+          options:
+            - "トップダウン（全体市場から絞り込む）"
+            - "ボトムアップ（個別要素から積み上げる）"
+            - "バリューチェーン分析"
+          default: "ボトムアップ（個別要素から積み上げる）"
+          required: true
+      store_as: "market_params"
+    - name: "confirm_research"
+      action: "confirm"
+      message: "以下の内容で市場規模推定を実施します：\n\nプロジェクト: {{market_params.project_name}}\nターゲット顧客: {{market_params.target_customers}}\n対象地域: {{market_params.geographic_scope}}\n推定アプローチ: {{market_params.estimation_approach}}\n\nWeb検索を開始してよろしいですか？"
+    - name: "web_search_market_size"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} {{market_params.target_customers}} 市場規模 TAM SAM SOM {{market_params.geographic_scope}}"
+      explanation: "プロジェクトに関連する市場規模情報を収集します"
+      store_as: "market_size_data"
+    - name: "web_search_industry_data"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} 業界データ 統計 年間成長率 市場予測 {{market_params.geographic_scope}}"
+      explanation: "業界全体のデータと統計情報を収集します"
+      store_as: "industry_data"
+    - name: "web_search_customer_data"
+      action: "web_search"
+      search_term: "{{market_params.target_customers}} 人口統計 消費者行動 購買頻度 平均支出 {{market_params.geographic_scope}}"
+      explanation: "ターゲット顧客に関するデータを収集します"
+      store_as: "customer_data"
+    - name: "web_search_specific_metrics"
+      action: "web_search"
+      search_term: "{{market_params.business_description}} ベンチマーク データ 指標 {{market_params.estimation_approach == 'トップダウン（全体市場から絞り込む）' ? '市場シェア 競合' : '単価 利用率 頻度'}}"
+      explanation: "選択した推定アプローチに基づく具体的な指標データを収集します"
+      store_as: "metrics_data"
+    - name: "analyze_web_research"
+      action: "analyze"
+      data: ["{{market_size_data}}", "{{industry_data}}", "{{customer_data}}", "{{metrics_data}}"]
+      instructions: "収集したWeb検索データを分析し、TAM/SAM/SOMの推定に必要なパラメータと数値を抽出します。またフェルミ推定に使用できる要素を整理します。"
+      store_as: "analyzed_results"
+    - name: "create_draft"
+      action: "create_markdown_file"
+      path: "{{patterns.flow_date}}/draft_market_size_estimation.md"
+      template_reference: "02_pmbok_research.mdc => market_size_template"
+      data_mapping:
+        project_name: "{{market_params.project_name}}"
+        business_description: "{{market_params.business_description}}"
+        target_customers: "{{market_params.target_customers}}"
+        geographic_scope: "{{market_params.geographic_scope}}"
+        estimation_factors: "{{analyzed_results.estimation_factors}}"
+        specific_data_points: "{{analyzed_results.specific_data_points}}"
+        assumptions: "{{analyzed_results.assumptions}}"
+        competitors_share: "{{analyzed_results.competitors_share}}"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        市場規模推定レポートのドラフトを作成しました：
+        {{patterns.flow_date}}/draft_market_size_estimation.md
+        
+        Web検索結果をもとにTAM、SAM、SOMの市場規模推定をまとめました。
+        内容を確認し、必要に応じて編集後、「確定反映して」と入力するとStockディレクトリに保存されます。
+
+
+
+#-----
+# 16. Developmentフェーズ - 実装フェーズ
+#-----
+  - trigger: "(開発フェーズ|Development|実装フェーズ)"
+    priority: high
+    steps:
+      - message: |
+          Development（開発実装）フェーズでは以下の成果物を作成できます：
+          - **開発環境セットアップ**：「開発環境初期化」と入力
+          - **開発計画**：「開発計画作成」と入力
+          - **実装順序計画**：「実装順序計画」と入力
+          - **ストーリー実装**：「ストーリー実装」と入力
+          - **記事執筆**：「記事執筆」と入力
+          - **成果物確認**：「成果物確認」と入力
+
+#-----
+# Development: 開発環境初期化
+#-----
+  - trigger: "(開発環境初期化|Development初期化|実装環境セットアップ)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_init_questions"
+        message: "【開発環境セットアップ】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で開発環境セットアップドキュメントを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_setup}}"
+        template_reference: "basic/09_pmbok_development.mdc => development_init_template"
+        message: "開発環境セットアップのドラフトを作成しました。"
+      - name: "setup_dev_folders"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.dev_root}}/{code,articles,assets}"
+        message: "開発用フォルダを作成しています..."
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          開発環境セットアップが完了しました。
+          
+          セットアップドキュメント: {{patterns.draft_dev_setup}}
+          開発フォルダ: {{patterns.dev_root}}
+          
+          次のステップ:
+          1. 「開発計画作成」と入力して開発計画を作成
+          2. 「実装順序計画」と入力して実装順序を決定
+          3. 「ストーリー実装」と入力して個別ストーリーの実装を開始
+
+#-----
+# Development: 開発計画作成
+#-----
+  - trigger: "(開発計画作成|Development計画|実装計画)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_planning_questions"
+        message: "【開発計画】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で開発計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_plan}}"
+        template_reference: "basic/09_pmbok_development.mdc => development_planning_template"
+        message: "開発計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          開発計画のドラフトを作成しました：
+          {{patterns.draft_dev_plan}}
+          
+          次のステップ:
+          1. 「実装順序計画」と入力して詳細な実装順序を決定
+          2. 「ストーリー実装」と入力して個別ストーリーの実装を開始
+
+#-----
+# Development: 実装順序計画
+#-----
+  - trigger: "(実装順序計画|開発順序|ストーリー依存関係|実装順序決定)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => implementation_order_questions"
+        message: "【実装順序計画】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で実装順序計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_dev_dir}}/draft_implementation_order.md"
+        template_reference: "basic/09_pmbok_development.mdc => implementation_order_template"
+        message: "実装順序計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          実装順序計画のドラフトを作成しました：
+          {{patterns.flow_dev_dir}}/draft_implementation_order.md
+          
+          ストーリーの依存関係を分析し、最適な実装順序を決定しました。
+          次は「ストーリー実装」と入力して、個別ストーリーの実装を開始してください。
+
+#-----
+# Development: ストーリー実装
+#-----
+  - trigger: "(ストーリー実装|実装開始|ユーザーストーリー実装)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => story_implementation_questions"
+        message: "【ストーリー実装】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でストーリー実装計画を作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_story}}"
+        template_reference: "basic/09_pmbok_development.mdc => story_implementation_template"
+        message: "ストーリー実装計画のドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ストーリー実装計画のドラフトを作成しました：
+          {{patterns.draft_dev_story}}
+          
+          実装完了後は「成果物確認」と入力して、成果物のレビューと確定を行ってください。
+
+#-----
+# Development: 記事執筆
+#-----
+  - trigger: "(記事執筆|ドキュメント作成|記事作成)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => article_writing_questions"
+        message: "【記事執筆】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報で記事ドラフトを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.draft_dev_article}}"
+        template_reference: "basic/09_pmbok_development.mdc => article_writing_template"
+        message: "記事ドラフトを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          記事ドラフトを作成しました：
+          {{patterns.draft_dev_article}}
+          
+          記事の執筆を進め、完了後は「成果物確認」と入力して確定手続きを行ってください。
+
+#-----
+# Development: 成果物確認
+#-----
+  - trigger: "(成果物確認|実装確認|確定レビュー)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/09_pmbok_development.mdc => development_review_questions"
+        message: "【成果物確認】に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でレビューレポートを作成します。よろしいですか？"
+      - name: "create_draft"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_dev_dir}}/draft_development_review.md"
+        template_reference: "basic/09_pmbok_development.mdc => development_review_template"
+        message: "レビューレポートを作成しました。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          成果物レビューレポートを作成しました：
+          {{patterns.flow_dev_dir}}/draft_development_review.md
+          
+          成果物の確認が完了したら「確定反映して」と入力して、
+          Flow → Stock への移動を行ってください。
+
+

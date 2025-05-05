@@ -1,0 +1,219 @@
+---
+description: 「実行フェーズの成果物（スプリントゴール、会議議事録、Decision Log など）を生成するテンプレート群」
+globs: 
+alwaysApply: false
+---
+# =========================
+# 04_pmbok_executing.mdc
+# =========================
+
+# ----------------------------------------------------------
+# パス参照設定 - このファイルは pmbok_paths.mdc を参照します
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+
+# ---------- Sprint Goal Sheet ----------
+sprint_goal_questions:
+  - category: "スプリント基本情報"
+    items:
+      - question: "スプリント番号は？"
+        key: "sprint_number"
+        required: true
+      - question: "スプリント期間は？（yyyy-mm-dd から yyyy-mm-dd）"
+        key: "sprint_period"
+        required: true
+      - question: "スプリントゴールは？"
+        key: "sprint_goal"
+        required: true
+      - question: "主要ストーリー/タスクは？（箇条書きで）"
+        key: "major_stories"
+        required: true
+
+sprint_goal_template: |
+  # Sprint Goal Sheet - Sprint {{sprint_number}}
+
+  **期間**: {{sprint_period}}
+
+  ## スプリントゴール
+  {{sprint_goal}}
+
+  ## 主要ストーリー/タスク
+  {{major_stories}}
+
+  ## 完了の定義
+  - [ ] すべての受け入れ基準を満たしている
+  - [ ] コードレビュー完了
+  - [ ] テスト完了
+  - [ ] デモ可能な状態
+
+# ---------- Decision Log ----------
+decision_log_questions:
+  - category: "決定内容"
+    items:
+      - question: "決定事項のタイトルは？"
+        key: "decision_title"
+        required: true
+      - question: "決定の詳細内容は？"
+        key: "decision_content"
+        required: true
+      - question: "決定日は？（yyyy-mm-dd）"
+        key: "decision_date"
+        required: true
+      - question: "決定者は？（役職/名前）"
+        key: "decider"
+        required: true
+      - question: "検討した代替案は？"
+        key: "alternatives"
+        required: false
+
+decision_log_template: |
+  # 決定ログ: {{decision_title}}
+
+  **決定日**: {{decision_date}}  
+  **決定者**: {{decider}}
+
+  ## 決定内容
+  {{decision_content}}
+
+  ## 検討した代替案
+  {{alternatives}}
+
+  ## 影響範囲
+  - [ ] スコープ
+  - [ ] スケジュール
+  - [ ] コスト
+  - [ ] 品質
+  - [ ] リソース
+
+# ---------- Meeting Minutes ----------
+meeting_minutes_questions:
+  - category: "会議基本情報"
+    items:
+      - question: "会議タイトルは？"
+        key: "meeting_title"
+        required: true
+      - question: "日時は？（yyyy-mm-dd hh:mm）"
+        key: "meeting_time"
+        required: true
+      - question: "参加者は？（役職/名前のリスト）"
+        key: "participants"
+        required: true
+      - question: "議題項目は？（箇条書きで）"
+        key: "agenda_items"
+        required: true
+      - question: "アクションアイテムは？（担当者/タスク/期限）"
+        key: "action_items"
+        required: false
+
+meeting_minutes_template: |
+  ---
+  doc_targets: [charter, wbs, risk_plan]
+  importance: 4
+  project_name: ""
+  project_background: |
+    
+  scope_in: ""
+  sponsor: ""
+  risks: []
+  ---
+
+  # 会議議事録: {{meeting_title}}
+
+  **日時**: {{meeting_time}}  
+  **参加者**: {{participants}}
+
+  ## 議題
+  {{agenda_items}}
+
+  ## 議論内容
+  *ここに詳細な議論内容を記録します*
+
+  ## 決定事項 / Action Items
+  {{action_items}}
+
+  ## 次回会議
+  *日時・場所*
+
+# ---------- Test Cases List ----------
+test_cases_questions:
+  - category: "テスト概要"
+    items:
+      - question: "ストーリーID/機能IDは？"
+        key: "story_id"
+        required: true
+      - question: "テスト対象タイトルは？"
+        key: "test_title"
+        required: true
+      - question: "テストケース（GIVEN/WHEN/THEN形式）"
+        key: "test_cases"
+        required: true
+
+test_cases_template: |
+  # テストケース: {{test_title}} ({{story_id}})
+
+  ## テストケース一覧
+
+  {{test_cases}}
+
+  ## テスト実行結果
+  
+  | テストID | 実行日 | 実行者 | 結果 | 備考 |
+  |----------|--------|--------|------|------|
+  |          |        |        |      |      |
+
+
+
+  #----------------------------------------------------------
+# ◆ Sprint Review 作成 質問セット
+#----------------------------------------------------------
+sprint_review_questions:
+  - category: "基本"
+    items:
+      - question: "スプリント ID (例: 2025-04-Sprint1)"
+        key: sprint_id
+        required: true
+      - question: "スプリント期間 (yyyy-mm-dd 〜 yyyy-mm-dd)"
+        key: sprint_period
+        required: true
+      - question: "レビュー日時 (金曜の予定)"
+        key: review_time
+        required: false
+      - question: "デモ対象ストーリー / 主要成果 (箇条書き)"
+        key: demo_items
+        required: true
+      - question: "達成度コメント"
+        key: accomplishments
+        required: false
+      - question: "次スプリントへのインプット (箇条書き)"
+        key: next_inputs
+        required: false
+
+#----------------------------------------------------------
+# ◆ Sprint Review テンプレート
+#----------------------------------------------------------
+sprint_review_template: |
+  # Sprint Review – {{sprint_id}}
+
+  **期間** : {{sprint_period}}  
+  **レビュー日時** : {{review_time|default(today)}}  
+
+  ---
+
+  ## ✔ 完了ストーリー / デモ
+  {{demo_items}}
+
+  ## 📈 達成度サマリー
+  {{accomplishments}}
+
+  ## 📊 バーンダウンスナップ
+  ![](../4_monitoring/burndown_{{sprint_id}}.png)
+
+  ## ⚠ インペディメント / リスク
+  {{impediments}}
+
+  ## 🔄 次スプリントへの入力
+  {{next_inputs}}
+
+  ## 📝 参加者メモ
+  *ここに QA やフィードバックを追記*
+

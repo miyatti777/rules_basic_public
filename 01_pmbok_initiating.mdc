@@ -1,0 +1,144 @@
+---
+description: 「立ち上げフェーズ（プロジェクト憲章・ステークホルダー分析）の質問リストとテンプレートを提供し、マスターから呼び出された際に自動で回答を埋め込む」	
+globs: 
+alwaysApply: false
+---
+# =========================
+# 01_pmbok_initiating.mdc
+# =========================
+
+# ----------------------------------------------------------
+# パス参照設定 - このファイルは pmbok_paths.mdc を参照します
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+
+# ---------- プロジェクト名から初期化時のプログラム名質問 ----------
+project_program_questions:
+  - category: "プログラム情報"
+    items:
+      - question: "このプロジェクトが属するプログラム（カテゴリ）名を入力してください。例: 夕食準備、朝食準備、Web開発など"
+        key: "program_id"
+        required: true
+
+# ---------- プロジェクト初期化 ----------
+project_init_questions:
+  - category: "プロジェクト基本情報"
+    items:
+      - question: "プログラム名（カテゴリ）を入力してください。例: 夕食準備、朝食準備、Web開発など"
+        key: "program_id"
+        required: true
+      - question: "プロジェクト名を入力してください。例: カレー作り、パン焼き、ポートフォリオサイトなど"
+        key: "project_id"
+        required: true
+      - question: "このプロジェクトの目的を簡潔に教えてください"
+        key: "project_purpose"
+        required: true
+      - question: "開始予定日（YYYY-MM-DD）"
+        key: "start_date"
+        default: "{{today}}"
+        required: false
+      - question: "終了予定日（YYYY-MM-DD）"
+        key: "end_date"
+        required: false
+
+# ---------- プロジェクト憲章 ----------
+charter_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクト名は？"
+        key: "project_name"
+        required: true
+      - question: "背景と目的は？"
+        key: "project_background"
+        required: true
+  - category: "スコープ概要"
+    items:
+      - question: "含まれる範囲は？"
+        key: "scope_in"
+        required: false
+      - question: "含まれない範囲は？"
+        key: "scope_out"
+        required: false
+  - category: "ステークホルダー"
+    items:
+      - question: "主要ステークホルダー（部署・役職）は？"
+        key: "stakeholders"
+        required: true
+      - question: "プロジェクトスポンサーは？"
+        key: "sponsor"
+        required: true
+  - category: "期間・予算"
+    items:
+      - question: "開始予定日（YYYY‑MM‑DD）"
+        key: "start_date"
+        required: false
+      - question: "終了予定日（YYYY‑MM‑DD）"
+        key: "end_date"
+        required: false
+      - question: "概算予算（万円）"
+        key: "budget"
+        required: false
+
+charter_template: |
+  # プロジェクト憲章
+  **プロジェクト名**: {{project_name}}
+
+  ## 1. 背景と目的
+  {{project_background}}
+
+  ## 2. スコープ
+  - **含む**: {{scope_in}}
+  - **含まない**: {{scope_out}}
+
+  ## 3. ステークホルダー
+  - **スポンサー**: {{sponsor}}
+  - **主要ステークホルダー**: {{stakeholders}}
+
+  ## 4. 期間・予算
+  | 項目 | 値 |
+  |------|----|
+  | 開始 | {{start_date}} |
+  | 終了 | {{end_date}} |
+  | 予算 | {{budget}} 万円 |
+
+  ## 5. 承認
+  | 役割 | 氏名 | 署名 | 日付 |
+  |------|------|------|------|
+  | スポンサー | {{sponsor}} | | |
+
+# ---------- ステークホルダー登録簿 ----------
+stakeholder_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクト名は？"
+        key: "project_name"
+        required: true
+  - category: "内部ステークホルダー"
+    items:
+      - question: "内部ステークホルダー一覧（部署/名前/役割）"
+        key: "internal_stakeholders"
+        required: true
+  - category: "外部ステークホルダー"
+    items:
+      - question: "外部ステークホルダー一覧（会社/名前/役割）"
+        key: "external_stakeholders"
+        required: false
+  - category: "影響度・関心度"
+    items:
+      - question: "影響力が高いステークホルダー"
+        key: "high_power"
+        required: true
+      - question: "関心度が高いステークホルダー"
+        key: "high_interest"
+        required: true
+
+stakeholder_template: |
+  # ステークホルダー登録簿 – {{project_name}}
+
+  | 名前 | 組織/部署 | 役割 | 影響度 | 関心度 | エンゲージメント方針 |
+  |------|-----------|------|--------|--------|------------------------|
+  {{internal_stakeholders}}
+  {{external_stakeholders}}
+
+  **影響力大**: {{high_power}}  
+  **関心度大**: {{high_interest}}

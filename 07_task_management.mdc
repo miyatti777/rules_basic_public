@@ -1,0 +1,108 @@
+---
+description: 「日次タスク・週次レビューを生成し、完了タスクを WBS やリスクログへ同期するタスク管理ルール」
+globs: 
+alwaysApply: false
+---
+# =========================
+# 07_task_management.mdc
+# =========================
+path_reference: "pmbok_paths.mdc"
+
+#----------------------------------------------------------
+# 共通パターン
+#----------------------------------------------------------
+patterns:
+  wbs_glob:          "{{dirs.stock}}/projects/*/documents/3_planning/wbs.md"
+  backlog_glob:      "{{dirs.stock}}/projects/*/documents/3_planning/backlog/**/*.yaml"
+  daily_template:    "{{rules_basic_templates}}/daily_tasks_template.md"
+  weekly_template:   "{{rules_basic_templates}}/weekly_review_template.md"
+  daily_md:          "{{dirs.flow}}/{{today}}/daily_tasks.md"
+  weekly_md:         "{{dirs.flow}}/{{iso_week_end}}/weekly_review.md"
+
+# =========================
+# 1. Daily Tasks
+# =========================
+daily_tasks:
+  trigger:
+    - pattern: "(今日のタスク|日次タスク作成|Daily tasks)"
+    - time: "09:00"               # 平日 AM9:00 自動
+  steps:
+    # 1) Stock からタスク抽出
+    - collect_tasks:
+        sources:
+          - glob: "{{patterns.wbs_glob}}"
+          - glob: "{{patterns.backlog_glob}}"
+        rules:
+          due_within_days: 3       # 3日以内期限 → HIGH
+          sort_by: ["priority","due"]
+        store_as: tasks_today
+
+    # 2) Google カレンダー予定も取得 (MCP コマンド)
+    - execute_shell:
+        command: "mcp calendar today --json"
+        store_as: calendar_json
+
+    # 3) テンプレに自動差し込み
+    - create_markdown_file:
+        path: "{{patterns.daily_md}}"
+        template_path: "{{patterns.daily_template}}"
+        variables:
+          date: "{{today}}"
+          calendar: "{{calendar_json}}"
+          tasks: "{{tasks_today}}"
+
+    # 4) 未完了タスク通知
+    - notify_overdue:
+        lookback_days: 1
+        file_pattern: "{{dirs.flow}}/*/daily_tasks.md"
+        message_template: "🔔 前日までの未完了タスク: **{{count}}件**"
+
+    - notify:
+        message: |
+          ✅ 日次タスクを生成しました → {{patterns.daily_md}}
+          「完了したら [x] にマーク → 'Sync' で WBS へ反映できます」
+
+# =========================
+# 2. Weekly Review (金曜 17 : 30)
+# =========================
+weekly_review:
+  trigger:
+    - pattern: "(週次レビュー|Weekly review)"
+    - time: "金 17:30"
+  steps:
+    - aggregate_week:
+        flow_glob: "{{dirs.flow}}/{{iso_week}}*/daily_tasks.md"
+        store_as: week_data
+    - create_markdown_file:
+        path: "{{patterns.weekly_md}}"
+        template_path: "{{patterns.weekly_template}}"
+        variables:
+          week_data: "{{week_data}}"
+          iso_week: "{{iso_week}}"
+    - sync_progress:
+        source: "{{week_data.completed}}"
+        wbs_glob: "{{patterns.wbs_glob}}"
+        risk_glob: "{{dirs.stock}}/projects/*/documents/3_planning/risk_log.md"
+    - notify:
+        message: |
+          📒 週次レビューを生成しました → {{patterns.weekly_md}}
+          確認後「確定反映して」で Stock に移動します
+
+# =========================
+# 3. Sync Command (手動)
+# =========================
+sync_with_artifacts:
+  trigger:
+    - pattern: "(Sync|WBSと同期|リスクログと同期)"
+  steps:
+    - parse_daily:
+        file: "{{patterns.daily_md}}"
+        store_as: done_today
+    - sync_wbs:
+        completed: "{{done_today}}"
+        wbs_glob: "{{patterns.wbs_glob}}"
+    - sync_risk_log:
+        completed: "{{done_today}}"
+        risk_glob: "{{dirs.stock}}/projects/*/documents/3_planning/risk_log.md"
+    - notify:
+        message: "WBS / リスクログへ同期しました ✅"

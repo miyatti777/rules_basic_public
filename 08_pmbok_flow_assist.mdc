@@ -1,0 +1,78 @@
+---
+description: "Flow Assistフェーズの質問リストとテンプレートを提供"
+globs: 
+alwaysApply: false
+---
+# 08_pmbok_flow_assist.mdc
+# 新フェーズ「Flow Assist」- ルール定義
+# ----
+path_reference: "pmbok_paths.mdc"
+# ----
+
+# ----
+# 1. 質問セット - flow_assist_questions
+# ----
+flow_assist_questions:
+  - category: "基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "発散のテーマ"
+        key: diverge_theme
+        required: true
+      - question: "アイディア発散の目的"
+        key: purpose
+        required: true
+      - question: "参加者"
+        key: participants
+        required: false
+
+# ----
+# 2. テンプレート - flow_assist_template
+# ----
+flow_assist_template: |
+  ---
+  doc_type: flow_assist_document
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # Flow Assist アイディア発散記録
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}
+  **参加者**: {{participants}}
+
+  ## 1. テーマと目的
+
+  **テーマ**: {{diverge_theme}}
+
+  **目的**: {{purpose}}
+
+  ## 2. アイディア一覧
+
+  1. 
+  2. 
+  3. 
+
+  ## 3. 考察
+
+  (アイディアの関連性や可能性について)
+
+  ## 4. 次のステップ
+
+  - [ ] 優先アイディアの選定
+  - [ ] 実行計画の作成
+  - [ ] リソース配分の検討
+
+
+# 新フェーズ追加に必要な追加情報
+# ----------------------------
+# phase_name: Flow Assist
+# phase_number: 08
+# phase_slug: flow_assist
+# phase_trigger: アイディア発散
+# new_rule_file: 08_pmbok_flow_assist.mdc
+# new_flow_number: 16 

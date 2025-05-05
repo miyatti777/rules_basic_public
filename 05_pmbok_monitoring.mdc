@@ -1,0 +1,135 @@
+---
+description: 「監視・コントロール用ドキュメント（ステータスレポート、変更要求、リスク更新）を作成するための質問とテンプレート」	
+globs: 
+alwaysApply: false
+---
+# =========================
+# 05_pmbok_monitoring.mdc
+# =========================
+
+# ----------------------------------------------------------
+# パス参照設定 - このファイルは pmbok_paths.mdc を参照します
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+
+# ---------- Status Report ----------
+status_report_questions:
+  - category: "レポート基本情報"
+    items:
+      - question: "レポート日付は？（yyyy-mm-dd）"
+        key: "report_date"
+        required: true
+      - question: "プロジェクトIDは？"
+        key: "project_id"
+        required: true
+      - question: "進捗率は？（%）"
+        key: "progress_percentage"
+        required: true
+  - category: "詳細情報"
+    items:
+      - question: "今週の主な成果は？（箇条書きで）"
+        key: "highlights"
+        required: true
+      - question: "課題・懸念事項は？（箇条書きで）"
+        key: "issues"
+        required: false
+      - question: "リスク要因は？（箇条書きで）"
+        key: "risks"
+        required: false
+
+status_report_template: |
+  # ステータスレポート: {{project_id}}
+  **日付**: {{report_date}}
+  **進捗率**: {{progress_percentage}}%
+
+  ## 今週のハイライト
+  {{highlights}}
+
+  ## 課題・懸念事項
+  {{issues}}
+
+  ## リスク
+  {{risks}}
+
+  ## 次週の予定
+  *ここに次週の予定を記入*
+
+# ---------- Change Request ----------
+change_request_questions:
+  - category: "変更要求基本情報"
+    items:
+      - question: "変更タイトルは？"
+        key: "change_title"
+        required: true
+      - question: "提出日は？（yyyy-mm-dd）"
+        key: "submission_date"
+        required: true
+      - question: "要求者は？（部署/名前）"
+        key: "requester"
+        required: true
+  - category: "変更内容"
+    items:
+      - question: "変更内容の要約は？"
+        key: "change_summary"
+        required: true
+      - question: "変更による影響（スコープ/スケジュール/コスト）は？"
+        key: "impact"
+        required: true
+      - question: "代替案は？"
+        key: "alternatives"
+        required: false
+
+change_request_template: |
+  # 変更要求: {{change_title}}
+  
+  **ID**: CR-{{submission_date}}-01  
+  **提出日**: {{submission_date}}  
+  **要求者**: {{requester}}
+  
+  ## 変更内容
+  {{change_summary}}
+  
+  ## 変更理由
+  *ここに変更が必要な理由を記入*
+  
+  ## 影響範囲
+  {{impact}}
+  
+  ## 代替案
+  {{alternatives}}
+  
+  ## 承認状況
+  - [ ] レビュー中
+  - [ ] 承認済み
+  - [ ] 却下
+  - [ ] 保留
+
+# ---------- Risk/Issue Update ----------
+risk_issue_update_questions:
+  - category: "リスク/課題基本情報"
+    items:
+      - question: "リスク/課題IDは？"
+        key: "item_id"
+        required: true
+      - question: "タイプは？（リスク/課題）"
+        key: "item_type"
+        required: true
+      - question: "現在のステータスは？（未対応/対応中/解決済み/受容）"
+        key: "current_status"
+        required: true
+  - category: "アップデート"
+    items:
+      - question: "アップデート内容は？"
+        key: "update_content"
+        required: true
+
+risk_issue_update_template: |
+  # {{item_type}}アップデート: {{item_id}}
+  
+  **ステータス**: {{current_status}}
+  
+  ## アップデート内容
+  {{update_content}}
+  
+  ## 追加アクション
+  *必要な追加アクションがあれば記入*

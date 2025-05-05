@@ -1,0 +1,1252 @@
+---
+description: "Discovery（発見）フェーズの質問リストとテンプレートを提供 仮説マップ、ペルソナ、課題定義、ジャーニー、仮設リスト"
+globs: 
+alwaysApply: false
+---
+# 新フェーズ「Discovery」- Lean UX アプローチ
+# ----------------------------------------------------------
+path_reference: "pmbok_paths.mdc"
+# ----------------------------------------------------------
+
+# ----------------------------------------------------------
+# 1. Assumption Map - 前提条件の可視化
+# ----------------------------------------------------------
+assumption_questions:
+  - category: "仮説マップ（Assumption Map）基本情報"
+    items:
+      - question: "ターゲットユーザー (WHO) は？"
+        key: who
+        required: true
+      - question: "抱えている課題 (PROBLEM) は？"
+        key: problem
+        required: true
+      - question: "仮のソリューション / 機能案は？"
+        key: solution
+        required: true
+      - question: "期待するユーザー行動 (OUTCOME) は？"
+        key: outcome
+        required: true
+      - question: "測定指標 (METRIC) は？"
+        key: metric
+        required: true
+      
+  - category: "確実性とリスクの評価（Pip Decks方式）"
+    items:
+      - question: "この仮説が間違っていた場合のリスク（1-5、5が最高リスク）は？"
+        key: risk_level
+        required: true
+        description: "もしこの仮説が誤りだった場合、どれくらい悪影響がありますか？5=非常に大きな影響、1=影響は軽微"
+      - question: "この仮説に対する現在の確実性（1-5、1が最も不確か）は？"
+        key: certainty_level
+        required: true
+        description: "この仮説についてどれくらい確信がありますか？1=ほとんど確信がない（未知）、5=強い確信がある（既知）"
+
+assumption_template: |
+  ---
+  doc_type: assumption_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # Assumption Map – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 仮説マップ（Lean UX形式）
+
+  | ID | WHO | PROBLEM | SOLUTION/FEATURE | OUTCOME | METRIC | リスク | 確実性 |
+  |----|-----|---------|------------------|---------|--------|--------|--------|
+  | H1 | {{who}} | {{problem}} | {{solution}} | {{outcome}} | {{metric}} | {{risk_level}} | {{certainty_level}} |
+
+  ## 確実性×リスク マトリックス（Pip Decks方式）
+
+  ```
+  高リスク │    未知・高リスク    │    既知・高リスク
+         │  すぐに調査が必要   │   リスク対策計画を立てる
+         │                   │
+  ─────────┼───────────────────┼────────────────────
+         │                   │
+  低リスク │    未知・低リスク    │    既知・低リスク
+         │  知識を深める評価   │   後回しだが監視する
+         │                   │
+         └───────────────────┴────────────────────
+               未知             既知
+              確実性
+  ```
+
+  ### マトリックスの見方
+  - **高リスク・未知**：すぐに調査すべき最優先事項
+  - **高リスク・既知**：リスク対策計画を立てて対応
+  - **低リスク・未知**：知識を深めるための評価を行う
+  - **低リスク・既知**：後回しにするが状況変化を監視
+
+  ## 優先順位の決定方法
+  1. 各仮説を「リスク」と「確実性」のスコアに基づいてマトリックス上に配置
+  2. 「高リスク・未知」の象限にある仮説を最優先で検証
+  3. 「高リスク・既知」の象限にある仮説について対策を計画
+  4. 残りの象限の仮説はリソースに余裕がある場合に取り組む
+
+  ## 次のステップ
+  1. この仮説マップを元に検証計画を立てる
+  2. 「高リスク・未知」の象限から優先的に検証を行う
+  3. 「高リスク・既知」の象限には対策計画を立てる
+  4. 検証結果を元に仮説を修正・追加する
+
+# 複数仮説を格納するためのテンプレート
+assumption_map_multiple_template: |
+  ---
+  doc_type: assumption_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # Assumption Map – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 仮説マップ（Lean UX形式）
+
+  | ID | WHO | PROBLEM | SOLUTION/FEATURE | OUTCOME | METRIC | リスク | 確実性 |
+  |----|-----|---------|------------------|---------|--------|--------|--------|
+  {{#each assumptions}}
+  | H{{@index}} | {{this.who}} | {{this.problem}} | {{this.solution}} | {{this.outcome}} | {{this.metric}} | {{this.risk_level}} | {{this.certainty_level}} |
+  {{/each}}
+
+  ## 確実性×リスク マトリックス（Pip Decks方式）
+
+  ```
+  高リスク │    未知・高リスク    │    既知・高リスク
+         │  すぐに調査が必要   │   リスク対策計画を立てる
+         │                   │
+  ─────────┼───────────────────┼────────────────────
+         │                   │
+  低リスク │    未知・低リスク    │    既知・低リスク
+         │  知識を深める評価   │   後回しだが監視する
+         │                   │
+         └───────────────────┴────────────────────
+               未知             既知
+              確実性
+  ```
+
+  ### マトリックスの見方
+  - **高リスク・未知**（リスク:4-5, 確実性:1-2）：すぐに調査すべき最優先事項
+  - **高リスク・既知**（リスク:4-5, 確実性:4-5）：リスク対策計画を立てて対応
+  - **低リスク・未知**（リスク:1-2, 確実性:1-2）：知識を深めるための評価を行う
+  - **低リスク・既知**（リスク:1-2, 確実性:4-5）：後回しにするが状況変化を監視
+
+  ### 優先順位分類
+
+  #### 高リスク・未知（最優先）
+  {{#each assumptions}}
+  {{#if (and (gte this.risk_level 4) (lte this.certainty_level 2))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 高リスク・既知（対策計画）
+  {{#each assumptions}}
+  {{#if (and (gte this.risk_level 4) (gte this.certainty_level 4))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 低リスク・未知（知識を深める）
+  {{#each assumptions}}
+  {{#if (and (lte this.risk_level 2) (lte this.certainty_level 2))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  #### 低リスク・既知（監視）
+  {{#each assumptions}}
+  {{#if (and (lte this.risk_level 2) (gte this.certainty_level 4))}}
+  - **H{{@index}}**: {{this.who}} - {{this.problem}}
+  {{/if}}
+  {{/each}}
+
+  ## 次のステップ
+  1. この仮説マップを元に検証計画を立てる
+  2. 「高リスク・未知」の象限から優先的に検証を行う
+  3. 「高リスク・既知」の象限には対策計画を立てる
+  4. 検証結果を元に仮説を修正・追加する
+  5. assumption_map.md をStock/projects/{{project_id}}/documents/2_discovery/ に確定保存
+  6. 優先度の高い仮説からhypothesis_backlog.yamlに登録
+
+# ----------------------------------------------------------
+# 2. Persona - ユーザー像
+# ----------------------------------------------------------
+persona_questions:
+  - category: "ペルソナ情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "ペルソナ名"
+        key: persona_name
+        required: true
+      - question: "年齢・性別"
+        key: demographics
+        required: true
+      - question: "職業・役割"
+        key: occupation
+        required: true
+      - question: "ゴール（目標）"
+        key: goals
+        required: true
+      - question: "フラストレーション（悩み）"
+        key: pain_points
+        required: true
+      - question: "行動パターン"
+        key: behaviors
+        required: true
+
+persona_template: |
+  ---
+  doc_type: persona
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # ペルソナ定義
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}
+
+  ## {{persona_name}}
+
+  **基本情報**: {{demographics}}  
+  **職業/役割**: {{occupation}}
+
+  ### ゴール
+  {{goals}}
+
+  ### 課題・悩み
+  {{pain_points}}
+
+  ### 行動パターン
+  {{behaviors}}
+
+# ----------------------------------------------------------
+# 3. Problem Statement - 課題定義
+# ----------------------------------------------------------
+problem_questions:
+  - category: "課題定義の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "背景（現状の課題の概要）"
+        key: background
+        required: true
+      - question: "主要な問題点（箇条書きで3つ程度）"
+        key: main_problems
+        required: true
+      - question: "なぜ今解決すべきか（緊急性・重要性）"
+        key: urgency
+        required: true
+      - question: "短期的な期待効果"
+        key: short_term_effects
+        required: true
+      - question: "長期的な期待効果"
+        key: long_term_effects
+        required: true
+      - question: "解決の方向性（候補となるソリューション）"
+        key: solution_directions
+        required: true
+      - question: "次のステップ（アクションプラン）"
+        key: next_steps
+        required: true
+      - question: "成功指標（定量的な指標）"
+        key: success_metrics
+        required: true
+
+problem_template: |
+  ---
+  doc_type: problem_statement
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # プロブレムステートメント：{{project_id}}
+
+  ## 1. 背景
+
+  {{background}}
+
+  ## 2. 主要な問題点
+
+  {{main_problems}}
+
+  ## 3. 解決の必要性と期待効果
+
+  ### なぜ今解決すべきか
+
+  {{urgency}}
+
+  ### 期待される効果
+
+  1. **短期的効果**：
+     {{short_term_effects}}
+
+  2. **中長期的効果**：
+     {{long_term_effects}}
+
+  ## 4. ソリューションの方向性
+
+  {{solution_directions}}
+
+  ## 5. 次のステップ
+
+  {{next_steps}}
+
+  ## 6. 成功指標
+
+  {{success_metrics}}
+
+# ----------------------------------------------------------
+# 4. Hypothesis Backlog - 仮説リスト
+# ----------------------------------------------------------
+hypothesis_questions:
+  - category: "仮説バックログ"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "仮説のタイトル"
+        key: hypothesis_title
+        required: true
+      - question: "もし〜ならば〜（具体的な仮説）"
+        key: if_then_statement
+        required: true
+      - question: "検証方法"
+        key: validation_method
+        required: true
+      - question: "成功指標"
+        key: success_metric
+        required: true
+      - question: "リスクレベル（1-5、5が最高リスク）"
+        key: risk_level
+        required: true
+      - question: "確実性レベル（1-5、1が最も不確か）"
+        key: certainty_level
+        required: true
+
+hypothesis_template: |
+  ---
+  doc_type: hypothesis_backlog
+  project_id: {{project_id}}
+  created_at: {{today}}
+  version: v1.0
+  ---
+
+  # 仮説バックログ
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}
+
+  ## 仮説リスト
+
+  epics:
+    - epic_id: HX-01
+      title: {{hypothesis_title}}
+      statement: {{if_then_statement}}
+      validation: {{validation_method}}
+      success_criteria: {{success_metric}}
+      risk_level: {{risk_level}}
+      certainty_level: {{certainty_level}}
+      status: "未検証"
+      priority_quadrant: "{{#if (and (gte risk_level 4) (lte certainty_level 2))}}高リスク・未知（最優先）{{else}}{{#if (and (gte risk_level 4) (gte certainty_level 4))}}高リスク・既知（対策計画）{{else}}{{#if (and (lte risk_level 2) (lte certainty_level 2))}}低リスク・未知（知識を深める）{{else}}{{#if (and (lte risk_level 2) (gte certainty_level 4))}}低リスク・既知（監視）{{else}}中程度（個別判断）{{/if}}{{/if}}{{/if}}{{/if}}"
+
+# ----------------------------------------------------------
+# 5. User Journey Map - ユーザージャーニーマップ
+# ----------------------------------------------------------
+journey_map_questions:
+  - category: "ジャーニーマップ基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "対象ペルソナ（複数可、カンマ区切り）"
+        key: target_personas
+        required: true
+      - question: "ジャーニーの主要フェーズ（複数可、カンマ区切り）"
+        key: journey_phases
+        required: true
+      - question: "現状の課題・痛点（各フェーズごとの主な問題）"
+        key: current_pain_points
+        required: true
+      - question: "理想のジャーニー（各フェーズでの改善後の姿）"
+        key: ideal_journey
+        required: true
+      - question: "改善ポイント（具体的な改善策）"
+        key: improvement_points
+        required: true
+
+journey_map_template: |
+  ---
+  doc_type: user_journey_map
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # ユーザージャーニーマップ – {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **更新日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## はじめに
+
+  このドキュメントは、{{project_id}}における主要ペルソナの現状の業務フローと、プロジェクト実施後の理想的な業務フロー（ジャーニー）を記述しています。各ペルソナの目標、行動、感情、課題、および改善機会を可視化することで、具体的な解決策の方向性を示します。
+
+  ## ペルソナと現状のジャーニー
+
+  {{#each target_personas}}
+  ### {{this}}の現状のジャーニー
+
+  | フェーズ | 行動 | 感情 | 課題/痛点 |
+  |---------|------|------|----------|
+  {{/each}}
+
+  ## 理想のジャーニー（提案後）
+
+  {{#each target_personas}}
+  ### {{this}}の理想のジャーニー
+
+  | フェーズ | 行動 | 感情 | 改善ポイント |
+  |---------|------|------|------------|
+  {{/each}}
+
+  ## 主要な発見と改善機会
+
+  ### 共通する主要な痛点
+
+  {{current_pain_points}}
+
+  ### 提案ソリューションによる改善ポイント
+
+  {{improvement_points}}
+
+  ## 次のステップ
+
+  1. ユーザージャーニーマップを基に、各ペルソナの主要なペインポイントに対応するソリューションの詳細設計を行う
+  2. 優先度の高い解決策から順に実装計画を策定
+  3. ソリューション導入後の効果測定指標と方法を具体化する
+
+# ----------------------------------------------------------
+# 6. Validation Plan - 検証計画
+# ----------------------------------------------------------
+validation_plan_questions:
+  - category: "検証計画基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "検証の目的（箇条書きで2-4項目）"
+        key: validation_purpose
+        required: true
+      - question: "検証対象の主要仮説（3つ程度）"
+        key: main_hypotheses
+        required: true
+      - question: "検証方法の概要（各仮説ごとの実施期間・対象者・手順）"
+        key: validation_methods
+        required: true
+      - question: "検証の指標（定量/定性指標と成功基準）"
+        key: metrics
+        required: true
+      - question: "検証体制（役割と責任）"
+        key: validation_team
+        required: true
+      - question: "リスクと対策"
+        key: risks_countermeasures
+        required: true
+      - question: "検証スケジュール"
+        key: validation_timeline
+        required: true
+      - question: "次のステップ"
+        key: next_steps
+        required: true
+
+validation_plan_template: |
+  ---
+  doc_type: validation_plan
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # 検証計画（バリデーションプラン）– {{project_id}}
+
+  **プロジェクト**: {{project_id}}  
+  **作成日**: {{today}}  
+  **更新日**: {{today}}  
+  **バージョン**: v1.0
+
+  ## 1. 概要
+
+  本検証計画は、{{project_id}}における仮説マップで設定した優先度の高い仮説を検証するための具体的な方法とスケジュールを定義します。特に「高リスク・未知」の象限に分類された仮説を優先的に検証します。
+
+  ## 2. 検証目的
+
+  {{validation_purpose}}
+
+  ## 3. 優先仮説の検証計画
+
+  {{main_hypotheses}}
+
+  ## 4. 検証方法
+
+  {{validation_methods}}
+
+  ## 5. 計測指標と成功基準
+
+  {{metrics}}
+
+  ## 6. 検証体制
+
+  {{validation_team}}
+
+  ## 7. リスクと対策
+
+  {{risks_countermeasures}}
+
+  ## 8. タイムライン
+
+  {{validation_timeline}}
+
+  ## 9. 次のステップ
+
+  {{next_steps}}
+
+  ---
+
+  **作成者**: [担当者名]  
+  **承認者**: [承認者名] 
+
+# ----------------------------------------------------------
+# 7. Solution Definition - ソリューション定義
+# ----------------------------------------------------------
+solution_definition_questions:
+  - category: "ソリューション定義の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "背景（ユーザーが直面している状況）"
+        key: background
+        required: true
+      - question: "課題/ニーズ（お客様が抱える問題）"
+        key: problem
+        required: true
+      - question: "提案するソリューション"
+        key: solution
+        required: true
+      - question: "期待する行動変化"
+        key: behavior_change
+        required: true
+      - question: "ソリューションの主要機能（箇条書きで3-5項目）"
+        key: main_features
+        required: true
+      - question: "ソリューションの仕様詳細"
+        key: specifications
+        required: true
+      - question: "関連する既存リソース（既存ペルソナやジャーニーマップなど）"
+        key: related_resources
+        required: false
+
+solution_definition_template: |
+  ---
+  doc_type: solution_definition
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # ソリューション定義：{{project_id}}
+
+  ## 1. 課題仮説
+
+  ### 背景
+  {{background}}
+
+  ### 課題/ニーズ
+  上記の状況があるので、お客様は**{{problem}}**があります。
+
+  ## 2. ソリューション仮説
+
+  **{{solution}}**することで、より多くのお客様が**{{behavior_change}}**できるようになると信じています。
+
+  ## 3. ソリューションの主要機能
+
+  {{main_features}}
+
+  ## 4. 仕様詳細
+
+  {{specifications}}
+
+  ## 5. 関連リソース
+
+  {{#if related_resources}}
+  {{related_resources}}
+  {{else}}
+  - ペルソナ：[リンク]
+  - ユーザージャーニーマップ：[リンク]
+  - 課題定義書：[リンク]
+  {{/if}}
+
+  ## 6. 次のステップ
+
+  1. 本ソリューション定義をもとに検証計画を策定する
+  2. 優先度の高い機能から検証を実施する
+  3. ユーザーフィードバックをもとにソリューション定義を改善する 
+
+# ----------------------------------------------------------
+# 8. UX Research Overview - UXリサーチ調査概要
+# ----------------------------------------------------------
+ux_research_overview_questions:
+  - category: "UXリサーチ基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "リサーチの目的（何を明らかにしたいか）"
+        key: research_purpose
+        required: true
+      - question: "主なリサーチクエスチョン（3-5個）"
+        key: research_questions
+        required: true
+      - question: "リサーチスコープと焦点"
+        key: research_scope
+        required: true
+      - question: "リサーチ手法（複数選択可）"
+        key: research_methods
+        options:
+          - "ユーザーインタビュー"
+          - "ユーザビリティテスト"
+          - "フィールドスタディ/民族誌的調査"
+          - "ダイアリースタディ"
+          - "フォーカスグループ"
+          - "カードソート"
+          - "アンケート調査"
+          - "その他"
+        multi_select: true
+        required: true
+      - question: "想定される活用方法"
+        key: research_applications
+        required: true
+      - question: "関連する既存リソース（ペルソナ、ジャーニーマップなど）"
+        key: related_resources
+        required: false
+
+ux_research_overview_template: |
+  ---
+  doc_type: ux_research_overview
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # UXリサーチ調査概要：{{project_id}}
+
+  ## 1. リサーチの背景と目的
+
+  {{research_purpose}}
+
+  ## 2. リサーチクエスチョン
+
+  この調査では、以下の具体的な問いに答えることを目指します：
+
+  {{research_questions}}
+
+  ## 3. リサーチスコープと焦点
+
+  {{research_scope}}
+
+  ## 4. 採用する調査手法
+
+  {{#each research_methods}}
+  - {{this}}
+  {{/each}}
+
+  ## 5. 調査結果の活用方法
+
+  {{research_applications}}
+
+  ## 6. タイムライン
+
+  | フェーズ | 予定期間 | 主な活動 |
+  |---------|---------|----------|
+  | 準備 | 〜〜日 | インタビューガイド作成、リクルーティング計画策定 |
+  | リクルーティング | 〜〜日 | 参加者募集、スクリーニング、スケジュール調整 |
+  | 実施 | 〜〜日 | インタビュー/テスト実施、データ収集 |
+  | 分析 | 〜〜日 | データ整理、パターン分析、インサイト抽出 |
+  | 報告 | 〜〜日 | レポート作成、フィードバック収集、提案策定 |
+
+  ## 7. 関連リソース
+
+  {{#if related_resources}}
+  {{related_resources}}
+  {{else}}
+  - ペルソナ：[リンク]
+  - ユーザージャーニーマップ：[リンク]
+  - 課題定義書：[リンク]
+  {{/if}}
+
+  ## 8. 成功指標
+
+  この調査は以下の場合に成功と見なします：
+
+  1. 上記のリサーチクエスチョンに対する明確な回答が得られる
+  2. 調査結果が製品/サービス開発における意思決定に活用される
+  3. ユーザーのニーズと期待が明確に理解され、チーム内で共有される
+
+# ----------------------------------------------------------
+# 9. Interview Design - インタビュー設計
+# ----------------------------------------------------------
+interview_design_questions:
+  - category: "インタビュー設計の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "インタビューの目的"
+        key: interview_purpose
+        required: true
+      - question: "主なリサーチクエスチョン（3-5個）"
+        key: research_questions
+        required: true
+      - question: "インタビュー種類"
+        key: interview_type
+        options:
+          - "構造化インタビュー（事前に決めた質問のみ）"
+          - "半構造化インタビュー（質問項目+臨機応変な質問）"
+          - "非構造化インタビュー（テーマのみ決めて自由な対話）"
+        required: true
+      - question: "インタビュー実施方法"
+        key: interview_method
+        options:
+          - "対面（現地訪問）"
+          - "対面（ラボ/会議室）"
+          - "リモート（ビデオ会議）"
+          - "電話"
+        required: true
+      - question: "予定時間"
+        key: interview_duration
+        options:
+          - "15-30分"
+          - "30-45分"
+          - "45-60分"
+          - "60-90分"
+        required: true
+      - question: "想定参加者像（ターゲットユーザー）"
+        key: target_participants
+        required: true
+
+interview_guide_template: |
+  ---
+  doc_type: interview_guide
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # インタビューガイド：{{project_id}}
+
+  ## 調査概要
+
+  **目的**: {{interview_purpose}}
+  
+  **リサーチクエスチョン**:
+  {{research_questions}}
+  
+  **インタビュー種類**: {{interview_type}}
+  
+  **実施方法**: {{interview_method}}
+  
+  **所要時間**: {{interview_duration}}
+  
+  **対象者**: {{target_participants}}
+
+  ## インタビュアー用チェックリスト
+
+  **準備**:
+  - [ ] インタビュー環境確認（静かな場所、録音機器準備など）
+  - [ ] 同意書用意
+  - [ ] 謝礼準備
+  - [ ] テスト録音実施
+
+  **開始時**:
+  - [ ] 挨拶、自己紹介
+  - [ ] 調査概要説明
+  - [ ] 録音・記録についての許可取得
+  - [ ] 個人情報保護についての説明
+  - [ ] 調査協力への同意確認
+
+  ## インタビュー質問項目
+
+  ### 1. アイスブレイク（5分）
+
+  *目的: 参加者にリラックスしてもらい、ラポールを構築する*
+
+  - 今日はお時間をいただきありがとうございます。まずは簡単に自己紹介をしていただけますか？
+  - お仕事や日常生活について少し教えていただけますか？
+
+  ### 2. 背景と文脈（10分）
+
+  *目的: 参加者の現状や関連経験を理解する*
+
+  - [製品/サービス]に関連する経験について教えてください。
+  - 最近、[活動/行動]をした時のことを思い出してください。その時の状況を詳しく教えていただけますか？
+  - そのとき、どのような課題や困りごとがありましたか？
+
+  ### 3. 主要テーマ（20-30分）
+
+  *目的: 主要なリサーチクエスチョンに対する回答を得る*
+
+  #### テーマA: [テーマ名]
+  - [オープンエンド質問1]
+  - [オープンエンド質問2]
+  - [深堀り質問]
+
+  #### テーマB: [テーマ名]
+  - [オープンエンド質問1]
+  - [オープンエンド質問2]
+  - [深堀り質問]
+
+  #### テーマC: [テーマ名]
+  - [オープンエンド質問1]
+  - [オープンエンド質問2]
+  - [深堀り質問]
+
+  ### 4. 概念検証/アイデア評価（オプション、10分）
+
+  *目的: 特定の概念やアイデアに対する反応を確認する*
+
+  - [概念/アイデア]についてどう思いますか？
+  - もしこのような[製品/機能]があったら、使いたいと思いますか？その理由は？
+  - このアイデアをより良くするためのご提案はありますか？
+
+  ### 5. クロージング（5分）
+
+  *目的: インタビューを締めくくり、未カバーの重要事項を拾う*
+
+  - 今日お話しした内容の中で、特に強調したい点はありますか？
+  - 他に何か付け加えたいことはありますか？
+  - このインタビューで触れなかった重要な点はありますか？
+
+  ## フォローアップと分析計画
+
+  - インタビュー後24時間以内にメモを整理し、主要なインサイトを抽出
+  - 録音データを文字起こし
+  - テーマ別にデータをコード化・分類
+  - パターンと洞察の特定
+  - 報告書作成とフィードバック収集
+
+  ## 付録：プロービング（深堀り）質問例
+
+  - 「もう少し詳しく教えていただけますか？」
+  - 「具体的な例を挙げていただけますか？」
+  - 「それはなぜだと思いますか？」
+  - 「その時どう感じましたか？」
+  - 「その後どうなりましたか？」
+  - 「もし～だったらどうしますか？」（仮説的質問は慎重に）
+
+# ----------------------------------------------------------
+# 10. Recruiting Plan - リクルーティング計画
+# ----------------------------------------------------------
+recruiting_plan_questions:
+  - category: "リクルーティング計画の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "リクルーティングの目的"
+        key: recruiting_purpose
+        required: true
+      - question: "必要な参加者数"
+        key: participant_count
+        required: true
+      - question: "参加者の主な条件（スクリーニング条件）"
+        key: screening_criteria
+        required: true
+      - question: "リクルーティング方法"
+        key: recruiting_methods
+        options:
+          - "既存ユーザーデータベース"
+          - "ソーシャルメディア募集"
+          - "クライアント経由"
+          - "市場調査会社"
+          - "スノーボール方式（紹介）"
+          - "その他"
+        multi_select: true
+        required: true
+      - question: "インセンティブ設計"
+        key: incentives
+        required: true
+      - question: "スケジュール（リクルーティング期間）"
+        key: recruiting_timeline
+        required: true
+      - question: "スクリーナー調査の主な質問内容"
+        key: screener_questions
+        required: true
+
+recruiting_plan_template: |
+  ---
+  doc_type: recruiting_plan
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # リクルーティング計画：{{project_id}}
+
+  ## 1. リクルーティングの目的
+
+  {{recruiting_purpose}}
+
+  ## 2. 参加者の条件と人数
+
+  **必要な参加者数**: {{participant_count}}
+
+  **スクリーニング条件**:
+  {{screening_criteria}}
+
+  ## 3. リクルーティング方法
+
+  この調査では、以下の方法で参加者を募集します：
+
+  {{#each recruiting_methods}}
+  - {{this}}
+  {{/each}}
+
+  ## 4. スクリーナー調査内容
+
+  スクリーニングでは以下の点を確認します：
+
+  {{screener_questions}}
+
+  ## 5. インセンティブ設計
+
+  {{incentives}}
+
+  ## 6. リクルーティングタイムライン
+
+  {{recruiting_timeline}}
+
+  ## 7. コミュニケーション計画
+
+  ### 初期連絡
+  - 参加者候補への初期メール/通知テンプレート
+  - スクリーナー調査の案内方法
+
+  ### 選定後の連絡
+  - 選定通知メールテンプレート
+  - 詳細説明と同意取得プロセス
+  - 日程調整方法
+
+  ### リマインダー
+  - インタビュー前日のリマインダーメールテンプレート
+  - 当日の最終確認連絡
+
+  ### フォローアップ
+  - お礼メールテンプレート
+  - インセンティブ提供方法
+  - 追加調査の可能性についての案内
+
+  ## 8. 同意と倫理的考慮
+
+  1. **参加同意書**の準備
+  2. 個人情報の**取り扱いポリシー**
+  3. データの保存と使用に関する規定
+  4. 参加者が途中で辞退する権利の保証
+
+  ## 9. リスク対策
+
+  1. **参加者が集まらない場合**の代替リクルーティング戦略
+  2. **参加者のドロップアウト**に備えた余剰リクルーティング
+  3. **スケジュール調整の問題**が生じた場合の対応策
+  4. **インタビュー/テスト実施環境**に関するトラブル対応 
+
+# ----------------------------------------------------------
+# 11. Interview Analysis - インタビュー分析（個別）
+# ----------------------------------------------------------
+interview_analysis_questions:
+  - category: "インタビュー分析の基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "インタビュー日時"
+        key: interview_date
+        required: true
+      - question: "参加者ID/名前"
+        key: participant_id
+        required: true
+      - question: "参加者プロフィール概要"
+        key: participant_profile
+        required: true
+      - question: "インタビュー実施方法"
+        key: interview_method
+        options:
+          - "対面（現地訪問）"
+          - "対面（ラボ/会議室）"
+          - "リモート（ビデオ会議）"
+          - "電話"
+        required: true
+      - question: "インタビュー記録（会話ログ）のファイルパス"
+        key: interview_log_path
+        required: true
+      - question: "主要な発見（3-5項目）"
+        key: key_findings
+        required: true
+      - question: "特筆すべき引用（ユーザーの言葉）"
+        key: notable_quotes
+        required: true
+      - question: "検証された仮説"
+        key: validated_hypotheses
+        required: false
+      - question: "否定された仮説"
+        key: invalidated_hypotheses
+        required: false
+      - question: "新たに発見された課題/ニーズ"
+        key: new_issues
+        required: true
+
+interview_analysis_template: |
+  ---
+  doc_type: interview_analysis
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  participant_id: {{participant_id}}
+  ---
+
+  # インタビュー分析：{{participant_id}}
+
+  ## 1. 基本情報
+
+  - **プロジェクト**: {{project_id}}
+  - **インタビュー日時**: {{interview_date}}
+  - **参加者ID**: {{participant_id}}
+  - **実施方法**: {{interview_method}}
+  - **分析者**: [分析者名]
+  - **分析日**: {{today}}
+
+  ## 2. 参加者プロフィール
+
+  {{participant_profile}}
+
+  ## 3. 主要な発見
+
+  {{key_findings}}
+
+  ## 4. 特筆すべき引用
+
+  {{notable_quotes}}
+
+  ## 5. 仮説検証結果
+
+  ### 検証された仮説
+  {{#if validated_hypotheses}}
+  {{validated_hypotheses}}
+  {{else}}
+  - なし
+  {{/if}}
+
+  ### 否定された仮説
+  {{#if invalidated_hypotheses}}
+  {{invalidated_hypotheses}}
+  {{else}}
+  - なし
+  {{/if}}
+
+  ## 6. 新たに発見された課題/ニーズ
+
+  {{new_issues}}
+
+  ## 7. インタビュー内容の要約
+
+  *注: 以下はインタビュー会話ログ（{{interview_log_path}}）から抽出した主要な会話の要約です*
+
+  ### テーマA: [テーマ名]
+  - 質問: [質問内容]
+  - 回答要約: [回答の要約]
+  - 洞察: [得られた洞察]
+
+  ### テーマB: [テーマ名]
+  - 質問: [質問内容]
+  - 回答要約: [回答の要約]
+  - 洞察: [得られた洞察]
+
+  ### テーマC: [テーマ名]
+  - 質問: [質問内容]
+  - 回答要約: [回答の要約]
+  - 洞察: [得られた洞察]
+
+  ## 8. 次のステップと推奨アクション
+
+  1. [具体的なアクション項目]
+  2. [具体的なアクション項目]
+  3. [具体的なアクション項目]
+
+  ## 9. 添付資料
+
+  - インタビュー会話ログ: [{{interview_log_path}}]({{interview_log_path}})
+  - 関連するスクリーンショット/写真: [ファイルパス]
+
+# ----------------------------------------------------------
+# 12. Research Summary - リサーチサマリー（全体分析）
+# ----------------------------------------------------------
+research_summary_questions:
+  - category: "リサーチサマリーの基本情報"
+    items:
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+      - question: "調査期間"
+        key: research_period
+        required: true
+      - question: "調査目的（リサーチクエスチョン）"
+        key: research_questions
+        required: true
+      - question: "調査方法"
+        key: research_methods
+        required: true
+      - question: "参加者総数"
+        key: total_participants
+        required: true
+      - question: "参加者セグメント（属性グループ）"
+        key: participant_segments
+        required: true
+      - question: "分析したインタビュー/テストの一覧"
+        key: analyzed_interviews
+        required: true
+      - question: "主要な発見（全体総括）"
+        key: key_findings
+        required: true
+      - question: "パターンと傾向"
+        key: patterns_trends
+        required: true
+      - question: "ペルソナへの影響"
+        key: persona_implications
+        required: false
+      - question: "製品/サービスへの推奨事項"
+        key: recommendations
+        required: true
+      - question: "次のリサーチへの提案"
+        key: next_research
+        required: false
+
+research_summary_template: |
+  ---
+  doc_type: research_summary
+  project_id: {{project_id}}
+  created_at: {{today}}
+  updated_at: {{today}}
+  version: v1.0
+  ---
+
+  # UXリサーチサマリー：{{project_id}}
+
+  ## 1. 調査概要
+
+  - **プロジェクト**: {{project_id}}
+  - **調査期間**: {{research_period}}
+  - **分析実施日**: {{today}}
+  - **分析者**: [分析者名]
+
+  ## 2. 調査目的
+
+  本調査では、以下のリサーチクエスチョンに答えることを目指しました：
+
+  {{research_questions}}
+
+  ## 3. 調査方法
+
+  {{research_methods}}
+
+  ## 4. 参加者概要
+
+  - **総参加者数**: {{total_participants}}
+  - **参加者セグメント**:
+  
+  {{participant_segments}}
+
+  ## 5. 分析対象
+
+  本サマリーでは、以下のインタビュー/テスト結果を分析しました：
+
+  {{analyzed_interviews}}
+
+  ## 6. 主要な発見
+
+  {{key_findings}}
+
+  ## 7. パターンと傾向
+
+  データ全体から以下のパターンと傾向が観察されました：
+
+  {{patterns_trends}}
+
+  ## 8. ペルソナへの影響
+
+  {{#if persona_implications}}
+  {{persona_implications}}
+  {{else}}
+  現在のペルソナに対して、今回の調査結果から以下の影響・更新が示唆されます：
+
+  - [ペルソナへの影響1]
+  - [ペルソナへの影響2]
+  - [ペルソナへの影響3]
+  {{/if}}
+
+  ## 9. 製品/サービスへの推奨事項
+
+  {{recommendations}}
+
+  ## 10. 今後の調査への提案
+
+  {{#if next_research}}
+  {{next_research}}
+  {{else}}
+  本調査の結果に基づき、今後以下の調査を行うことを提案します：
+
+  1. [次の調査提案1]
+  2. [次の調査提案2]
+  3. [次の調査提案3]
+  {{/if}}
+
+  ## 11. 付録：主要参加者の声（抜粋）
+
+  ### 肯定的な意見・ニーズ
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID
+
+  ### 課題・懸念
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID
+
+  ### 提案・アイデア
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID
+  - 「[具体的な引用]」—参加者ID 
