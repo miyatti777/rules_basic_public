@@ -14,8 +14,8 @@ path_reference: "pmbok_paths.mdc"
 patterns:
   wbs_glob:          "{{dirs.stock}}/projects/*/documents/3_planning/wbs.md"
   backlog_glob:      "{{dirs.stock}}/projects/*/documents/3_planning/backlog/**/*.yaml"
-  daily_template:    "{{dirs.flow}}/templates/daily_tasks_template.md"
-  weekly_template:   "{{dirs.flow}}/templates/weekly_review_template.md"
+  daily_template:    "{{rules_basic_templates}}/daily_tasks_template.md"
+  weekly_template:   "{{rules_basic_templates}}/weekly_review_template.md"
   daily_md:          "{{dirs.flow}}/{{today}}/daily_tasks.md"
   weekly_md:         "{{dirs.flow}}/{{iso_week_end}}/weekly_review.md"
 

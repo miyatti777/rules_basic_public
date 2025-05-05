@@ -21,7 +21,7 @@ root: "/Users/daisukemiyata/{{PROJECT_ROOT}}"
 dirs:
   # ─ Flow（WIP／ドラフト／議事録など）
   flow:           "{{root}}/Flow"
-  flow_templates: "{{dirs.flow}}/templates"
+  flow_templates: "{{rules_basic_templates}}"
 
   # ─ Stock（確定版ドキュメント）
   stock:          "{{root}}/Stock"
@@ -36,6 +36,7 @@ dirs:
   # ─ ルールファイル
   rules:          "{{root}}/.cursor/rules"
   rules_basic:    "{{dirs.rules}}/basic"
+  rules_basic_templates: "{{dirs.rules}}/basic/templates"
   # - 個別ルールファイル（必要なだけ追加）
   rules_real_estate: "{{dirs.rules}}/real_estate"
 

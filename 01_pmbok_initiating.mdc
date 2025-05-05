@@ -12,6 +12,35 @@ alwaysApply: false
 # ----------------------------------------------------------
 path_reference: "pmbok_paths.mdc"
 
+# ---------- プロジェクト名から初期化時のプログラム名質問 ----------
+project_program_questions:
+  - category: "プログラム情報"
+    items:
+      - question: "このプロジェクトが属するプログラム（カテゴリ）名を入力してください。例: 夕食準備、朝食準備、Web開発など"
+        key: "program_id"
+        required: true
+
+# ---------- プロジェクト初期化 ----------
+project_init_questions:
+  - category: "プロジェクト基本情報"
+    items:
+      - question: "プログラム名（カテゴリ）を入力してください。例: 夕食準備、朝食準備、Web開発など"
+        key: "program_id"
+        required: true
+      - question: "プロジェクト名を入力してください。例: カレー作り、パン焼き、ポートフォリオサイトなど"
+        key: "project_id"
+        required: true
+      - question: "このプロジェクトの目的を簡潔に教えてください"
+        key: "project_purpose"
+        required: true
+      - question: "開始予定日（YYYY-MM-DD）"
+        key: "start_date"
+        default: "{{today}}"
+        required: false
+      - question: "終了予定日（YYYY-MM-DD）"
+        key: "end_date"
+        required: false
+
 # ---------- プロジェクト憲章 ----------
 charter_questions:
   - category: "基本情報"

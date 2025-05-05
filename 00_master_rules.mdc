@@ -23,39 +23,163 @@ path_reference: "basic/pmbok_paths.mdc"
 
 master_triggers:
 
-  #--------------------------------------------
-  # 0. 汎用ドキュメント生成（Flow素材自動集約）
-  #--------------------------------------------
-  - trigger: "(プロジェクト憲章|ステークホルダー分析|WBS作成|リスク計画)"
+
+
+  #-----
+  # プロジェクト初期化フェーズ
+  #-----
+  - trigger: "(プロジェクト初期化|プロジェクト開始|プロジェクト立ち上げ)"
     priority: high
-    mode: "exclusive"
     steps:
-      - name: collect_flow_materials
-        action: search_flow_files
-        query:
-          doc_targets: "{{matched_trigger}}"
-          importance_gte: 3
-          lookback_days: 30
-        store_as: draft_pool
-      - name: auto_prefill
-        action: prefill_question_answers
-        target_questions: "pmbok_*.mdc => *_questions"
-        source: "{{draft_pool}}"
-      - name: ask_missing
-        action: ask_unfilled_questions
-        message: "議事録などから拾えなかった項目だけ回答お願いします。"
-      - name: confirm
-        action: confirm
-        message: "集約データ＋追加回答で {{matched_trigger}} のドラフトを作ります。よろしいですか？"
-      - name: create_draft
-        action: create_markdown_file
-        path: "{{patterns.flow_date}}/draft_{{matched_trigger}}.md"
-        template_reference: "pmbok_*.mdc => *_template"
-      - name: notify
-        action: notify
+      - name: "start_info_collection"
+        action: "call basic/01_pmbok_initiating.mdc => project_init_questions"
+        message: "プロジェクト初期化に必要な情報を収集します。以下の質問に回答してください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_project_creation"
+        action: "confirm"
+        message: "以下の内容でプロジェクトを初期化します：\n\nプログラム: {{program_id}}\nプロジェクト: {{project_id}}\n\nよろしいですか？"
+      - name: "create_program_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}"
+        message: "プログラムディレクトリを作成します..."
+      - name: "create_project_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.project_dir}}"
+        message: "プロジェクトディレクトリを作成します..."
+      - name: "create_document_dirs"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.doc_initiating}} {{patterns.doc_discovery}} {{patterns.doc_research}} {{patterns.doc_planning}} {{patterns.doc_executing}} {{patterns.doc_monitoring}} {{patterns.doc_closing}}"
+        message: "プロジェクト文書ディレクトリを作成します..."
+      - name: "create_readme"
+        action: "create_markdown_file"
+        path: "{{patterns.project_dir}}/README.md"
+        content: |
+          # {{project_id}}
+
+          ## 概要
+          {{project_purpose}}
+
+          ## 開始日
+          {{start_date}}
+
+          ## 終了予定日
+          {{end_date}}
+
+          ## 主要ステークホルダー
+          {{#stakeholders}}
+          - {{.}}
+          {{/stakeholders}}
+          {{^stakeholders}}
+          - TBD
+          {{/stakeholders}}
+        message: "プロジェクトREADMEを作成します..."
+      - name: "check_structure"
+        action: "execute_shell"
+        command: "find {{patterns.project_dir}} -type d | sort"
+        message: "プロジェクト構造を確認します..."
+      - name: "notify_completion"
+        action: "notify"
         message: |
-          🎉 Flow にドラフトを生成しました。足りないところがあれば追記して
-          「確定反映して」と入力してください。
+          ✅ プロジェクト「{{project_id}}」の初期化が完了しました。
+          
+          次のステップとして以下をお勧めします：
+          
+          1. 「プロジェクト憲章」と入力して、プロジェクト憲章を作成する
+          2. 「ステークホルダー分析」と入力して、ステークホルダーを特定する
+          3. 「WBS作成」と入力して、作業分解構造を作成する
+          
+          作業を開始するには「作業開始」と入力すると、今日の日付のフォルダと日次タスクファイルが作成されます。
+
+  #-----
+  # プロジェクト名から初期化（プログラム名質問）
+  #-----
+  - trigger: "([^プログラム初期化|^プロジェクト初期化][^\\s]+)(始めたい|はじめたい|開始したい|作りたい)"
+    priority: high
+    steps:
+      - name: "extract_project_name"
+        action: "extract"
+        pattern: "([^プログラム初期化|^プロジェクト初期化][^\\s]+)(始めたい|はじめたい|開始したい|作りたい)"
+        group: 1
+        store_as: "extracted_project"
+      - name: "ask_program_name"
+        action: "call basic/01_pmbok_initiating.mdc => project_program_questions"
+        message: "「{{extracted_project}}」のプログラム名（カテゴリ）を教えてください。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な回答が揃うまで先に進みません。"
+      - name: "confirm_project_creation"
+        action: "confirm"
+        message: "以下の内容でプロジェクトを初期化します：\n\nプログラム: {{program_id}}\nプロジェクト: {{extracted_project}}\n\nよろしいですか？"
+      - name: "create_program_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}"
+        message: "プログラムディレクトリを作成します..."
+      - name: "create_project_dir"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}/projects/{{extracted_project}}"
+        message: "プロジェクトディレクトリを作成します..."
+      - name: "create_document_dirs"
+        action: "execute_shell"
+        command: "mkdir -p {{dirs.programs}}/{{program_id}}/projects/{{extracted_project}}/documents/{1_initiating,2_discovery,2_research,3_planning,4_executing,5_monitoring,6_closing}"
+        message: "プロジェクト文書ディレクトリを作成します..."
+      - name: "create_flow_folder"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.flow_date}}/{{program_id}}_{{extracted_project}}"
+        message: "Flowフォルダを作成しています..."
+      - name: "create_daily_tasks_file"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_date}}/{{program_id}}_{{extracted_project}}/daily_tasks.md"
+        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
+        message: "日次タスクファイルを作成します。"
+      - name: "notify_next_steps"
+        action: "notify"
+        message: |
+          ✅ プロジェクト初期化が完了しました！
+          
+          プログラム: {{program_id}}
+          プロジェクト: {{extracted_project}}
+          
+          次のステップをおすすめします：
+          1.「プロジェクト憲章」と入力してプロジェクト憲章を作成する
+          2.「ステークホルダー分析」と入力して関係者を整理する
+          3.「WBS作成」と入力して作業分解構造を作成する
+          
+          また、「日次タスク作成」と入力すると今日のタスクリストが作成されます。
+
+  #-----
+  # 作業開始フェーズ（Flow日付フォルダ作成）
+  #-----
+  - trigger: "(作業開始|work start|今日の作業開始)"
+    priority: high
+    steps:
+      - name: "create_todays_flow_folder"
+        action: "execute_shell"
+        command: "mkdir -p {{patterns.flow_date}}"
+        message: "今日の日付でFlowフォルダを作成します。"
+      - name: "create_daily_tasks_file"
+        action: "create_markdown_file"
+        path: "{{patterns.flow_date}}/daily_tasks.md"
+        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
+        message: "今日の日次タスクファイルを作成します。"
+      - name: "check_folder_structure"
+        action: "execute_shell"
+        command: "ls -la {{patterns.flow_date}}"
+        message: "作成したフォルダの構造を確認します。"
+      - name: "notify_creation"
+        action: "notify"
+        message: |
+          ✅ 作業開始の準備が完了しました。
+          今日の作業フォルダが作成されました：{{patterns.flow_date}}
+          日次タスクファイルも用意しました：{{patterns.flow_date}}/daily_tasks.md
+          
+          次のステップとして以下のコマンドが利用可能です：
+          -「議事録」：会議議事録のテンプレート作成
+          -「プロジェクト憲章」「ステークホルダー分析」：文書作成
+          -「WBS作成」：作業分解構造の作成
+
+
 
   #--------------------------------------------
   # 1. プロジェクト憲章作成
@@ -65,7 +189,7 @@ master_triggers:
     mode: "exclusive"
     steps:
       - name: "start_info_collection"
-        action: "call basic/pmbok_initiating.mdc => charter_questions"
+        action: "call basic/01_pmbok_initiating.mdc => charter_questions"
         message: "【プロジェクト憲章】の作成に必要な情報を収集します。以下の質問に回答してください。すべて回答が終わるまでファイルは作成しません。"
       - name: "wait_user_responses"
         action: "wait_for_all_answers"  # 全質問が回答される or TBD指定で完了
@@ -76,7 +200,7 @@ master_triggers:
       - name: "create_draft"
         action: "create_markdown_file"
         path: "{{patterns.draft_charter}}"
-        template_reference: "basic/pmbok_initiating.mdc => charter_template"
+        template_reference: "basic/01_pmbok_initiating.mdc => charter_template"
         message: "ドラフトを作成しました: {{patterns.draft_charter}}\n必要に応じて修正・追記した後、Stockディレクトリへ確定反映できます。"
 
   #--------------------------------------------
