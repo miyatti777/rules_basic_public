@@ -188,9 +188,22 @@ master_triggers:
     priority: high
     mode: "exclusive"
     steps:
+      - name: "collect_existing_info"
+        action: "search_flow_files"
+        query:
+          doc_targets: "charter"
+          importance_gte: 3
+          lookback_days: 30
+        store_as: "charter_materials"
+        message: "プロジェクト憲章関連の既存情報を探しています..."
+      - name: "auto_prefill"
+        action: "prefill_question_answers"
+        target_questions: "basic/01_pmbok_initiating.mdc => charter_questions"
+        source: "{{charter_materials}}"
+        message: "見つかった情報を元に回答を自動入力しています..."
       - name: "start_info_collection"
         action: "call basic/01_pmbok_initiating.mdc => charter_questions"
-        message: "【プロジェクト憲章】の作成に必要な情報を収集します。以下の質問に回答してください。すべて回答が終わるまでファイルは作成しません。"
+        message: "【プロジェクト憲章】の作成に必要な情報を収集します。以下の質問に回答してください。\n※既存の情報から推測した回答をあらかじめ入力してあります。必要に応じて修正してください。特に決まっていなければ、おまかせといっていただければ、推測で内容を作成します"
       - name: "wait_user_responses"
         action: "wait_for_all_answers"  # 全質問が回答される or TBD指定で完了
         message: "必要な回答が揃うまで他のファイル作成を行いません。"
@@ -665,6 +678,21 @@ steps:
       path: "{{patterns.flow_date}}/draft_solution_definition.md"
       template_reference: "02_pmbok_discovery.mdc => solution_definition_template"
 
+
+#--------------------------------------------
+# アイディア発散 / Flow Assist フェーズ
+#--------------------------------------------
+- trigger: "(アイディア発散)"
+  priority: high
+  steps:
+    - call basic/08_pmbok_flow_assist.mdc => flow_assist_questions
+    - wait_for_all_answers
+    - confirm: "Flow Assist アイディア発散をお手伝いします。よろしいですか？"
+    - create_markdown_file:
+        path: "{{patterns.flow_date}}/draft_flow_assist.md"
+        template_reference: "08_pmbok_flow_assist.mdc => flow_assist_template"
+
+
 #--------------------------------------------
 # Discovery: Validation Plan
 #--------------------------------------------
@@ -765,19 +793,6 @@ steps:
   - create_markdown_file:
       path: "{{patterns.draft_hypothesis}}"
       template_reference: "02_pmbok_discovery.mdc => hypothesis_template"
-
-#--------------------------------------------
-# Flow Assist フェーズ
-#--------------------------------------------
-- trigger: "(アイディア発散)"
-  priority: high
-  steps:
-    - call basic/03_pmbok_flow_assist.mdc => flow_assist_questions
-    - wait_for_all_answers
-    - confirm: "Flow Assist ドラフトを作成します。よろしいですか？"
-    - create_markdown_file:
-        path: "{{patterns.flow_date}}/draft_flow_assist.md"
-        template_reference: "03_pmbok_flow_assist.mdc => flow_assist_template"
 
 #--------------------------------------------
 # 補足: 全体設定や共通メタ情報など
