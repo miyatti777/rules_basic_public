@@ -1,0 +1,227 @@
+/* modern-business.css - モダンなビジネス向けMarpテーマ */
+
+/* ベーススタイル */
+section {
+  width: 1280px;
+  height: 720px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  padding: 40px;
+  background-color: #fafafa;
+  color: #333333;
+  background-image: linear-gradient(to bottom right, rgba(0,120,212,0.05), rgba(0,120,212,0));
+}
+
+/* ヘッダーとフッター */
+header {
+  position: absolute;
+  top: 20px;
+  left: 40px;
+  right: 40px;
+  color: #0078d4;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+footer {
+  position: absolute;
+  bottom: 20px;
+  left: 40px;
+  right: 40px;
+  color: #666666;
+  font-size: 14px;
+}
+
+/* タイトルスライド */
+section.title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-image: linear-gradient(to bottom right, rgba(0,120,212,0.1), rgba(0,120,212,0));
+}
+
+section.title h1 {
+  font-size: 60px;
+  color: #0078d4;
+  margin-bottom: 20px;
+  font-weight: 300;
+}
+
+section.title h2 {
+  font-size: 36px;
+  color: #0078d4;
+  margin-top: 0;
+  font-weight: 300;
+}
+
+/* 見出し */
+h1 {
+  color: #0078d4;
+  font-size: 42px;
+  font-weight: 400;
+  margin-bottom: 30px;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  color: #0078d4;
+  font-size: 36px;
+  font-weight: 400;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  letter-spacing: -0.3px;
+}
+
+h3 {
+  color: #2b88d8;
+  font-size: 28px;
+  font-weight: 400;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+
+/* リスト */
+ul, ol {
+  padding-left: 30px;
+}
+
+li {
+  margin-bottom: 15px;
+  font-size: 24px;
+  line-height: 1.5;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 22px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+th {
+  background-color: #0078d4;
+  color: white;
+  padding: 15px;
+  text-align: left;
+  border: none;
+}
+
+td {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tr:nth-child(even) {
+  background-color: #f5f9fd;
+}
+
+tr:hover {
+  background-color: #edf5fc;
+}
+
+/* 画像 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* コード */
+code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  background-color: #f0f0f0;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 90%;
+  color: #0078d4;
+}
+
+pre {
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 5px;
+  overflow: auto;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 18px;
+  margin: 20px 0;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+}
+
+/* 引用 */
+blockquote {
+  border-left: 4px solid #0078d4;
+  padding: 10px 20px;
+  margin-left: 0;
+  color: #666666;
+  font-style: italic;
+  background-color: #f8f8f8;
+  border-radius: 0 4px 4px 0;
+}
+
+/* レイアウト用クラス */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.columns-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 30px;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+/* カード */
+.card {
+  background-color: white;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* 強調表示 */
+.highlight {
+  color: #d83b01;
+  font-weight: 600;
+}
+
+.accent {
+  color: #0078d4;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 90%;
+  color: #666666;
+  font-style: italic;
+}
+
+/* アイコン用スタイル */
+.icon {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* ページ番号 */
+section::after {
+  content: attr(data-marpit-pagination) '/' attr(data-marpit-pagination-total);
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  font-size: 16px;
+  color: #666666;
+} 

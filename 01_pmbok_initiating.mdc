@@ -1,5 +1,5 @@
 ---
-description: 「立ち上げフェーズ（プロジェクト憲章・ステークホルダー分析）の質問リストとテンプレートを提供し、マスターから呼び出された際に自動で回答を埋め込む」	
+description: 「立ち上げフェーズ（プロジェクト憲章・ステークホルダー分析）の質問リストとテンプレートを提供し、マスターから呼び出された際に自動で回答を埋め込む」
 globs: 
 alwaysApply: false
 ---
@@ -40,6 +40,203 @@ project_init_questions:
       - question: "終了予定日（YYYY-MM-DD）"
         key: "end_date"
         required: false
+
+# ---------- プロダクト（プログラム）定義 ----------
+program_definition_questions:
+  - category: "0. プロダクト（プログラム）定義要否確認"
+    items:
+      - question: "プロダクト（プログラム）定義書を作成しますか？（いいえの場合はスキップします）"
+        key: "create_program_definition"
+        options: ["はい", "いいえ"]
+        default: "はい"
+        required: true
+
+  - category: "基本情報"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "プロダクト（プログラム）名は？"
+        key: "program_name"
+        required: true
+        suggest_from_context: true
+      - question: "関連するテーマ/戦略は？"
+        key: "related_theme"
+        required: true
+        suggest_from_context: true
+      - question: "作成日は？"
+        key: "creation_date"
+        default: "{{today}}"
+        required: true
+
+  - category: "1. Mission/Vision/Value"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "カンパニーミッション（使命・存在意義）：何のために存在する？"
+        key: "mission"
+        description: "このカンパニーが何者か、何を成し遂げるのか、何のために存在するのかを表すもの"
+        required: true
+        suggest_from_context: true
+      - question: "ビジョン（目指す姿・目標）：どんな状態を目指す？"
+        key: "vision"
+        description: "このカンパニーを続けていくことで実現を目指す、組織や社会の姿"
+        required: true
+        suggest_from_context: true
+      - question: "バリュー（信念・価値観）：何を大切にする？"
+        key: "values"
+        description: "使命・存在意義を実現していくにあたって、大切なこと、判断や行動の基礎となるもの"
+        required: false
+        suggest_from_context: true
+
+  - category: "2. プロダクトビジョン"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "数年後の理想的な姿とそれによる世界の変化を描いてください"
+        key: "product_vision"
+        description: "感情的で刺激的であり、このビジョンを本当にしたいと思うことでモチベートされるものを描写"
+        required: true
+        suggest_from_context: true
+
+  - category: "3. プロダクトポジションステートメント"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "いつ：どのような現在（時代）において"
+        key: "position_when"
+        required: false
+        suggest_from_context: true
+      - question: "なにを：世界（日本）で唯一の何か"
+        key: "position_what"
+        required: true
+        suggest_from_context: true
+      - question: "どのように：特徴的機能"
+        key: "position_how"
+        required: true
+        suggest_from_context: true
+      - question: "どこの：対象の地理的範囲"
+        key: "position_where"
+        required: false
+        suggest_from_context: true
+      - question: "なぜ：解決するニーズ（問題）"
+        key: "position_why"
+        required: true
+        suggest_from_context: true
+      - question: "だれに：対象ユーザー"
+        key: "position_who"
+        required: true
+        suggest_from_context: true
+
+  - category: "4. 目標とOKR"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "Objective（単一の定性的ゴール）"
+        key: "objective"
+        description: "あなたのチームだけでなく、プロダクト関係者全員の認識をあわせて一つの方向に向かうための目標"
+        required: true
+        suggest_from_context: true
+      - question: "Key Result 1（主要成果指標1）"
+        key: "key_result_1"
+        description: "測定可能な成果指標"
+        required: true
+        suggest_from_context: true
+      - question: "Key Result 2（主要成果指標2）"
+        key: "key_result_2"
+        description: "測定可能な成果指標"
+        required: false
+        suggest_from_context: true
+      - question: "Key Result 3（主要成果指標3）"
+        key: "key_result_3"
+        description: "測定可能な成果指標"
+        required: false
+        suggest_from_context: true
+
+  - category: "7. 体制"
+    condition: "create_program_definition === 'はい'"
+    items:
+      - question: "プロダクト（プログラム）オーナー"
+        key: "program_owner"
+        required: true
+        suggest_from_context: true
+      - question: "意思決定範囲"
+        key: "product_owner"
+        required: true
+        suggest_from_context: true
+      - question: "PMとやること"
+        key: "project_manager"
+        required: true
+        suggest_from_context: true
+      - question: "ステークホルダーと役割"
+        key: "stakeholders"
+        required: true
+        suggest_from_context: true
+
+
+program_definition_template: |
+ # {{program_name}} プロダクト（プログラム）定義書
+
+> 作成日: {{creation_date}}
+> 作成者: 
+
+## 1. Company Mission/Vision/Value
+
+### ミッション（使命・存在意義）
+{{mission}}
+
+### ビジョン（目指す姿・目標）
+{{vision}}
+
+### バリュー（信念・価値観）
+{{values}}
+
+## 2. プロダクトビジョン
+
+{{product_vision}}
+
+## 3. プロダクトポジションステートメント
+
+いつ： {{position_when}}という現在（時代）において,
+なにを: 私たちのプロダクトは世界（日本）で唯一の {{position_what}} である。
+どのように: そのプロダクトの特徴的機能は {{position_how}} であり
+どこの: {{position_where}} に住んでいる（からやってくる）
+なぜ: {{position_why}} というニーズ（問題）を持った
+だれに: {{position_who}} のために提供する。
+
+## 4. 目標とOKR
+
+### Objective（目標）
+{{objective}}
+
+### Key Results（主要成果指標）
+| # | 成果指標 | 目標値 | 現状値 |
+| --- | --- | --- | --- |
+| KR1 | {{key_result_1}} | | |
+| KR2 | {{key_result_2}} | | |
+| KR3 | {{key_result_3}} | | |
+
+## 5. 体制
+
+**プロダクト（プログラム）オーナー：{{program_owner}}**
+- プログラムの計画、進行、課題解消の推進
+
+**PO**
+- {{po_name}}: {{po_responsibility}}
+  - {{po_detail_1}}
+  - {{po_detail_2}}
+  - {{po_detail_3}}
+
+**PM**
+- {{pm_name}}: {{pm_responsibility}}
+  - {{pm_detail_1}}
+  - {{pm_detail_2}}
+
+**ステークホルダー**
+- {{stakeholder_name}}
+  - {{stakeholder_responsibility}}
+
+**運用体制**
+- {{operation_owner}} → {{operation_team}}
+
+
+## 参考
+
+- プロダクト（プログラム）関連資料リンク
 
 # ---------- プロジェクト憲章 ----------
 charter_questions:

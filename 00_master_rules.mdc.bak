@@ -862,14 +862,9 @@ steps:
 - trigger: "(プレゼン資料生成)"
   priority: high
   steps:
-    - name: "check_available_themes"
-      action: "execute_shell"
-      command: "ls -la {{dirs.rules_basic_templates}}/marp-themes/*.css | sed 's/.*\\/\\([^\\/]*\\)\\.css$/\\1/'"
-      store_as: "available_themes"
-      message: "利用可能なMarpテーマを確認しています..."
     - name: "start_info_collection"
       action: "call basic/02_pmbok_presentation.mdc => presentation_questions"
-      message: "【プレゼン資料生成】に必要な情報を収集します。以下の質問に回答してください。\n\n利用可能なテーマ: {{available_themes.stdout}}"
+      message: "【プレゼン資料生成】に必要な情報を収集します。以下の質問に回答してください。"
     - name: "wait_user_responses"
       action: "wait_for_all_answers"
       message: "必要な回答が揃うまで先に進みません。"
@@ -880,59 +875,37 @@ steps:
       action: "edit_file"
       path: "{{patterns.draft_presentation}}"
       template_reference: "basic/02_pmbok_presentation.mdc => presentation_template"
-      message: "プレゼン資料のドラフトを作成しました: {{patterns.draft_presentation}}"
     - name: "create_assets_dir"
       action: "execute_shell"
       command: "mkdir -p {{patterns.flow_date}}/assets"
       message: "プレゼン資料用のassetsディレクトリを作成します..."
-    - name: "create_diagram"
-      action: "create_file"
-      path: "{{patterns.flow_date}}/assets/diagram.drawio"
-      content: |
-        <mxfile host="app.diagrams.net" modified="2025-05-03T12:00:00.000Z" agent="5.0 (Macintosh)" version="14.6.13" etag="example_etag">
-          <diagram id="sample_diagram" name="ページ1">
-            <mxGraphModel dx="1298" dy="866" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-              <root>
-                <mxCell id="0"/>
-                <mxCell id="1" parent="0"/>
-                <mxCell id="2" value="サンプル図表&#10;(このファイルを開いて編集してください)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-                  <mxGeometry x="320" y="230" width="220" height="90" as="geometry"/>
-                </mxCell>
-              </root>
-            </mxGraphModel>
-          </diagram>
-        </mxfile>
-      message: "プレゼン資料用のサンプル図表ファイルを作成しました: {{patterns.flow_date}}/assets/diagram.drawio"
+    - name: "create_drawio"
+      action: "notify"
+      message: "プレゼン資料の中で必要となる図表用のdrawioファイルを作成します。"
     - name: "notify_completion"
       action: "notify"
       message: |
-        プレゼン資料の作成が完了しました。
+        プレゼン資料のドラフトを作成しました：
+        {{patterns.draft_presentation}}
         
-        作成されたファイル:
-        - プレゼン資料: {{patterns.draft_presentation}}
-        - 図表サンプル: {{patterns.flow_date}}/assets/diagram.drawio
+        次のステップ:
         
-        {{#if theme_folder_path}}
-        ▼ テーマフォルダの設定
-        指定されたテーマフォルダパス: {{theme_folder_path}}
-        draw.ioを開いて [ファイル] > [プロパティ] からこのパスを設定してください。
-        {{else}}
-        ▼ テーマの設定（任意）
-        特定のテーマ（スタイル）を使用したい場合は、draw.ioを開いて [ファイル] > [プロパティ] からテーマフォルダパスを指定できます。
-        推奨テーマパス: {{dirs.rules_basic_templates}}/marp-themes
-        {{/if}}
+        1. **drawioファイルのPNG変換**
+           - 作成されたdrawioファイルを開き、File > Export as > PNG を選択
+           - 図表の大きさに応じた解像度で保存（推奨: 横幅1000px以上）
+           - プレゼン資料と同じassetsフォルダに保存してください
+           - 例: assets/課題分析イメージ.png, assets/提案内容の概要.png など
         
-        ▼ 次のステップ
-        1. **図表の編集・追加**
-           - 作成されたdrawioファイルを編集またはCursorに「Drawioで〇〇図作って」と依頼
-           - 完成した図表をPNG形式でエクスポート（推奨: 横幅1000px以上）
-        
-        2. **プレゼン内の図表プレースホルダを置換**
-           - プレゼン内の「!@図表名」を実際の画像参照に変更:
+        2. **プレゼンファイルの編集**
+           - プレゼン内の「!@図表名」を適切な画像参照に変更:
            - 変更前: !@課題分析イメージ width:450px
            - 変更後: ![課題分析イメージ width:450px](mdc:assets/課題分析イメージ.png)
         
-        3. 修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+        3. **Marpでのプレビュー**
+           - VSCode + Marp拡張機能または Marp CLI でプレビュー確認
+           - 文字サイズ、レイアウト、図表サイズなどを調整
+        
+        4. 修正後「確定反映して」と入力するとStockディレクトリに保存されます。
 
 #============================
 # フェーズ3: 計画（Planning
@@ -1034,7 +1007,7 @@ steps:
     steps:
       - name: "run_yaml_to_stories_script"
         action: "execute_shell"
-        command: "python {{dirs.scripts}}/yaml_to_stories.py {{patterns.backlog_yaml}} {{patterns.stories_dir}}"
+        command: "python /Users/daisukemiyata/{{root}}/scripts/yaml_to_stories.py {{patterns.backlog_yaml}} {{patterns.stories_dir}}"
         message: "backlog.yamlからユーザーストーリーファイルを生成します。"
       - name: "notify_generation_complete"
         action: "notify"

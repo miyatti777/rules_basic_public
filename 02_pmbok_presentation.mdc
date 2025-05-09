@@ -1,0 +1,393 @@
+---
+description: プレゼンテーション資料作成に関するルールとテンプレート
+globs: 
+alwaysApply: false
+---
+# ==========================================================
+# 02_pmbok_presentation.mdc  ―  "プレゼンテーション関連ルール"
+# ==========================================================
+# ・プレゼンテーション資料作成に関するルールとテンプレートを提供
+# ・最終更新: 2023-12-08
+
+# ----------------------------------------------------------
+# 1. Presentation - プレゼン資料/プレゼンテーション資料
+# ----------------------------------------------------------
+presentation_questions:
+  - category: "プレゼンテーション基本情報"
+    items:
+      - question: "プレゼンテーションのスキップ確認"
+        key: skip_presentation
+        options:
+          - "はい（スキップする）"
+          - "いいえ（作成する）"
+        required: true
+        description: "プレゼンテーション作成をスキップするか確認します。「はい」を選択すると作成プロセスをスキップします。"
+      - question: "プロジェクトID"
+        key: project_id
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "プレゼンテーションのタイトル"
+        key: presentation_title
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "プレゼンテーションの目的"
+        key: presentation_purpose
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "ターゲットオーディエンス"
+        key: target_audience
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "参考にする資料（どの資料をもとに作成するか）"
+        key: reference_materials
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+        description: "これまでの成果物や外部資料など、プレゼン作成に参考にしたい資料を指定してください"
+      - question: "グラフ/図表の要件"
+        key: diagram_requirements
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+        description: "drawioで作成する図表について、必要なものと概要を記述してください"
+      - question: "プレゼンテーションの長さ（スライド数目安）"
+        key: presentation_length
+        options:
+          - "短め（5-10枚）"
+          - "標準（10-15枚）"
+          - "詳細（15-20枚）"
+          - "長め（20-30枚）"
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "プレゼンテーションのスタイル"
+        key: presentation_style
+        options:
+          - "シンプルで簡潔"
+          - "視覚的でグラフィカル"
+          - "詳細で分析的"
+          - "ストーリーテリング重視"
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+      - question: "カラーテーマ"
+        key: color_theme
+        options:
+          - "professional（プロフェッショナル）"
+          - "modern-business（モダンビジネス）"
+          - "explaza（ビジネスプレゼン）"
+        required: true
+        condition: "skip_presentation == 'いいえ（作成する）'"
+        description: "利用可能なテーマを選択してください。{{available_themes.stdout}}が使用できます。"
+      - question: "テーマフォルダパス（任意）"
+        key: theme_folder_path
+        required: false
+        condition: "skip_presentation == 'いいえ（作成する）'"
+        description: "Draw.io用のテーマフォルダパスを指定する場合は入力してください（例: /path/to/themes または ../themes）"
+
+presentation_template: |
+  ---
+  marp: true
+  theme: {{#if theme_folder_path}}{{theme_folder_path}}/{{color_theme | replace: "（プロフェッショナル）" | replace: "（モダンビジネス）" | replace: "（ビジネスプレゼン）" | split: "（" | first}}.css{{else}}{{dirs.rules_basic_templates}}/marp-themes/{{color_theme | replace: "（プロフェッショナル）" | replace: "（モダンビジネス）" | replace: "（ビジネスプレゼン）" | split: "（" | first}}.css{{/if}}
+  paginate: true
+  header: "**{{presentation_title}}**"
+  footer: "© {{year}} {{project_id}}"
+  {{#unless color_theme}}
+  style: |
+    section {
+      background-color: #f5f5f5;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+    }
+    h1 {
+      color: #2d5c88;
+      font-size: 40px;
+    }
+    h2 {
+      color: #2d5c88;
+      font-size: 30px;
+    }
+    h3 {
+      color: #3d7eaa;
+      font-size: 20px;
+    }
+    li {
+      font-size: 20px;
+    }
+    .highlight {
+      color: #e63946;
+      font-weight: bold;
+    }
+  {{/unless}}
+
+  <!-- 
+  ===== Marpを利用したスライド作成の基本ルール =====
+  
+  1. タイトルスライド (1枚目):
+     ```
+     <!-- _class: lead -->
+     ![bg](assets/bg_{theme_name}.png)
+     # タイトル
+     ## サブタイトル
+     ```
+     注: leadクラスを使用すると、テーマファイルで定義された背景画像が自動的に適用されます。
+     追加の背景画像が必要な場合は `![bg](mdc:画像パス)` で指定できます。
+
+  2. 2カラムレイアウト:
+     ```
+     <div class="grid">
+     <div>
+     <!-- 左カラムの内容 -->
+     </div>
+     <div>
+     <!-- 右カラムの内容 -->
+     </div>
+     </div>
+     ```
+
+  3. 表の文字サイズ調整:
+     ```
+     <style scoped>
+     table {
+       font-size: 0.78em;
+     }
+     </style>
+
+     | 項目1 | 項目2 | 項目3 |
+     |-------|-------|-------|
+     | 内容1 | 内容2 | 内容3 |
+     ```
+  -->
+
+  <!-- _class: lead -->
+  ![bg](mdc:assets/bg_{{color_theme | replace: "（プロフェッショナル）" | replace: "（モダンビジネス）" | replace: "（ビジネスプレゼン）" | split: "（" | first}}.png)
+  # {{presentation_title}}
+  ## {{presentation_purpose}}
+
+  ---
+
+  <!-- 
+  プレゼンテーションの構成は、参考資料や内容に応じて自由に調整してください。
+  以下は一般的なプレゼンテーション構成の例です。必要に応じて変更・調整してください。
+  -->
+
+  ## 目次
+
+  <!-- ここに目次項目を追加します。参考資料の内容に応じて変更してください -->
+  1. プロジェクト概要
+  2. 背景・課題
+  3. 提案内容
+  4. 主要ポイント
+  5. 分析結果
+  6. 実施計画
+  7. まとめ
+
+  ---
+
+  ## 1. プロジェクト概要
+
+  ### 基本情報
+  - **プロジェクト名**: {{project_id}}
+  - **期間**: <!-- 期間を入力 -->
+  - **目的**: <!-- 目的を入力 -->
+  - **予算規模**: <!-- 予算規模を入力 -->
+
+  ### 目標
+  - <!-- 主要目標1 -->
+  - <!-- 主要目標2 -->
+  - <!-- 主要目標3 -->
+
+  ---
+
+  ## 2. 背景・課題
+
+  <div class="grid">
+  <div>
+
+  ### 現状の課題
+  - <!-- 課題1 -->
+  - <!-- 課題2 -->
+  - <!-- 課題3 -->
+
+  ### 市場状況
+  - <!-- 市場状況1 -->
+  - <!-- 市場状況2 -->
+  - <!-- 市場状況3 -->
+
+  </div>
+  <div class="img-wrapper">
+
+  !@課題分析イメージ width:450px
+
+  </div>
+  </div>
+
+  ---
+
+  ## 3. 提案内容
+
+  <div class="img-wrapper">
+
+  !@提案内容の概要 height:450px
+
+  </div>
+
+  ---
+
+  ## 4. 主要ポイント
+
+  ### ポイント1
+  - <!-- 詳細1 -->
+  - <!-- 詳細2 -->
+  - <!-- 詳細3 -->
+
+  ### ポイント2
+  - <!-- 詳細1 -->
+  - <!-- 詳細2 -->
+  - <!-- 詳細3 -->
+
+  ### ポイント3
+  - <!-- 詳細1 -->
+  - <!-- 詳細2 -->
+  - <!-- 詳細3 -->
+
+  ---
+
+  ## 5. 分析結果
+
+  <div class="grid">
+  <div>
+
+  ### 定量的分析
+  - <!-- 分析結果1 -->
+  - <!-- 分析結果2 -->
+  - <!-- 分析結果3 -->
+
+  ### 定性的分析
+  - <!-- 分析結果1 -->
+  - <!-- 分析結果2 -->
+  - <!-- 分析結果3 -->
+
+  </div>
+  <div class="img-wrapper">
+
+  !@分析結果 width:450px
+
+  </div>
+  </div>
+
+  ---
+
+  ## 6. 実施計画
+
+  ### フェーズ別実施計画
+
+  <div class="grid">
+  <div>
+
+  #### フェーズ1: <!-- フェーズ名 -->
+  - <!-- 主要タスク -->
+  - <!-- 期間 -->
+  - <!-- 担当者/役割 -->
+
+  #### フェーズ2: <!-- フェーズ名 -->
+  - <!-- 主要タスク -->
+  - <!-- 期間 -->
+  - <!-- 担当者/役割 -->
+
+  </div>
+  <div>
+
+  #### フェーズ3: <!-- フェーズ名 -->
+  - <!-- 主要タスク -->
+  - <!-- 期間 -->
+  - <!-- 担当者/役割 -->
+
+  ### スケジュール
+  - **準備期間**: <!-- 期間 -->
+  - **実施期間**: <!-- 期間 -->
+  - **評価期間**: <!-- 期間 -->
+
+  </div>
+  </div>
+
+  ---
+
+  ## 6. 実施計画（タイムライン）
+
+  <div class="img-wrapper" style="margin-top: 20px;">
+  <div style="width: 90%; margin: 0 auto; background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+      <div style="width: 25%; text-align: right; padding-right: 15px; font-weight: bold;"><!-- 期間1 --></div>
+      <div style="width: 75%; background-color: #aed6f1; padding: 10px; border-radius: 5px;"><!-- タスク1 --></div>
+    </div>
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+      <div style="width: 25%; text-align: right; padding-right: 15px; font-weight: bold;"><!-- 期間2 --></div>
+      <div style="width: 75%; background-color: #f9e79f; padding: 10px; border-radius: 5px;"><!-- タスク2 --></div>
+    </div>
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+      <div style="width: 25%; text-align: right; padding-right: 15px; font-weight: bold;"><!-- 期間3 --></div>
+      <div style="width: 75%; background-color: #d4efdf; padding: 10px; border-radius: 5px;"><!-- タスク3 --></div>
+    </div>
+  </div>
+  </div>
+
+  ---
+
+  <!-- _class: lead -->
+  ## 7. まとめ
+
+  ### 主要ポイント
+
+  - **ポイント1**: <!-- 概要 -->
+  - **ポイント2**: <!-- 概要 -->
+  - **ポイント3**: <!-- 概要 -->
+  - **ポイント4**: <!-- 概要 -->
+
+  ---
+
+  ## 7. まとめ（続き）
+
+  ### 次のステップ
+  1. <!-- 次のステップ1 -->
+  2. <!-- 次のステップ2 -->
+  3. <!-- 次のステップ3 -->
+  4. <!-- 次のステップ4 -->
+
+  <div style="margin-top: 40px; text-align: center;">
+    <div style="font-size: 1.5em; margin-bottom: 20px;">ご清聴ありがとうございました</div>
+    <div style="font-style: italic; color: #666;">
+      お問い合わせ・ご質問：<br>
+      <!-- 連絡先名 --> <!-- メールアドレス --><br>
+    </div>
+  </div>
+
+  ---
+
+  ## 参考: テーブルフォーマット例
+
+  <style scoped>
+  table {
+    font-size: 0.78em;
+  }
+  </style>
+
+  ### スコープ済みスタイルによる表の文字サイズ調整
+
+  | 項目      | 説明                                  | 備考                              |
+  |-----------|--------------------------------------|-----------------------------------|
+  | 項目1     | これは説明テキストです                | 必要に応じて備考を追加できます    |
+  | 項目2     | 長い説明テキストの場合も自動的に折り返されます | テーブル内のセルは自動調整されます |
+  | 項目3     | テーブルの文字サイズは0.78emに設定されています | スコープ付きスタイルによる設定です |
+
+  ---
+
+  ## 参考: テーブルフォーマット例（その2）
+
+  <div class="table-small">
+
+  ### クラスによる表の文字サイズ調整
+
+  | プロジェクト | 開始日     | 終了日     | 状態     | 担当者    | 予算（万円） | 進捗率 |
+  |-------------|------------|------------|----------|----------|------------|--------|
+  | プロジェクトA | 2025-01-01 | 2025-03-31 | 進行中   | 山田太郎  | 1,200      | 45%    |
+  | プロジェクトB | 2025-02-15 | 2025-06-30 | 計画中   | 佐藤花子  | 800        | 0%     |
+  | プロジェクトC | 2024-11-01 | 2025-01-31 | 完了     | 鈴木一郎  | 500        | 100%   |
+  | プロジェクトD | 2025-04-01 | 2025-09-30 | 保留中   | 高橋次郎  | 1,500      | 15%    |
+
+  </div>
