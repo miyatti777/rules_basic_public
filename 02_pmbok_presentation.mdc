@@ -70,7 +70,7 @@ presentation_questions:
         key: color_theme
         options:
           - "professional（プロフェッショナル）"
-          - "modern-business（モダンビジネス）"
+          - "modern-business（モダン）"
           - "explaza（ビジネスプレゼン）"
         required: true
         condition: "skip_presentation == 'いいえ（作成する）'"
@@ -121,7 +121,7 @@ presentation_template: |
   1. タイトルスライド (1枚目):
      ```
      <!-- _class: lead -->
-     ![bg](assets/bg_{theme_name}.png)
+     ![bg](mdc:assets/bg_{theme_name}.png)
      # タイトル
      ## サブタイトル
      ```

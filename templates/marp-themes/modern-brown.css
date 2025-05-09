@@ -1,18 +1,18 @@
-/* @theme explaza */
+/* @theme modern-brown */
 @charset "UTF-8";
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Roboto+Mono&display=swap");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css");
 
 :root {
-  --color-primary: #2d46ad;
-  --color-secondary: #3f51b5;
-  --color-accent: #5c6bc0;
-  --color-background: #ffffff;
-  --color-foreground: #333333;
-  --color-highlight: #304ffe;
-  --color-code-bg: #f0f4ff;
-  --color-blockquote-bg: #f5f7ff;
-  --color-dimmed: #505070;
+  --color-primary: #8b5a2b;     /* 深い茶色 */
+  --color-secondary: #a0522d;   /* 中間的な茶色 */
+  --color-accent: #cd853f;      /* 明るい茶色 */
+  --color-background: #ffffff;  /* 白（変更なし） */
+  --color-foreground: #333333;  /* テキスト色（変更なし） */
+  --color-highlight: #d2691e;   /* ハイライト用の明るい茶色 */
+  --color-code-bg: #fff8f0;     /* コード背景用の淡い茶色 */
+  --color-blockquote-bg: #fff5e6; /* 引用背景用の淡い茶色 */
+  --color-dimmed: #705040;      /* 薄い茶色 */
   --header-height: 42px;
   --footer-height: 42px;
   --content-top-margin: 25px;
@@ -213,13 +213,13 @@ table td {
 }
 
 table thead th {
-  background: var(--color-secondary); /* より鮮やかな青色に変更 */
+  background: var(--color-secondary); /* 茶色に変更 */
   color: white;
   font-weight: 700;
 }
 
 table tbody tr:nth-child(odd) {
-  background: #f0f4ff; /* より青みを感じる背景色に調整 */
+  background: var(--color-code-bg); /* 淡い茶色系の背景色に調整 */
 }
 
 /* ***** 画像関連のスタイル - 完全にシンプル化 ***** */
@@ -273,9 +273,9 @@ section.lead {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: #3949ab; /* より鮮やかな青色に変更 */
+  background: #8b4513; /* 茶色系に変更 */
   color: white;
-  background-image: url("/Users/daisukemiyata/aipm_v3/.cursor/rules/basic/templates/marp-themes/assets/bg_explaza.png");
+  background-image: url("/Users/daisukemiyata/aipm_v3/.cursor/rules/basic/templates/marp-themes/assets/bg_brown.png"); /* 背景画像も茶色系に */
   background-size: cover;
   background-position: center;
 }
@@ -359,7 +359,7 @@ section.lead::after {
 }
 
 .bg-primary {
-  background-color: var(--color-secondary); /* より鮮やかな青色に変更 */
+  background-color: var(--color-secondary); /* 茶色に変更 */
   color: white;
   padding: 0.2em 0.4em;
   border-radius: 3px;

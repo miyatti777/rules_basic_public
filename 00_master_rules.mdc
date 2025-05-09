@@ -885,6 +885,10 @@ steps:
       action: "execute_shell"
       command: "mkdir -p {{patterns.flow_date}}/assets"
       message: "プレゼン資料用のassetsディレクトリを作成します..."
+    - name: "copy_background_images"
+      action: "execute_shell"
+      command: "cp {{dirs.rules_basic_templates}}/marp-themes/assets/bg_*.png {{patterns.flow_date}}/assets/"
+      message: "背景画像をassetsディレクトリにコピーしています..."
     - name: "create_diagram"
       action: "create_file"
       path: "{{patterns.flow_date}}/assets/diagram.drawio"
@@ -906,21 +910,11 @@ steps:
     - name: "notify_completion"
       action: "notify"
       message: |
-        プレゼン資料の作成が完了しました。
+        プレゼン資料の作成が完了しました。次のステップも実行してください。
         
         作成されたファイル:
         - プレゼン資料: {{patterns.draft_presentation}}
         - 図表サンプル: {{patterns.flow_date}}/assets/diagram.drawio
-        
-        {{#if theme_folder_path}}
-        ▼ テーマフォルダの設定
-        指定されたテーマフォルダパス: {{theme_folder_path}}
-        draw.ioを開いて [ファイル] > [プロパティ] からこのパスを設定してください。
-        {{else}}
-        ▼ テーマの設定（任意）
-        特定のテーマ（スタイル）を使用したい場合は、draw.ioを開いて [ファイル] > [プロパティ] からテーマフォルダパスを指定できます。
-        推奨テーマパス: {{dirs.rules_basic_templates}}/marp-themes
-        {{/if}}
         
         ▼ 次のステップ
         1. **図表の編集・追加**
@@ -928,11 +922,13 @@ steps:
            - 完成した図表をPNG形式でエクスポート（推奨: 横幅1000px以上）
         
         2. **プレゼン内の図表プレースホルダを置換**
-           - プレゼン内の「!@図表名」を実際の画像参照に変更:
+           - プレゼン内の「!@図表名」を実際のファイルのプレゼンファイルから見た相対パスに変更:
            - 変更前: !@課題分析イメージ width:450px
            - 変更後: ![課題分析イメージ width:450px](mdc:assets/課題分析イメージ.png)
         
         3. 修正後「確定反映して」と入力するとStockディレクトリに保存されます。
+        
+        ※ 背景画像は自動的にassetsディレクトリにコピーされています。
 
 #============================
 # フェーズ3: 計画（Planning
