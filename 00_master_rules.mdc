@@ -885,10 +885,6 @@ steps:
       action: "execute_shell"
       command: "mkdir -p {{patterns.flow_date}}/assets"
       message: "プレゼン資料用のassetsディレクトリを作成します..."
-    - name: "copy_background_images"
-      action: "execute_shell"
-      command: "cp {{dirs.rules_basic_templates}}/marp-themes/assets/bg_*.png {{patterns.flow_date}}/assets/"
-      message: "背景画像をassetsディレクトリにコピーしています..."
     - name: "create_diagram"
       action: "create_file"
       path: "{{patterns.flow_date}}/assets/diagram.drawio"
@@ -927,8 +923,6 @@ steps:
            - 変更後: ![課題分析イメージ width:450px](mdc:assets/課題分析イメージ.png)
         
         3. 修正後「確定反映して」と入力するとStockディレクトリに保存されます。
-        
-        ※ 背景画像は自動的にassetsディレクトリにコピーされています。
 
 #============================
 # フェーズ3: 計画（Planning

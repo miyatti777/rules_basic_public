@@ -59,7 +59,10 @@ patterns:
   
   # ドラフトファイル
   draft_charter:      "{{patterns.flow_date}}/draft_project_charter.md"
+<<<<<<< HEAD
   draft_program_definition: "{{patterns.flow_date}}/draft_program_definition.md"
+=======
+>>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
   draft_stakeholder:  "{{patterns.flow_date}}/draft_stakeholder_analysis.md"
   draft_wbs:          "{{patterns.flow_date}}/draft_wbs.md"
   draft_risk_plan:    "{{patterns.flow_date}}/draft_risk_plan.md"
@@ -146,7 +149,10 @@ patterns:
   # ---- Stock: Initiating ----
   stock_charter:          "{{patterns.doc_initiating}}/project_charter.md"
   stakeholder_register:   "{{patterns.doc_initiating}}/stakeholder_register.md"
+<<<<<<< HEAD
   program_definition:    "{{patterns.program_dir}}/program_definition.md"
+=======
+>>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 
   # ---- Stock: Discovery -----
   stock_assumption:       "{{patterns.doc_discovery}}/assumption_map.md"
@@ -218,7 +224,10 @@ meta:
   week_end_date: "{{env.WEEK_END:date:YYYY-MM-DD}}"
   program_id:    "{{env.PROGRAM_ID}}"    # 実行時に指定するプログラムID
   project_id:    "{{env.PROJECT_ID}}"    # 実行時に指定するプロジェクトID
+<<<<<<< HEAD
   program_id:       "{{env.PROGRAM_ID}}"      # 実行時に指定するプログラムID
+=======
+>>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
   
   # ---- 特殊変数 ---
   change_title:  ""      # 変更要求のタイトル
