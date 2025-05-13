@@ -1,5 +1,5 @@
 ---
-description: 「日次タスク・週次レビューを生成し、完了タスクを WBS やリスクログへ同期するタスク管理ルール」
+description: 「予定確認、日次タスク・週次レビューを生成し、完了タスクを WBS やリスクログへ同期するタスク管理ルール」
 globs: 
 alwaysApply: false
 ---
@@ -8,62 +8,213 @@ alwaysApply: false
 # =========================
 path_reference: "pmbok_paths.mdc"
 
-#----------------------------------------------------------
-# 共通パターン
-#----------------------------------------------------------
-patterns:
-  wbs_glob:          "{{dirs.stock}}/projects/*/documents/3_planning/wbs.md"
-  backlog_glob:      "{{dirs.stock}}/projects/*/documents/3_planning/backlog/**/*.yaml"
-  daily_template:    "{{rules_basic_templates}}/daily_tasks_template.md"
-  weekly_template:   "{{rules_basic_templates}}/weekly_review_template.md"
-  daily_md:          "{{dirs.flow}}/{{today}}/daily_tasks.md"
-  weekly_md:         "{{dirs.flow}}/{{iso_week_end}}/weekly_review.md"
+# =========================
+# AI注意事項 - AIが必ず守るべきルール
+# =========================
+ai_instructions:
+  - "各ルールのトリガーやステップを必ず正確に実行すること - 独自の処理は一切追加しないこと"
+  - "execute_shellアクションのコマンドは一切変更せずそのまま実行すること"
+  - "独自の解釈を加えず、ルールに記載された通知メッセージをそのまま使用すること"
+  - "ルールが実行できない場合は、その旨を報告し勝手に代替手段を取らないこと"
+  - "【重要】カレンダー予定確認（今日の予定確認/今日の予定/カレンダー確認/Calendar events）では、余計な処理を追加せず必ず「./scripts/get_calendar_events.sh」だけを実行すること"
+  - "ファイル構造を自分で考えて作成せず、ルールに従って生成すること"
+  - "ルールに記載されていない処理は絶対に実行しないこと"
+
+
 
 # =========================
-# 1. Daily Tasks
+# 3. Routines YAML Template - ルーチンタスク定義テンプレート
 # =========================
-daily_tasks:
-  trigger:
-    - pattern: "(今日のタスク|日次タスク作成|Daily tasks)"
-    - time: "09:00"               # 平日 AM9:00 自動
-  steps:
-    # 1) Stock からタスク抽出
-    - collect_tasks:
-        sources:
-          - glob: "{{patterns.wbs_glob}}"
-          - glob: "{{patterns.backlog_glob}}"
-        rules:
-          due_within_days: 3       # 3日以内期限 → HIGH
-          sort_by: ["priority","due"]
-        store_as: tasks_today
-
-    # 2) Google カレンダー予定も取得 (MCP コマンド)
-    - execute_shell:
-        command: "mcp calendar today --json"
-        store_as: calendar_json
-
-    # 3) テンプレに自動差し込み
-    - create_markdown_file:
-        path: "{{patterns.daily_md}}"
-        template_path: "{{patterns.daily_template}}"
-        variables:
-          date: "{{today}}"
-          calendar: "{{calendar_json}}"
-          tasks: "{{tasks_today}}"
-
-    # 4) 未完了タスク通知
-    - notify_overdue:
-        lookback_days: 1
-        file_pattern: "{{dirs.flow}}/*/daily_tasks.md"
-        message_template: "🔔 前日までの未完了タスク: **{{count}}件**"
-
-    - notify:
-        message: |
-          ✅ 日次タスクを生成しました → {{patterns.daily_md}}
-          「完了したら [x] にマーク → 'Sync' で WBS へ反映できます」
+routines_yaml_template: |
+  # ルーチンタスク定義ファイル
+  # プロジェクト: {{project_name}}
+  # 作成日: {{today}}
+  # バージョン: 1.0
+  
+  project: "{{project_name}}"
+  program: "{{program_name}}"
+  description: "{{project_name}}プロジェクトのルーチンタスク定義"
+  created_date: "{{today}}"
+  version: "1.0"
+  
+  # ルーチン定義
+  routines:
+    # {{routine1_title}}
+    - routine_id: "RT-001"
+      title: "{{routine1_title}}"
+      description: "{{routine1_description}}"
+      frequency: "{{routine1_frequency}}"
+      {{#routine1_day_of_week}}
+      day_of_week: "{{routine1_day_of_week}}"
+      {{/routine1_day_of_week}}
+      priority: "high"
+      total_estimate: {{task1_estimate|add:task2_estimate}}
+      tasks:
+        - task_id: "T-001"
+          title: "{{task1_title}}"
+          description: "{{task1_description}}"
+          estimate: {{task1_estimate}}
+          priority: "high"
+        
+        - task_id: "T-002"
+          title: "{{task2_title}}"
+          description: "{{task2_description}}"
+          estimate: {{task2_estimate}}
+          priority: "medium"
+    
+    {{#routine2_title}}
+    # {{routine2_title}}
+    - routine_id: "RT-002"
+      title: "{{routine2_title}}"
+      description: "{{routine2_description}}"
+      frequency: "{{routine2_frequency}}"
+      priority: "medium"
+      total_estimate: {{task3_estimate|add:task4_estimate}}
+      tasks:
+        {{#task3_title}}
+        - task_id: "T-101"
+          title: "{{task3_title}}"
+          description: "{{task3_description}}"
+          estimate: {{task3_estimate}}
+          priority: "medium"
+        {{/task3_title}}
+        
+        {{#task4_title}}
+        - task_id: "T-102"
+          title: "{{task4_title}}"
+          description: "{{task4_description}}"
+          estimate: {{task4_estimate}}
+          priority: "low"
+        {{/task4_title}}
+    {{/routine2_title}}
+  
+  # 頻度定義
+  frequencies:
+    - name: "daily"
+      description: "毎日実行するルーチン"
+    - name: "weekly"
+      description: "毎週実行するルーチン"
+    - name: "monthly"
+      description: "毎月実行するルーチン"
+    - name: "quarterly"
+      description: "四半期ごとに実行するルーチン"
+    - name: "yearly"
+      description: "年に一度実行するルーチン"
+  
+  # 優先度定義
+  priorities:
+    - name: "high"
+      description: "高優先度のタスク"
+    - name: "medium"
+      description: "中程度の優先度のタスク"
+    - name: "low"
+      description: "低優先度のタスク"
 
 # =========================
-# 2. Weekly Review (金曜 17 : 30)
+# 4. Routines Questions - ルーチンタスク定義質問
+# =========================
+routines_questions:
+  - key: "project_name"
+    question: "ルーチンタスクを定義するプロジェクト名を入力してください"
+    required: true
+  - key: "program_name"
+    question: "プログラム名を入力してください"
+    required: true
+  - key: "routine1_title"
+    question: "最初のルーチンのタイトルを入力してください"
+    description: "例: 朝のルーチン、週次振り返りなど"
+    required: true
+  - key: "routine1_description"
+    question: "このルーチンの説明を入力してください"
+    required: false
+  - key: "routine1_frequency"
+    question: "このルーチンの頻度を選択してください"
+    options:
+      - "daily"
+      - "weekly"
+      - "monthly"
+      - "quarterly"
+      - "yearly"
+    default: "daily"
+    required: true
+  - key: "routine1_day_of_week"
+    question: "週次の場合、曜日を選択してください"
+    options:
+      - "monday"
+      - "tuesday"
+      - "wednesday"
+      - "thursday"
+      - "friday"
+      - "saturday"
+      - "sunday"
+    default: "monday"
+    condition: "routine1_frequency == 'weekly'"
+  - key: "task1_title"
+    question: "最初のタスクのタイトルを入力してください"
+    required: true
+  - key: "task1_description"
+    question: "最初のタスクの説明を入力してください"
+    required: false
+  - key: "task1_estimate"
+    question: "最初のタスクの見積時間（分）を入力してください"
+    type: "number"
+    default: 15
+  - key: "task2_title"
+    question: "2つ目のタスクのタイトルを入力してください"
+    required: true
+  - key: "task2_description"
+    question: "2つ目のタスクの説明を入力してください"
+    required: false
+  - key: "task2_estimate"
+    question: "2つ目のタスクの見積時間（分）を入力してください"
+    type: "number"
+    default: 15
+  - key: "routine2_title"
+    question: "2つ目のルーチンのタイトルを入力してください（任意）"
+    required: false
+  - key: "routine2_description"
+    question: "2つ目のルーチンの説明を入力してください"
+    condition: "routine2_title"
+    required: false
+  - key: "routine2_frequency"
+    question: "2つ目のルーチンの頻度を選択してください"
+    options:
+      - "daily"
+      - "weekly"
+      - "monthly"
+      - "quarterly"
+      - "yearly"
+    default: "weekly"
+    condition: "routine2_title"
+  - key: "task3_title"
+    question: "2つ目のルーチンの最初のタスクのタイトルを入力してください"
+    condition: "routine2_title"
+    required: false
+  - key: "task3_description"
+    question: "タスクの説明を入力してください"
+    condition: "task3_title"
+    required: false
+  - key: "task3_estimate"
+    question: "タスクの見積時間（分）を入力してください"
+    type: "number"
+    default: 30
+    condition: "task3_title"
+  - key: "task4_title"
+    question: "2つ目のルーチンの2つ目のタスクのタイトルを入力してください（任意）"
+    condition: "routine2_title"
+    required: false
+  - key: "task4_description"
+    question: "タスクの説明を入力してください"
+    condition: "task4_title"
+    required: false
+  - key: "task4_estimate"
+    question: "タスクの見積時間（分）を入力してください"
+    type: "number"
+    default: 30
+    condition: "task4_title"
+
+# =========================
+# 4. Weekly Review (金曜 17 : 30)
 # =========================
 weekly_review:
   trigger:
@@ -89,7 +240,7 @@ weekly_review:
           確認後「確定反映して」で Stock に移動します
 
 # =========================
-# 3. Sync Command (手動)
+# 5. Sync Command (手動)
 # =========================
 sync_with_artifacts:
   trigger:
@@ -106,3 +257,285 @@ sync_with_artifacts:
         risk_glob: "{{dirs.stock}}/projects/*/documents/3_planning/risk_log.md"
     - notify:
         message: "WBS / リスクログへ同期しました ✅"
+
+# =========================
+# 6. ルーチンタスク定義のための質問
+# =========================
+routines_questions:
+  questions:
+    - key: "program_id"
+      question: "プログラム（プロダクト）IDを入力してください"
+      required: true
+    - key: "project_id"
+      question: "プロジェクトIDを入力してください"
+      required: true
+    - key: "routine_name"
+      question: "ルーティンタスクセットの名前を入力してください（例：朝の作業ルーティン）"
+      required: true
+    - key: "routine_description"
+      question: "ルーティンタスクセットの説明を入力してください"
+      required: true
+    - key: "routine_tasks"
+      question: "ルーティンタスクをカンマ区切りで入力してください（例：メール確認,タスク整理,会議準備）"
+      required: true
+    - key: "task_estimates"
+      question: "各タスクの所要時間を分単位でカンマ区切りで入力してください。タスクと同じ順序で指定してください（例：5,10,15）"
+      required: true
+    - key: "task_priorities"
+      question: "各タスクの優先度を0（最高）～3（低）でカンマ区切りで入力してください。タスクと同じ順序で指定してください（例：0,1,2）"
+      required: true
+    - key: "frequency"
+      question: "ルーティンの頻度を選択してください"
+      options: ["daily", "weekly", "monthly"]
+      required: true
+
+# =========================
+# 7. Routines YAML Template - ルーチンYAMLテンプレート
+# =========================
+routines_yaml_template: |
+  # ルーチンタスク定義ファイル
+  # プロジェクト: {{project_name}}
+  # 作成日: {{today}}
+  # バージョン: 1.0
+  
+  project: "{{project_name}}"
+  program: "{{program_name}}"
+  description: "{{project_name}}プロジェクトのルーチンタスク定義"
+  created_date: "{{today}}"
+  version: "1.0"
+  
+  # ルーチン定義
+  routines:
+    # {{routine1_title}}
+    - routine_id: "RT-001"
+      title: "{{routine1_title}}"
+      description: "{{routine1_description}}"
+      frequency: "{{routine1_frequency}}"
+      {{#routine1_day_of_week}}
+      day_of_week: "{{routine1_day_of_week}}"
+      {{/routine1_day_of_week}}
+      priority: "high"
+      total_estimate: {{task1_estimate|add:task2_estimate}}
+      tasks:
+        - task_id: "T-001"
+          title: "{{task1_title}}"
+          description: "{{task1_description}}"
+          estimate: {{task1_estimate}}
+          priority: "high"
+        
+        - task_id: "T-002"
+          title: "{{task2_title}}"
+          description: "{{task2_description}}"
+          estimate: {{task2_estimate}}
+          priority: "medium"
+    
+    {{#routine2_title}}
+    # {{routine2_title}}
+    - routine_id: "RT-002"
+      title: "{{routine2_title}}"
+      description: "{{routine2_description}}"
+      frequency: "{{routine2_frequency}}"
+      priority: "medium"
+      total_estimate: {{task3_estimate|add:task4_estimate}}
+      tasks:
+        {{#task3_title}}
+        - task_id: "T-101"
+          title: "{{task3_title}}"
+          description: "{{task3_description}}"
+          estimate: {{task3_estimate}}
+          priority: "medium"
+        {{/task3_title}}
+        
+        {{#task4_title}}
+        - task_id: "T-102"
+          title: "{{task4_title}}"
+          description: "{{task4_description}}"
+          estimate: {{task4_estimate}}
+          priority: "low"
+        {{/task4_title}}
+    {{/routine2_title}}
+  
+  # 頻度定義
+  frequencies:
+    - name: "daily"
+      description: "毎日実行するルーチン"
+    - name: "weekly"
+      description: "毎週実行するルーチン"
+    - name: "monthly"
+      description: "毎月実行するルーチン"
+    - name: "quarterly"
+      description: "四半期ごとに実行するルーチン"
+    - name: "yearly"
+      description: "年に一度実行するルーチン"
+  
+  # 優先度定義
+  priorities:
+    - name: "high"
+      description: "高優先度のタスク"
+    - name: "medium"
+      description: "中程度の優先度のタスク"
+    - name: "low"
+      description: "低優先度のタスク"
+
+# =========================
+# 8. Daily Routine Template - 日次ルーチンテンプレート
+# =========================
+daily_routine_template: |
+  # 日次ルーチンタスク - {{date}}
+  
+  ## 🌅 {{routine1_title}}
+  - [ ] {{task1_title}} ({{task1_estimate}}分)
+  - [ ] {{task2_title}} ({{task2_estimate}}分)
+  
+  {{#routine2_title}}
+  ## 📋 {{routine2_title}}
+  - [ ] {{task3_title}} ({{task3_estimate}}分)
+  - [ ] {{task4_title}} ({{task4_estimate}}分)
+  {{/routine2_title}}
+  
+  ## 📝 備考
+  - 
+
+# =========================
+# 9. Generate Daily Tasks Script - 日次タスク生成スクリプト
+# =========================
+generate_daily_tasks_script: |
+  #!/usr/bin/env python3
+  # -*- coding: utf-8 -*-
+  """
+  日次ルーチンタスク生成スクリプト
+  
+  routines.yamlから日次、週次、月次のルーチンタスクを抽出し、
+  daily_routine_template.mdテンプレートを使って日次タスクファイルを生成します。
+  """
+  
+  import os
+  import sys
+  import yaml
+  import datetime
+  import argparse
+  from pathlib import Path
+  
+  def get_today_date():
+      """今日の日付を取得"""
+      return datetime.datetime.now().date()
+  
+  def load_routines_yaml(file_path):
+      """ルーチンYAMLファイルを読み込む"""
+      try:
+          with open(file_path, 'r', encoding='utf-8') as f:
+              return yaml.safe_load(f)
+      except Exception as e:
+          print(f"ルーチンファイル読み込みエラー: {e}")
+          return None
+  
+  def filter_routines_for_today(routines_data, today_date):
+      """今日実行すべきルーチンタスクをフィルタリング"""
+      if not routines_data or 'routines' not in routines_data:
+          return []
+      
+      weekday = today_date.weekday()  # 0=月曜, 1=火曜, ..., 6=日曜
+      weekday_names = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+      today_weekday = weekday_names[weekday]
+      
+      today_routines = []
+      
+      for routine in routines_data['routines']:
+          frequency = routine.get('frequency', '').lower()
+          day_of_week = routine.get('day_of_week', '').lower()
+          day_of_month = routine.get('day_of_month')
+          
+          # 日次タスク
+          if frequency == 'daily':
+              today_routines.append(routine)
+          # 週次タスク（指定された曜日）
+          elif frequency == 'weekly' and day_of_week == today_weekday:
+              today_routines.append(routine)
+          # 月次タスク（指定された日付）
+          elif frequency == 'monthly' and day_of_month and str(day_of_month) == str(today_date.day):
+              today_routines.append(routine)
+      
+      return today_routines
+  
+  def generate_task_markdown(routines, template_path, output_path, today_date):
+      """タスクのマークダウンを生成"""
+      try:
+          # テンプレートを読み込む
+          with open(template_path, 'r', encoding='utf-8') as f:
+              template = f.read()
+          
+          # ルーチンタスクごとに置換
+          for i, routine in enumerate(routines):
+              title = routine.get('title', f'ルーチン {i+1}')
+              tasks = routine.get('tasks', [])
+              
+              # タスクマークダウンを作成
+              tasks_md = ""
+              for task in tasks:
+                  task_title = task.get('title', 'タスク')
+                  estimate = task.get('estimate', '')
+                  tasks_md += f"- [ ] {task_title}"
+                  if estimate:
+                      tasks_md += f" ({estimate}分)"
+                  tasks_md += "\n"
+              
+              # テンプレートにタスクを挿入
+              marker = f"## 📋 {title}"
+              if marker in template:
+                  template = template.replace(f"{marker}\n", f"{marker}\n{tasks_md}")
+          
+          # 日付情報を置換
+          date_str = today_date.strftime("%Y-%m-%d")
+          template = template.replace("{{date}}", date_str)
+          
+          # ファイルに書き込み
+          os.makedirs(os.path.dirname(output_path), exist_ok=True)
+          with open(output_path, 'w', encoding='utf-8') as f:
+              f.write(template)
+          
+          print(f"日次ルーチンタスクを作成しました: {output_path}")
+          return True
+      except Exception as e:
+          print(f"タスク生成エラー: {e}")
+          return False
+  
+  def main():
+      parser = argparse.ArgumentParser(description='ルーチンタスクから日次タスクを生成')
+      parser.add_argument('--routines', '-r', help='ルーチン定義ファイルパス', default='routines.yaml')
+      parser.add_argument('--template', '-t', help='テンプレートファイルパス', default='templates/daily_routine_template.md')
+      parser.add_argument('--output', '-o', help='出力ファイルパス', default='daily_tasks.md')
+      parser.add_argument('--date', '-d', help='対象日付 (YYYY-MM-DD形式、デフォルト: 今日)')
+      args = parser.parse_args()
+      
+      # 日付の取得
+      if args.date:
+          try:
+              today_date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
+          except ValueError:
+              print(f"エラー: 無効な日付形式です: {args.date}")
+              return 1
+      else:
+          today_date = get_today_date()
+      
+      # ルーチン定義を読み込む
+      routines_data = load_routines_yaml(args.routines)
+      if not routines_data:
+          print("ルーチン定義ファイルの読み込みに失敗しました。")
+          return 1
+      
+      # 今日のルーチンをフィルタリング
+      today_routines = filter_routines_for_today(routines_data, today_date)
+      print(f"{len(today_routines)} 件のルーチンが本日実行すべきタスクとして見つかりました。")
+      
+      # タスクのマークダウンを生成
+      success = generate_task_markdown(today_routines, args.template, args.output, today_date)
+      
+      if success:
+          print("ルーチンタスクの生成が完了しました。")
+          return 0
+      else:
+          print("ルーチンタスクの生成に失敗しました。")
+          return 1
+  
+  if __name__ == "__main__":
+      sys.exit(main())

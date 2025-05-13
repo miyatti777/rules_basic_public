@@ -1,21 +1,28 @@
 ---
 date: {{date}}
 type: daily_tasks
-version: 1.0
+version: 1.1
 ---
 
 # 📋 {{date}} - 日次タスク
 
 ## 📅 今日の予定
 
-{{#calendar}}
-{{#events}}
-- {{start_time}}-{{end_time}} {{summary}}{{#location}} at {{location}}{{/location}}
-{{/events}}
-{{^events}}
-- 特になし
-{{/events}}
-{{/calendar}}
+{{#calendar_content}}
+{{calendar_content}}
+{{/calendar_content}}
+{{^calendar_content}}
+取得されたカレンダー予定はありません。
+{{/calendar_content}}
+
+## 🔄 ルーチンタスク
+
+{{#routines_content}}
+{{routines_content}}
+{{/routines_content}}
+{{^routines_content}}
+取得されたルーチンタスクはありません。
+{{/routines_content}}
 
 ## 🔥 今日のフォーカス
 
@@ -55,3 +62,28 @@ version: 1.0
 ## ⚠️ インピーディメント
 
 -
+
+# 日次タスク: {{date}}
+
+## 🕘 本日のスケジュール
+{{#calendar}}
+- {{time}} {{title}} {{#location}}@ {{location}}{{/location}}
+{{/calendar}}
+
+## 🔄 朝のルーティンタスク
+{{#routines}}
+- [ ] **{{title}}** ({{estimate}}分)
+{{/routines}}
+
+## 📋 今日のタスク
+{{#tasks}}
+- [ ] {{#due}}[期限:{{due}}] {{/due}}**{{title}}** {{#project}}({{project}}){{/project}}
+  {{#description}}{{description}}{{/description}}
+{{/tasks}}
+
+## 📝 メモ
+
+## 💭 振り返り
+- 今日の成果:
+- 学んだこと:
+- 明日に持ち越すこと:

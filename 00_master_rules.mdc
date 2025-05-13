@@ -5,6 +5,17 @@ alwaysApply: true
 ---
 path_reference: "basic/pmbok_paths.mdc"
 
+# =========================
+# AI注意事項 - AIが確実に守るべき指示
+# =========================
+ai_instructions:
+  - "すべてのルールは正確に実行し、独自の解釈で変更しないこと"
+  - "execute_shellアクションのコマンドは一切変更せずそのまま実行すること"
+  - "指定されたファイルパスやフォルダ構造を尊重し、勝手に構造を変更しないこと"
+  - "失敗した場合でも代替手段を取らず、失敗を報告してユーザーの指示を仰ぐこと"
+  - "パスや変数の設定はpmbok_paths.mdcを参照し、正確に使用すること"
+  - "特にFlow/年月/日付のフォルダ構造は必ず守ること"
+
 master_triggers:
 
 #============================
@@ -115,11 +126,6 @@ master_triggers:
         action: "execute_shell"
         command: "mkdir -p {{patterns.flow_date}}/{{program_id}}_{{extracted_project}}"
         message: "Flowフォルダを作成しています..."
-      - name: "create_daily_tasks_file"
-        action: "create_markdown_file"
-        path: "{{patterns.flow_date}}/{{program_id}}_{{extracted_project}}/daily_tasks.md"
-        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
-        message: "日次タスクファイルを作成します。"
       - name: "notify_next_steps"
         action: "notify"
         message: |
@@ -951,37 +957,6 @@ steps:
 # プロダクトバックログ初期化
 #--------------------------------------------
 
-    ```yaml
-    trigger: 
-    pattern: "(プロダクトバックログ初期化|backlog初期化|バックログ初期化)(して|お願い)"
-    priority: 100
-    ```
-
-    ```yaml
-    action:
-    type: function
-    function: backlog_initialization
-    params:
-        template_path: "{{patterns.backlog_init_template}}"
-        wbs_path: "{{patterns.wbs_path}}"
-    ```
-
-    ```javascript
-    function backlog_initialization(params) {
-    console.log("バックログ初期化プロセスを開始します");
-    
-    // Planning フェーズのルールを呼び出す
-    return {
-        type: "call_rule",
-        rule: "03_pmbok_planning.mdc",
-        function: "backlog_init",
-        params: {
-        template_path: params.template_path,
-        wbs_path: params.wbs_path
-        }
-    };
-    }
-    ```
 
   - trigger: "(プロダクトバックログ初期化|backlog初期化|バックログ初期化)(して|お願い)"
     priority: high
@@ -989,22 +964,11 @@ steps:
       - name: "start_info_collection"
         action: "call basic/pmbok_planning.mdc => backlog_questions"
         message: "プロダクトバックログを初期化します。必要情報を収集しますので回答をお願いします。"
-      - name: "wait_user_responses"
-        action: "wait_for_all_answers"
-        message: "必要な情報をすべて収集するまでお待ちください。"
-      - name: "confirm_document_creation"
-        action: "confirm"
-        message: "収集した情報でバックログYAMLファイルを作成します。よろしいですか？"
       - name: "create_backlog_yaml"
         action: "create_file"
         path: "{{patterns.backlog_yaml}}"
         template_reference: "basic/pmbok_planning.mdc => backlog_yaml_template"
         message: "backlog.yamlを作成しました。"
-      - name: "create_epics_yaml" 
-        action: "create_file"
-        path: "{{patterns.epics_yaml}}"
-        template_reference: "basic/pmbok_planning.mdc => epics_yaml_template"
-        message: "epics.yamlを作成しました。"
       - name: "validate_backlog_yaml"
         action: "execute_shell"
         command: "python {{patterns.backlog_validate_script}} {{patterns.backlog_yaml}}"
@@ -1012,28 +976,80 @@ steps:
       - name: "notify_completion"
         action: "notify"
         message: |
-          バックログの初期化が完了しました。backlog.yamlとepics.yamlが作成されました。
-          これを基に「ユーザーストーリー生成して」と入力するとストーリーファイルを生成できます。
+          バックログの初期化が完了しました。backlog.yamlが作成されました。
           内容を確認、修正した後「確定反映して」と入力するとStockへ反映されます。
 
 #--------------------------------------------
-# ユーザーストーリー生成
+# バックログ検証（独立したトリガー）
 #--------------------------------------------
-  - trigger: "(ユーザーストーリー生成|ストーリー生成|story生成)(して|お願い)"
+  - trigger: "(バックログが正しく出力されたか確認|バックログ検証|バックログ確認|バックログチェック)"
     priority: high
     steps:
-      - name: "run_yaml_to_stories_script"
+      - name: "ask_backlog_path"
+        action: "ask_question"
+        question: "検証したいバックログYAMLのパスを入力してください（デフォルト：{{patterns.backlog_yaml}}）"
+        default: "{{patterns.backlog_yaml}}"
+        store_as: "backlog_path"
+      - name: "validate_backlog_yaml"
         action: "execute_shell"
-        command: "python {{dirs.scripts}}/yaml_to_stories.py {{patterns.backlog_yaml}} {{patterns.stories_dir}}"
-        message: "backlog.yamlからユーザーストーリーファイルを生成します。"
-      - name: "notify_generation_complete"
+        command: "python {{patterns.backlog_validate_script}} {{backlog_path}}"
+        message: "バックログYAMLの検証を行います。"
+      - name: "notify_completion"
         action: "notify"
         message: |
-          ユーザーストーリーファイルの生成が完了しました。
-          {{patterns.stories_dir}}に生成されたストーリーを確認してください。
-          修正後「確定反映して」で Stock/backlog/stories へ移動できます。
+          バックログYAMLの検証が完了しました。
+          問題がなければ「確定反映して」と入力するとStockへ反映されます。
 
+#--------------------------------------------
+# ルーチンタスク定義
+#--------------------------------------------
+  - trigger: "(ルーチンタスク定義|routines作成|ルーティン定義)(して|お願い)"
+    priority: high
+    steps:
+      - name: "start_info_collection"
+        action: "call basic/07_task_management.mdc => routines_questions"
+        message: "ルーチンタスク定義を作成します。必要情報を収集しますので回答をお願いします。"
+      - name: "wait_user_responses"
+        action: "wait_for_all_answers"
+        message: "必要な情報をすべて収集するまでお待ちください。"
+      - name: "confirm_document_creation"
+        action: "confirm"
+        message: "収集した情報でroutines.yamlファイルを作成します。よろしいですか？"
+      - name: "create_routines_file"
+        action: "create_file"
+        path: "{{patterns.routines_yaml}}"
+        template_reference: "basic/07_task_management.mdc => routines_yaml_template"
+        message: "routines.yamlファイルを作成しました。"
+      - name: "validate_routines_yaml"
+        action: "execute_shell"
+        command: "python {{root}}/scripts/validate_routines_yaml.py {{patterns.routines_yaml}}"
+        message: "ルーチンタスク定義の検証を行います。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ルーチンタスク定義の作成が完了しました。routines.yamlが作成されました。
+          内容を確認、修正した後「確定反映して」と入力するとStockへ反映されます。
 
+#--------------------------------------------
+# ルーチンタスク検証（独立したトリガー）
+#--------------------------------------------
+  - trigger: "(ルーチンタスクが正しく出力されたか確認|ルーチンタスク検証|ルーチン検証|ルーチンチェック)"
+    priority: high
+    steps:
+      - name: "ask_routines_path"
+        action: "ask_question"
+        question: "検証したいroutines.yamlのパスを入力してください（デフォルト：{{patterns.routines_yaml}}）"
+        default: "{{patterns.routines_yaml}}"
+        store_as: "routines_path"
+      - name: "validate_routines_yaml"
+        action: "execute_shell"
+        command: "python {{root}}/scripts/validate_routines_yaml.py {{routines_path}}"
+        message: "ルーチンタスク定義の検証を行います。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ルーチンタスク定義の検証が完了しました。
+          問題がなければ「確定反映して」と入力するとStockへ反映されます。
 
 #--------------------------------------------
 # プロダクトロードマップ作成  ★NEW
@@ -1096,39 +1112,34 @@ steps:
   #-----
   # 作業開始フェーズ（Flow日付フォルダ作成）
   #-----
-  - trigger: "(作業開始|work start|今日の作業開始)"
-    priority: high
-    steps:
-      - name: "create_todays_flow_folder"
-        action: "execute_shell"
-        command: "mkdir -p {{patterns.flow_date}}"
-        message: "今日の日付でFlowフォルダを作成します。"
-      - name: "create_daily_tasks_file"
-        action: "create_markdown_file"
-        path: "{{patterns.flow_date}}/daily_tasks.md"
-        template_reference: "basic/07_task_management.mdc => daily_tasks_template"
-        message: "今日の日次タスクファイルを作成します。"
-      - name: "check_folder_structure"
-        action: "execute_shell"
-        command: "ls -la {{patterns.flow_date}}"
-        message: "作成したフォルダの構造を確認します。"
-      - name: "notify_creation"
-        action: "notify"
-        message: |
-          ✅ 作業開始の準備が完了しました。
-          今日の作業フォルダが作成されました：{{patterns.flow_date}}
-          日次タスクファイルも用意しました：{{patterns.flow_date}}/daily_tasks.md
-          
-          次のステップとして以下のコマンドが利用可能です：
-          -「議事録」：会議議事録のテンプレート作成
-          -「プロジェクト憲章」「ステークホルダー分析」：文書作成
-          -「WBS作成」：作業分解構造の作成
+ - trigger: "(作業開始|work start|今日の作業開始)"
+  priority: high
+  steps:
+    - name: "create_todays_flow_folder"
+      action: "execute_shell"
+      command: "mkdir -p {{patterns.flow_date}}"
+      message: "今日の日付でFlowフォルダを作成します。"
+    - name: "notify_completion"
+      action: "notify"
+      message: |
+        ✅ 作業開始フォルダの作成が完了しました。
+        今日の作業フォルダ: {{patterns.flow_date}}
+        
+        ※ファイルは作成していません。必要に応じて以下のコマンドを使用してください：
+        - 「日次タスク作成」：タスク管理ファイルを作成
+        - 「今日の予定確認」：カレンダー予定ファイルを作成
 
 #--------------------------------------------
 # タスク管理
 #--------------------------------------------
+  - trigger: "(今日の予定確認|今日の予定|カレンダー確認|Calendar events)"
+        command: "{{root}}/scripts/calendar_app/get_calendar_events.sh"
+        message: "カレンダーデータを取得しています..."
+        instruction: "このコマンドのみを実行し、他の処理は一切行わないこと"
   - trigger: "(今日のタスク|日次タスク作成|Daily tasks)"
-    call_rule: "07_task_management.mdc => daily_tasks"
+        command: "python {{root}}/scripts/generate_daily_tasks.py --filter-assignee && python {{root}}/scripts/merge_calendar_tasks.py"
+        message: "日次タスクを生成してカレンダー予定と統合しています..."
+        instruction: "このコマンドのみを実行し、他の処理は一切行わないこと"
   - trigger: "(週次レビュー|Weekly review)"
     call_rule: "07_task_management.mdc => weekly_review"
   - trigger: "(Sync|WBSと同期|リスクログと同期)"
