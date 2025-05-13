@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD
-description: 「計画フェーズ（WBS、リスク計画、バックログ初期化、リリースロードマップ等）の質問とテンプレートを定義」
-=======
 description: 「計画フェーズ（WBS、リスク計画、バックログ初期化、ロードマップ等）の質問とテンプレートを定義」
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 globs: 
 alwaysApply: false
 ---
@@ -198,53 +194,174 @@ backlog_init_questions:
 # ----------------------------------------------------------
 backlog_yaml_template: |
   # プロダクトバックログ定義
-  project_id: "{{project_id}}"
-  name: "{{backlog_name}}"
-  description: |
-    {{backlog_description}}
+  project:
+    id: "{{project_id}}"
+    name: "{{backlog_name}}"
+    description: |
+      {{backlog_description}}
+    last_updated: "{{today}}"
   
-  # バックログアイテム定義
-  items:
-    # エピック1
-    - id: "EPIC-001"
+  # スプリント定義
+  sprints:
+    - sprint_id: "S1"
+      name: "スプリント1"
+      start_date: "2025-01-01"
+      end_date: "2025-01-14"
+      goal: "初期機能の実装"
+      status: "completed"
+    
+    - sprint_id: "S2"
+      name: "スプリント2"
+      start_date: "2025-01-15"
+      end_date: "2025-01-28"
+      goal: "コア機能の実装"
+      status: "in_progress"
+    
+    - sprint_id: "S3"
+      name: "スプリント3"
+      start_date: "2025-01-29"
+      end_date: "2025-02-11"
+      goal: "拡張機能の実装"
+      status: "planned"
+  
+  # エピック定義
+  epics:
+    # 機能エピック
+    - epic_id: "EP-001"
       title: "{{epic1_title}}"
       description: "{{epic1_description}}"
       priority: "high"
-      type: "epic"
-      estimate: ~
-      acceptance_criteria: []
-      dependencies: []
-      assignee: ""
       status: "new"
-      
-    # ユーザーストーリー（エピック1に紐づく）
-    - id: "US-001"
-      title: "{{us1_title}}"
-      description: "{{us1_description}}"
-      priority: "high"
-      type: "story"
-      estimate: 5
-      epic_id: "EPIC-001"
-      acceptance_criteria:
-        - "{{us1_ac1}}"
-        - "{{us1_ac2}}"
-      dependencies: []
-      assignee: ""
-      status: "new"
+      stories:
+        # ストーリー1
+        - story_id: "US-001"
+          title: "{{us1_title}}"
+          description: "{{us1_description}}"
+          priority: "high"
+          story_points: 5
+          status: "new"
+          sprint: "S1"
+          acceptance_criteria:
+            - "{{us1_ac1}}"
+            - "{{us1_ac2}}"
+        
+        # ストーリー2
+        - story_id: "US-002"
+          title: "{{us2_title}}"
+          description: "{{us2_description}}"
+          priority: "medium"
+          story_points: 3
+          status: "new"
+          sprint: "S2"
+          acceptance_criteria:
+            - "{{us2_ac1}}"
     
-    # ユーザーストーリー2
-    - id: "US-002"
-      title: "{{us2_title}}"
-      description: "{{us2_description}}"
-      priority: "medium"
-      type: "story"
-      estimate: 3
-      epic_id: "EPIC-001"
-      acceptance_criteria:
-        - "{{us2_ac1}}"
-      dependencies: []
-      assignee: ""
+    # 基盤設計エピック
+    - epic_id: "EP-002"
+      title: "基盤設計"
+      description: "システムの基盤設計および実装に関するエピック"
+      priority: "high"
       status: "new"
+      stories:
+        # 基盤ストーリー1
+        - story_id: "US-003"
+          title: "{{foundation1_title}}"
+          description: "{{foundation1_description}}"
+          priority: "high"
+          story_points: 8
+          status: "new"
+          sprint: "S1"
+          acceptance_criteria:
+            - "{{foundation1_ac1}}"
+        
+        # 基盤ストーリー2
+        - story_id: "US-004"
+          title: "{{foundation2_title}}"
+          description: "{{foundation2_description}}"
+          priority: "medium"
+          story_points: 5
+          status: "new"
+          sprint: "S2"
+          acceptance_criteria:
+            - "{{foundation2_ac1}}"
+    
+    # 統合エピック
+    - epic_id: "EP-003"
+      title: "システム統合"
+      description: "外部システムとの統合に関するエピック"
+      priority: "medium"
+      status: "new"
+      stories:
+        # 統合ストーリー1
+        - story_id: "US-005"
+          title: "{{integration1_title}}"
+          description: "{{integration1_description}}"
+          priority: "medium"
+          story_points: 5
+          status: "new"
+          sprint: "S3"
+          acceptance_criteria:
+            - "{{integration1_ac1}}"
+  
+    # 将来実装エピック
+    - epic_id: "EP-004"
+      title: "将来実装"
+      description: "将来のリリースで実装予定の機能"
+      priority: "low"
+      status: "new"
+      stories:
+        - story_id: "US-006"
+          title: "{{future1_title}}"
+          description: "{{future1_description}}"
+          priority: "low"
+          story_points: 8
+          status: "new"
+          sprint: "S3"
+          acceptance_criteria:
+            - "{{future1_ac1}}"
+  
+  # ポイント規模定義
+  sizes:
+    - name: "XS"
+      points: 1
+      description: "1時間以内で完了する非常に小さなタスク"
+    - name: "S"
+      points: 2
+      description: "半日以内で完了する小さなタスク"
+    - name: "M"
+      points: 3
+      description: "1日程度で完了する標準的なタスク"
+    - name: "L"
+      points: 5
+      description: "2-3日で完了する大きめのタスク"
+    - name: "XL"
+      points: 8
+      description: "1週間程度で完了する大きなタスク"
+    - name: "XXL"
+      points: 13
+      description: "複数週間かかる非常に大きなタスク"
+  
+  # 優先度定義
+  priorities:
+    - name: "high"
+      description: "最優先で対応するべき重要な項目"
+    - name: "medium"
+      description: "標準的な優先度の項目"
+    - name: "low"
+      description: "時間に余裕があれば対応する項目"
+  
+  # ステータス定義
+  statuses:
+    - name: "new"
+      description: "新規作成されたアイテム"
+    - name: "planned"
+      description: "計画されているアイテム"
+    - name: "in_progress"
+      description: "現在作業中のアイテム"
+    - name: "blocked"
+      description: "何らかの理由でブロックされているアイテム"
+    - name: "completed"
+      description: "完了したアイテム"
 
 # エラー処理セクション
 backlog_validation_error_handling:
@@ -294,85 +411,6 @@ validation_error_guidance:
     - in_progress（進行中）
     - blocked（ブロック中）
     - done（完了）
-
-# ----------------------------------------------------------
-# ◆ ユーザーストーリー作成質問セット
-# ----------------------------------------------------------
-user_story_questions:
-  - question: "このストーリーのID/番号は何ですか？"
-    key: story_id
-    required: true
-    description: "US-#### の形式で一意のID"
-    
-  - question: "このストーリーが属するエピックのIDは何ですか？"
-    key: epic_id
-    required: true
-    description: "EP-## の形式でエピックID"
-    
-  - question: "ストーリーのタイトルは何ですか？"
-    key: story_title
-    required: true
-    description: "簡潔で明確なタイトル（50文字以内）"
-    
-  - question: "ユーザーストーリーの内容を「〜として、〜したい、なぜなら〜」の形式で記述してください"
-    key: user_story
-    required: true
-    description: "「〜ロールとして、〜機能が欲しい、なぜなら〜価値があるから」の形式"
-    
-  - question: "受け入れ基準は何ですか？"
-    key: acceptance_criteria
-    required: true
-    description: "このストーリーが完了したと見なすための基準を箇条書きで"
-    
-  - question: "ストーリーポイントまたは見積もりはいくつですか？"
-    key: story_points
-    required: true
-    description: "ストーリーの複雑さ/作業量の見積もり"
-    
-  - question: "優先度はどれくらいですか？"
-    key: priority
-    required: true
-    description: "High/Medium/Low または数値で"
-    
-  - question: "技術的な注記やメモはありますか？"
-    key: technical_notes
-    required: false
-    description: "実装に関する詳細や技術的な考慮事項（オプション）"
-
-# ----------------------------------------------------------
-# ◆ ユーザーストーリーテンプレート
-# ----------------------------------------------------------
-user_story_template: |
-  # {{story_title}}
-  
-  **ID:** {{story_id}}  
-  **エピック:** {{epic_id}}  
-  **優先度:** {{priority}}  
-  **ストーリーポイント:** {{story_points}}  
-  **ステータス:** Open  
-  **担当者:** {{assignee}}  
-  **作成日:** {{today}}  
-  **更新日:** {{today}}  
-  
-  ## 説明
-  
-  {{description}}
-  
-  ## ユーザーストーリー
-  
-  {{user_story}}
-  
-  ## 受け入れ基準
-  
-  {{acceptance_criteria}}
-  
-  ## 技術的詳細
-  
-  {{technical_notes}}
-  
-  ## 注記
-  
-  {{notes}}
 
 #----------------------------------------------------------
 # ◆ ロードマップ作成 質問セット
@@ -1350,7 +1388,6 @@ design_doc_template: |
 
   ## 目次
 
-<<<<<<< HEAD
   - [1. コンテキストとスコープ](mdc:#1-コンテキストとスコープ)
   - [2. 目標と非目標](mdc:#2-目標と非目標)
   - [3. 設計概要](mdc:#3-設計概要)
@@ -1358,15 +1395,6 @@ design_doc_template: |
   - [5. 代替案と検討したトレードオフ](mdc:#5-代替案と検討したトレードオフ)
   - [6. 懸念事項と考慮点](mdc:#6-懸念事項と考慮点)
   - [7. 実装とテスト計画](mdc:#7-実装とテスト計画)
-=======
-  - [1. コンテキストとスコープ](#1-コンテキストとスコープ)
-  - [2. 目標と非目標](#2-目標と非目標)
-  - [3. 設計概要](#3-設計概要)
-  - [4. 詳細設計](#4-詳細設計)
-  - [5. 代替案と検討したトレードオフ](#5-代替案と検討したトレードオフ)
-  - [6. 懸念事項と考慮点](#6-懸念事項と考慮点)
-  - [7. 実装とテスト計画](#7-実装とテスト計画)
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 
   ## 1. コンテキストとスコープ
 

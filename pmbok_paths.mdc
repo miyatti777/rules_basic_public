@@ -59,10 +59,7 @@ patterns:
   
   # ドラフトファイル
   draft_charter:      "{{patterns.flow_date}}/draft_project_charter.md"
-<<<<<<< HEAD
   draft_program_definition: "{{patterns.flow_date}}/draft_program_definition.md"
-=======
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
   draft_stakeholder:  "{{patterns.flow_date}}/draft_stakeholder_analysis.md"
   draft_wbs:          "{{patterns.flow_date}}/draft_wbs.md"
   draft_risk_plan:    "{{patterns.flow_date}}/draft_risk_plan.md"
@@ -90,6 +87,12 @@ patterns:
   stories_dir:        "{{patterns.backlog_dir}}/stories"
   story_template:     "{{dirs.flow_templates}}/user_story_template.md"
   
+  # ---- ルーチンタスク関連 ---
+  routines_yaml:      "{{patterns.backlog_dir}}/routines.yaml"
+  routines_templates: "{{patterns.backlog_dir}}/templates"
+  daily_routine_template: "{{patterns.routines_templates}}/daily_routine_template.md"
+  routines_scripts:   "{{patterns.backlog_dir}}/scripts"
+  
   # ---- バックログ関連（スクリプト) ----
   backlog_validate_script: "{{root}}/scripts/validate_backlog_yaml.py"
   
@@ -115,7 +118,12 @@ patterns:
   # ---- タスク管理テンプレート ---
   daily_tasks_template: "{{dirs.flow_templates}}/daily_tasks_template.md"
   weekly_review_template: "{{dirs.flow_templates}}/weekly_review_template.md"
-
+  
+  # ---- タスク管理ファイル（分割版）---
+  calendar_events_file: "{{patterns.flow_date}}/calendar_events.md"
+  routine_tasks_file: "{{patterns.flow_date}}/routine_tasks.md"
+  daily_tasks_file: "{{patterns.flow_date}}/daily_tasks.md"
+  
   # ---- プログラム/プロジェクト構造 ---
   program_dir:        "{{dirs.programs}}/{{program_id}}"
   project_dir:        "{{patterns.program_dir}}/projects/{{project_id}}"
@@ -149,10 +157,7 @@ patterns:
   # ---- Stock: Initiating ----
   stock_charter:          "{{patterns.doc_initiating}}/project_charter.md"
   stakeholder_register:   "{{patterns.doc_initiating}}/stakeholder_register.md"
-<<<<<<< HEAD
   program_definition:    "{{patterns.program_dir}}/program_definition.md"
-=======
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 
   # ---- Stock: Discovery -----
   stock_assumption:       "{{patterns.doc_discovery}}/assumption_map.md"
@@ -224,10 +229,7 @@ meta:
   week_end_date: "{{env.WEEK_END:date:YYYY-MM-DD}}"
   program_id:    "{{env.PROGRAM_ID}}"    # 実行時に指定するプログラムID
   project_id:    "{{env.PROJECT_ID}}"    # 実行時に指定するプロジェクトID
-<<<<<<< HEAD
   program_id:       "{{env.PROGRAM_ID}}"      # 実行時に指定するプログラムID
-=======
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
   
   # ---- 特殊変数 ---
   change_title:  ""      # 変更要求のタイトル
