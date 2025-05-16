@@ -980,6 +980,27 @@ steps:
           内容を確認、修正した後「確定反映して」と入力するとStockへ反映されます。
 
 #--------------------------------------------
+# バックログ検証（独立したトリガー）
+#--------------------------------------------
+  - trigger: "(バックログが正しく出力されたか確認|バックログ検証|バックログ確認|バックログチェック)"
+    priority: high
+    steps:
+      - name: "ask_backlog_path"
+        action: "ask_question"
+        question: "検証したいバックログYAMLのパスを入力してください（デフォルト：{{patterns.backlog_yaml}}）"
+        default: "{{patterns.backlog_yaml}}"
+        store_as: "backlog_path"
+      - name: "validate_backlog_yaml"
+        action: "execute_shell"
+        command: "python {{patterns.backlog_validate_script}} {{backlog_path}}"
+        message: "バックログYAMLの検証を行います。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          バックログYAMLの検証が完了しました。
+          問題がなければ「確定反映して」と入力するとStockへ反映されます。
+
+#--------------------------------------------
 # ルーチンタスク定義
 #--------------------------------------------
   - trigger: "(ルーチンタスク定義|routines作成|ルーティン定義)(して|お願い)"
@@ -1008,6 +1029,27 @@ steps:
         message: |
           ルーチンタスク定義の作成が完了しました。routines.yamlが作成されました。
           内容を確認、修正した後「確定反映して」と入力するとStockへ反映されます。
+
+#--------------------------------------------
+# ルーチンタスク検証（独立したトリガー）
+#--------------------------------------------
+  - trigger: "(ルーチンタスクが正しく出力されたか確認|ルーチンタスク検証|ルーチン検証|ルーチンチェック)"
+    priority: high
+    steps:
+      - name: "ask_routines_path"
+        action: "ask_question"
+        question: "検証したいroutines.yamlのパスを入力してください（デフォルト：{{patterns.routines_yaml}}）"
+        default: "{{patterns.routines_yaml}}"
+        store_as: "routines_path"
+      - name: "validate_routines_yaml"
+        action: "execute_shell"
+        command: "python {{root}}/scripts/validate_routines_yaml.py {{routines_path}}"
+        message: "ルーチンタスク定義の検証を行います。"
+      - name: "notify_completion"
+        action: "notify"
+        message: |
+          ルーチンタスク定義の検証が完了しました。
+          問題がなければ「確定反映して」と入力するとStockへ反映されます。
 
 #--------------------------------------------
 # プロダクトロードマップ作成  ★NEW

@@ -55,12 +55,14 @@ routines_yaml_template: |
           description: "{{task1_description}}"
           estimate: {{task1_estimate}}
           priority: "high"
+          assignee: "{{task1_assignee}}"
         
         - task_id: "T-002"
           title: "{{task2_title}}"
           description: "{{task2_description}}"
           estimate: {{task2_estimate}}
           priority: "medium"
+          assignee: "{{task2_assignee}}"
     
     {{#routine2_title}}
     # {{routine2_title}}
@@ -77,6 +79,7 @@ routines_yaml_template: |
           description: "{{task3_description}}"
           estimate: {{task3_estimate}}
           priority: "medium"
+          assignee: "{{task3_assignee}}"
         {{/task3_title}}
         
         {{#task4_title}}
@@ -85,6 +88,7 @@ routines_yaml_template: |
           description: "{{task4_description}}"
           estimate: {{task4_estimate}}
           priority: "low"
+          assignee: "{{task4_assignee}}"
         {{/task4_title}}
     {{/routine2_title}}
   
@@ -322,12 +326,14 @@ routines_yaml_template: |
           description: "{{task1_description}}"
           estimate: {{task1_estimate}}
           priority: "high"
+          assignee: "{{task1_assignee}}"
         
         - task_id: "T-002"
           title: "{{task2_title}}"
           description: "{{task2_description}}"
           estimate: {{task2_estimate}}
           priority: "medium"
+          assignee: "{{task2_assignee}}"
     
     {{#routine2_title}}
     # {{routine2_title}}
@@ -344,6 +350,7 @@ routines_yaml_template: |
           description: "{{task3_description}}"
           estimate: {{task3_estimate}}
           priority: "medium"
+          assignee: "{{task3_assignee}}"
         {{/task3_title}}
         
         {{#task4_title}}
@@ -352,6 +359,7 @@ routines_yaml_template: |
           description: "{{task4_description}}"
           estimate: {{task4_estimate}}
           priority: "low"
+          assignee: "{{task4_assignee}}"
         {{/task4_title}}
     {{/routine2_title}}
   

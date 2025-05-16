@@ -193,13 +193,16 @@ backlog_init_questions:
 # ◆ バックログ初期化テンプレート
 # ----------------------------------------------------------
 backlog_yaml_template: |
-  # プロダクトバックログ定義
   project:
-    id: "{{project_id}}"
     name: "{{backlog_name}}"
+    start_date: "{{start_date}}"
+    end_date: "{{end_date}}"
+    product_owner: "{{product_owner}}"
+    scrum_master: "{{scrum_master}}"
+    last_updated: "{{today}}"
+    id: "{{project_id}}"
     description: |
       {{backlog_description}}
-    last_updated: "{{today}}"
   
   # スプリント定義
   sprints:
@@ -239,8 +242,10 @@ backlog_yaml_template: |
           description: "{{us1_description}}"
           priority: "high"
           story_points: 5
+          assignee: "{{us1_assignee}}"
           status: "new"
           sprint: "S1"
+          memo: "{{us1_memo}}"
           acceptance_criteria:
             - "{{us1_ac1}}"
             - "{{us1_ac2}}"
@@ -251,8 +256,10 @@ backlog_yaml_template: |
           description: "{{us2_description}}"
           priority: "medium"
           story_points: 3
+          assignee: "{{us2_assignee}}"
           status: "new"
           sprint: "S2"
+          memo: "{{us2_memo}}"
           acceptance_criteria:
             - "{{us2_ac1}}"
     
@@ -269,8 +276,10 @@ backlog_yaml_template: |
           description: "{{foundation1_description}}"
           priority: "high"
           story_points: 8
+          assignee: "{{foundation1_assignee}}"
           status: "new"
           sprint: "S1"
+          memo: "{{foundation1_memo}}"
           acceptance_criteria:
             - "{{foundation1_ac1}}"
         
@@ -280,8 +289,10 @@ backlog_yaml_template: |
           description: "{{foundation2_description}}"
           priority: "medium"
           story_points: 5
+          assignee: "{{foundation2_assignee}}"
           status: "new"
           sprint: "S2"
+          memo: "{{foundation2_memo}}"
           acceptance_criteria:
             - "{{foundation2_ac1}}"
     
@@ -298,8 +309,10 @@ backlog_yaml_template: |
           description: "{{integration1_description}}"
           priority: "medium"
           story_points: 5
+          assignee: "{{integration1_assignee}}"
           status: "new"
           sprint: "S3"
+          memo: "{{integration1_memo}}"
           acceptance_criteria:
             - "{{integration1_ac1}}"
   
@@ -315,40 +328,26 @@ backlog_yaml_template: |
           description: "{{future1_description}}"
           priority: "low"
           story_points: 8
+          assignee: "{{future1_assignee}}"
           status: "new"
           sprint: "S3"
+          memo: "{{future1_memo}}"
           acceptance_criteria:
             - "{{future1_ac1}}"
   
   # ポイント規模定義
   sizes:
-    - name: "XS"
-      points: 1
-      description: "1時間以内で完了する非常に小さなタスク"
-    - name: "S"
-      points: 2
-      description: "半日以内で完了する小さなタスク"
-    - name: "M"
-      points: 3
-      description: "1日程度で完了する標準的なタスク"
-    - name: "L"
-      points: 5
-      description: "2-3日で完了する大きめのタスク"
-    - name: "XL"
-      points: 8
-      description: "1週間程度で完了する大きなタスク"
-    - name: "XXL"
-      points: 13
-      description: "複数週間かかる非常に大きなタスク"
+    XS: 0.5日以下（4時間未満）
+    S: 1日以下（4-8時間）
+    M: 2-3日（16-24時間）
+    L: 1週間（40時間）
+    XL: 2週間以上（80時間以上）
   
   # 優先度定義
   priorities:
-    - name: "high"
-      description: "最優先で対応するべき重要な項目"
-    - name: "medium"
-      description: "標準的な優先度の項目"
-    - name: "low"
-      description: "時間に余裕があれば対応する項目"
+    High: MVP2リリースに必須の機能
+    Medium: MVP2リリースで実装が望ましい機能
+    Low: 必要に応じて実装する機能
   
   # ステータス定義
   statuses:
