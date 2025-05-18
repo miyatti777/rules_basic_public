@@ -1109,11 +1109,7 @@ interview_analysis_template: |
 
   ## 9. 添付資料
 
-<<<<<<< HEAD
   - インタビュー会話ログ: [{{interview_log_path}}](mdc:{{interview_log_path}})
-=======
-  - インタビュー会話ログ: [{{interview_log_path}}]({{interview_log_path}})
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
   - 関連するスクリーンショット/写真: [ファイルパス]
 
 # ----------------------------------------------------------

@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD
 description: 「立ち上げフェーズ（プロジェクト憲章・ステークホルダー分析）の質問リストとテンプレートを提供し、マスターから呼び出された際に自動で回答を埋め込む」
-=======
-description: 「立ち上げフェーズ（プロジェクト憲章・ステークホルダー分析）の質問リストとテンプレートを提供し、マスターから呼び出された際に自動で回答を埋め込む」	
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 globs: 
 alwaysApply: false
 ---
@@ -45,7 +41,6 @@ project_init_questions:
         key: "end_date"
         required: false
 
-<<<<<<< HEAD
 # ---------- プロダクト（プログラム）定義 ----------
 program_definition_questions:
   - category: "0. プロダクト（プログラム）定義要否確認"
@@ -244,7 +239,7 @@ program_definition_template: |
 - プロダクト（プログラム）関連資料リンク
 
 =======
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
+
 # ---------- プロジェクト憲章 ----------
 charter_questions:
   - category: "基本情報"

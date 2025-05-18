@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD
 description: "アイディア発散などFlow Assistフェーズの質問リストとテンプレートを提供"
-=======
-description: "Flow Assistフェーズの質問リストとテンプレートを提供"
->>>>>>> b5e80abcc5c99ed2e65c7cccf51237133324e930
 globs: 
 alwaysApply: false
 ---
