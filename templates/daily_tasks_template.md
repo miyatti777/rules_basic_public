@@ -1,8 +1,10 @@
 ---
-date: {{date}}
+title: 📋 {{date}} - 日次タスク
 type: daily_tasks
-version: 1.1
+tags: []
 ---
+
+
 
 # 📋 {{date}} - 日次タスク
 

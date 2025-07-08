@@ -1,3 +1,9 @@
+---
+title: Week {{iso_week}} Review
+type: weekly_review
+tags: []
+---
+
 # Week {{iso_week}} Review
 
 ## ✔ 今週完了
